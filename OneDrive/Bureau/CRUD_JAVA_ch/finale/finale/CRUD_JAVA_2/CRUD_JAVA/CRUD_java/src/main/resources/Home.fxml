@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Text?>
+
+<VBox alignment="CENTER" prefHeight="400.0" prefWidth="600.0" spacing="20"
+      style="-fx-background-color: linear-gradient(to bottom right, #1E3C72, #2A5298);"
+      xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.esprit.controllers.HomeController">
+
+    <!-- Titre principal -->
+    <Text text="🏡 Menu Principal" style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-fill: white;" />
+
+    <!-- Boutons -->
+    <Button fx:id="btnPoubelles" text="🗑️ Gestion des Poubelles" styleClass="menu-button"/>
+    <Button fx:id="btnBienetres" text="💆 Gestion des Bien-Êtres" styleClass="menu-button"/>
+    <Button fx:id="btnQuitter" text="❌ Quitter" styleClass="exit-button"/>
+
+</VBox>

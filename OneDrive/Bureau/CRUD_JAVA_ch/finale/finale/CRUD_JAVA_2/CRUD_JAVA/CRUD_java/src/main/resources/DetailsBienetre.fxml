@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Text?>
+
+<AnchorPane prefHeight="686.0" prefWidth="904.0" styleClass="root" stylesheets="@style.css"
+            xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.esprit.controllers.DetailsBienetreController">
+
+    <!-- 🌿 Titre principal -->
+    <Text layoutX="300" layoutY="50" styleClass="title-text" text="🌿 Détails du Bien-être" />
+
+    <!-- 📋 Formulaire des détails -->
+    <Label layoutX="200.0" layoutY="119.0" styleClass="form-label" text="🏷️ Nom :" />
+    <TextField fx:id="ResultatNom" layoutX="350.0" layoutY="115.0" styleClass="text-field" editable="false"/>
+
+    <Label layoutX="196.0" layoutY="189.0" styleClass="form-label" text="📝 Review :" />
+    <TextField fx:id="ResultatReview" layoutX="350.0" layoutY="185.0" styleClass="text-field"/>
+
+    <Label layoutX="200.0" layoutY="260.0" styleClass="form-label" text="📊 Fidélité :" />
+    <TextField fx:id="ResultatFidality" layoutX="350.0" layoutY="255.0" styleClass="text-field"/>
+
+
+
+    <!-- ⚙️ Boutons d'action -->
+    <Button layoutX="132.0" layoutY="420.0" onAction="#ButtonActionModifier" styleClass="button" text="✏️ Modifier" />
+    <Button layoutX="350.0" layoutY="420.0" onAction="#ButtonActionSupprimer" styleClass="button-exit" text="🗑️ Supprimer" />
+    <Button layoutX="573.0" layoutY="420.0" onAction="#ButtonActionRetourMenu" styleClass="button-exit" text="🔙 Retour au Menu" />
+
+</AnchorPane>

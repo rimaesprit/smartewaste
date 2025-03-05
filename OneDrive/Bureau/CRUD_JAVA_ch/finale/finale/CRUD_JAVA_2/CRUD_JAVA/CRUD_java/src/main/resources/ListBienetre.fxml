@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.AnchorPane?>
+
+<AnchorPane prefHeight="685.0" prefWidth="897.0" styleClass="root" stylesheets="@style.css" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.esprit.controllers.ListBienetreController">
+
+    <!-- 🌿 Titre principal -->
+    <Button disable="true" layoutX="350.0" layoutY="30.0" styleClass="title-button" text="🌱 Liste des Bien-Êtres" />
+
+    <!-- 🖥️ Tableau de données -->
+    <TableView fx:id="TableViewListBienetre" layoutX="17.0" layoutY="80.0" prefHeight="524.0" prefWidth="856.0">
+        <columns>
+            <TableColumn fx:id="ColumnNom" prefWidth="180" text="🏷️ Nom" />
+            <TableColumn fx:id="ColumnReview" prefWidth="320" text="📝 Review" />
+            <TableColumn fx:id="ColumnRate" prefWidth="130" text="Rate" />  <!-- ✅ Correction -->
+            <TableColumn fx:id="ColumnFidality" prefWidth="130" text="⭐ Fidality" />  <!-- ✅ Correction -->
+        </columns>
+    </TableView>
+
+    <!-- ⚙️ Boutons d'action -->
+    <Button layoutX="700.0" layoutY="620.0" onAction="#ButtonActionAjouterBienetre" styleClass="button" text="➕ Ajouter Bien-Être" />
+    <Button layoutX="500.0" layoutY="620.0" onAction="#ButtonActionRetourMenu" styleClass="button-exit" text="🔙 Retour Menu" />
+
+</AnchorPane>

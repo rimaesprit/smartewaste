@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Text?>
+
+<VBox alignment="CENTER" prefHeight="617.0" prefWidth="939.0" spacing="20"
+      style="-fx-background-color: linear-gradient(to bottom right, #1E3C72, #2A5298); -fx-padding: 20;"
+      xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.esprit.controllers.ListPoubelleController">
+
+    <!-- Titre principal -->
+    <Text text="🗑️ Gestion des Poubelles"
+          style="-fx-font-size: 32px; -fx-font-weight: bold; -fx-fill: #ffffff;
+                 -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.6), 10, 0.5, 0, 3);" />
+
+    <!-- Tableau de la liste des poubelles -->
+    <TableView fx:id="TableViewListPoubelle" prefHeight="400.0" prefWidth="800.0"
+               style="-fx-background-color: #f4f4f4; -fx-border-radius: 10; -fx-padding: 5;">
+        <columns>
+            <TableColumn fx:id="ColumnId" text="ID" prefWidth="100" style="-fx-alignment: CENTER;"/>
+            <TableColumn fx:id="ColumnLocalisation" text="Localisation" prefWidth="200" style="-fx-alignment: CENTER-LEFT;"/>
+            <TableColumn fx:id="ColumnNiveauRemplissage" text="Niveau de Remplissage" prefWidth="250" style="-fx-alignment: CENTER;"/>
+            <TableColumn fx:id="ColumnStatus" text="Statut" prefWidth="200" style="-fx-alignment: CENTER;"/>
+        </columns>
+    </TableView>
+
+    <!-- Boutons d'action -->
+    <VBox spacing="10" alignment="CENTER">
+        <Button fx:id="btnAjouterPoubelle" text="➕ Ajouter Poubelle" onAction="#ButtonActionAjouterPoubelle"
+                style="-fx-background-color: linear-gradient(to right, #9b59b6, #8e44ad);
+                       -fx-text-fill: #ffffff; -fx-font-size: 18px;
+                       -fx-padding: 10 30; -fx-border-radius: 10; -fx-background-radius: 10;" />
+
+        <Button fx:id="btnRetourMenu" text="🔙 Retour au Menu" onAction="#ButtonActionRetourMenu"
+                style="-fx-background-color: linear-gradient(to right, #e74c3c, #c0392b);
+                       -fx-text-fill: #ffffff; -fx-font-size: 18px;
+                       -fx-padding: 10 30; -fx-border-radius: 10; -fx-background-radius: 10;" />
+    </VBox>
+
+</VBox>
