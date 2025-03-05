@@ -13,6 +13,23 @@ public class ServicePoubelle {
         connection = database.getInstance().getConnection();
     }
 
+    // Vérifier si une poubelle avec la même localisation existe déjà
+    public boolean existePoubelleAvecLocalisation(String localisation) {
+        String req = "SELECT COUNT(*) FROM poubelle WHERE localisation = ?";
+        try (PreparedStatement ps = connection.prepareStatement(req)) {
+            ps.setString(1, localisation);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    int count = rs.getInt(1);
+                    return count > 0; // Si le nombre de résultats est supérieur à 0, la localisation existe déjà
+                }
+            }
+        } catch (SQLException e) {
+            System.out.println("❌ Erreur lors de la vérification de la localisation : " + e.getMessage());
+        }
+        return false; // Si aucune poubelle avec cette localisation n'existe
+    }
+
     // Ajouter une poubelle (id auto-incrémenté)
     public void ajouter(Poubelle poubelle) {
         String req = "INSERT INTO poubelle (localisation, niveauRemplissage, status) VALUES (?, ?, ?)";

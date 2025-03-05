@@ -44,9 +44,15 @@ public class AjouterPoubelleController {
             return;
         }
 
+        // Vérification si la localisation existe déjà
+        ServicePoubelle service = new ServicePoubelle();
+        if (service.existePoubelleAvecLocalisation(localisation)) {
+            afficherAlerte("⚠️ Erreur", "Une poubelle existe déjà avec cette localisation !");
+            return;
+        }
+
         // Ajout de la poubelle
         Poubelle nouvellePoubelle = new Poubelle(localisation, niveau, status);
-        ServicePoubelle service = new ServicePoubelle();
         service.ajouter(nouvellePoubelle);
         afficherAlerte("✅ Succès", "Poubelle ajoutée avec succès !");
     }
@@ -58,6 +64,7 @@ public class AjouterPoubelleController {
         alert.setContentText(message);
         alert.showAndWait();
     }
+
     @FXML
     void ButtonActionRetourMenu(ActionEvent event) {
         try {
