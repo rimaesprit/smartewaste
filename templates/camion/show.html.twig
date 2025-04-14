@@ -1,0 +1,371 @@
+{% extends 'BackBase.html.twig' %}
+
+{% block title %}Détails du Camion{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .eco-score {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 20px;
+        }
+        .score-circle {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .score-excellent { background-color: #27ae60; }
+        .score-bon { background-color: #2ecc71; }
+        .score-moyen { background-color: #f1c40f; }
+        .score-mediocre { background-color: #e67e22; }
+        .score-mauvais { background-color: #e74c3c; }
+        
+        .env-info-table th {
+            width: 40%;
+        }
+        
+        .env-badge {
+            font-size: 0.9rem;
+            padding: 5px 10px;
+            border-radius: 50px;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+    <div class="d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-4">
+        <div>
+            <h3 class="fw-bold mb-3">Gestion des Camions</h3>
+            <h6 class="op-7 mb-2">Détails du camion</h6>
+        </div>
+        <div class="ms-md-auto py-2 py-md-0">
+            <a href="{{ path('app_camion_index') }}" class="btn btn-info btn-round me-2">
+                <i class="fas fa-arrow-left"></i> Retour à la liste
+            </a>
+            <a href="{{ path('app_camion_edit', {'id': camion.id}) }}" class="btn btn-primary btn-round">
+                <i class="fas fa-edit"></i> Modifier
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card card-round">
+                <div class="card-header">
+                    <div class="card-title">Information du Camion</div>
+                </div>
+                <div class="card-body">
+                    <table class="table">
+                        <tbody>
+                            <tr>
+                                <th>ID</th>
+                                <td>{{ camion.id }}</td>
+                            </tr>
+                            <tr>
+                                <th>Matricule</th>
+                                <td>{{ camion.matricule }}</td>
+                            </tr>
+                            <tr>
+                                <th>Capacité</th>
+                                <td>{{ camion.capacite }} tonnes</td>
+                            </tr>
+                            <tr>
+                                <th>État</th>
+                                <td>
+                                    {% if camion.etat == 'en_service' %}
+                                        <span class="badge bg-success">En service</span>
+                                    {% elseif camion.etat == 'en_maintenance' %}
+                                        <span class="badge bg-warning">En maintenance</span>
+                                    {% else %}
+                                        <span class="badge bg-danger">Hors service</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Informations environnementales -->
+        <div class="col-md-4">
+            <div class="card card-round">
+                <div class="card-header">
+                    <div class="card-title">Informations Environnementales</div>
+                </div>
+                <div class="card-body">
+                    <table class="table env-info-table">
+                        <tbody>
+                            <tr>
+                                <th>Type de moteur</th>
+                                <td>
+                                    <span class="env-badge 
+                                        {% if camion.typeMoteur == 'electrique' %}
+                                            bg-success
+                                        {% elseif camion.typeMoteur == 'hybride' %}
+                                            bg-info
+                                        {% elseif camion.typeMoteur == 'gaz' %}
+                                            bg-primary
+                                        {% elseif camion.typeMoteur == 'biodiesel' %}
+                                            bg-warning
+                                        {% else %}
+                                            bg-secondary
+                                        {% endif %}
+                                        text-white">
+                                        {{ camion.typeMoteur|capitalize }}
+                                    </span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Émissions CO2</th>
+                                <td>
+                                    {% if camion.emissionCo2 is not null %}
+                                        {{ camion.emissionCo2 }} g/km
+                                        {% if camion.emissionCo2 <= 50 %}
+                                            <i class="fas fa-leaf text-success ms-2" title="Très faible émission"></i>
+                                        {% elseif camion.emissionCo2 <= 100 %}
+                                            <i class="fas fa-leaf text-info ms-2" title="Faible émission"></i>
+                                        {% elseif camion.emissionCo2 <= 200 %}
+                                            <i class="fas fa-leaf text-warning ms-2" title="Émission moyenne"></i>
+                                        {% else %}
+                                            <i class="fas fa-leaf text-danger ms-2" title="Émission élevée"></i>
+                                        {% endif %}
+                                    {% else %}
+                                        Non défini
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Consommation</th>
+                                <td>
+                                    {% if camion.consommation is not null %}
+                                        {{ camion.consommation }} L/100km
+                                        {% if camion.consommation <= 10 %}
+                                            <i class="fas fa-gas-pump text-success ms-2" title="Très économique"></i>
+                                        {% elseif camion.consommation <= 20 %}
+                                            <i class="fas fa-gas-pump text-info ms-2" title="Économique"></i>
+                                        {% elseif camion.consommation <= 30 %}
+                                            <i class="fas fa-gas-pump text-warning ms-2" title="Consommation moyenne"></i>
+                                        {% else %}
+                                            <i class="fas fa-gas-pump text-danger ms-2" title="Consommation élevée"></i>
+                                        {% endif %}
+                                    {% else %}
+                                        Non défini
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Année de fabrication</th>
+                                <td>
+                                    {% if camion.anneeFabrication is not null %}
+                                        {{ camion.anneeFabrication }}
+                                    {% else %}
+                                        Non définie
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Kilométrage</th>
+                                <td>
+                                    {% if camion.kilometrage is not null %}
+                                        {{ camion.kilometrage|number_format(0, ',', ' ') }} km
+                                    {% else %}
+                                        Non défini
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Score environnemental -->
+        <div class="col-md-4">
+            <div class="card card-round">
+                <div class="card-header">
+                    <div class="card-title">Score Environnemental</div>
+                </div>
+                <div class="card-body">
+                    {% if camion.getScoreEnvironnemental is defined %}
+                        <div class="eco-score">
+                            <div class="score-circle 
+                                {% if camion.scoreEnvironnemental >= 80 %}
+                                    score-excellent
+                                {% elseif camion.scoreEnvironnemental >= 60 %}
+                                    score-bon
+                                {% elseif camion.scoreEnvironnemental >= 40 %}
+                                    score-moyen
+                                {% elseif camion.scoreEnvironnemental >= 20 %}
+                                    score-mediocre
+                                {% else %}
+                                    score-mauvais
+                                {% endif %}">
+                                {{ camion.scoreEnvironnemental }}
+                            </div>
+                            <h4>{{ camion.niveauEcologique }}</h4>
+                        </div>
+                        
+                        <div class="mt-4">
+                            <h6>Détail du score</h6>
+                            <div class="progress mb-3" style="height: 10px;">
+                                <div class="progress-bar bg-success" role="progressbar" style="width: 25%;" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100" title="Type de moteur">
+                                    25%
+                                </div>
+                            </div>
+                            <div class="progress mb-3" style="height: 10px;">
+                                <div class="progress-bar bg-info" role="progressbar" style="width: 25%;" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100" title="Émissions CO2">
+                                    25%
+                                </div>
+                            </div>
+                            <div class="progress mb-3" style="height: 10px;">
+                                <div class="progress-bar bg-warning" role="progressbar" style="width: 25%;" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100" title="Consommation">
+                                    25%
+                                </div>
+                            </div>
+                            <div class="progress mb-3" style="height: 10px;">
+                                <div class="progress-bar bg-danger" role="progressbar" style="width: 25%;" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100" title="Âge">
+                                    25%
+                                </div>
+                            </div>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            Le score environnemental n'est pas disponible pour ce camion.
+                        </div>
+                        <p>Assurez-vous que toutes les informations environnementales sont renseignées pour permettre le calcul du score.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Liste des déchets -->
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <div class="card card-round">
+                <div class="card-header">
+                    <div class="card-title">Liste des Déchets Associés</div>
+                </div>
+                <div class="card-body">
+                    {% if camion.dechets|length > 0 %}
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Type</th>
+                                    <th>Poids</th>
+                                    <th>Date</th>
+                                    <th>Statut</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for dechet in camion.dechets %}
+                                <tr>
+                                    <td>{{ dechet.id }}</td>
+                                    <td>
+                                        <span class="badge 
+                                            {% if dechet.typeDechet == 'plastique' %}
+                                                bg-primary
+                                            {% elseif dechet.typeDechet == 'papier' %}
+                                                bg-warning
+                                            {% elseif dechet.typeDechet == 'verre' %}
+                                                bg-success
+                                            {% elseif dechet.typeDechet == 'metal' %}
+                                                bg-secondary
+                                            {% elseif dechet.typeDechet == 'organique' %}
+                                                bg-info
+                                            {% elseif dechet.typeDechet == 'electronique' %}
+                                                bg-danger
+                                            {% else %}
+                                                bg-dark
+                                            {% endif %}">
+                                            {{ dechet.typeDechet|capitalize }}
+                                        </span>
+                                    </td>
+                                    <td>{{ dechet.poids }} kg</td>
+                                    <td>{{ dechet.dateDepot ? dechet.dateDepot|date('Y-m-d') : '' }}</td>
+                                    <td>
+                                        {% if dechet.traite %}
+                                            <span class="badge bg-success">Traité</span>
+                                        {% else %}
+                                            <span class="badge bg-warning text-dark">En attente</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <a href="{{ path('app_dechet_show', {'id': dechet.id}) }}" class="btn btn-icon btn-sm btn-primary">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                        <p class="text-center">Aucun déchet associé à ce camion</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-3">
+        <form method="post" action="{{ path('app_camion_delete', {'id': camion.id}) }}" class="d-inline" id="deleteForm{{ camion.id }}">
+            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ camion.id) }}">
+            <button type="button" class="btn btn-danger btn-round" onclick="confirmDelete({{ camion.id }}, '{{ camion.matricule }}', '{{ camion.capacite }}', '{{ camion.etat }}')">
+                <i class="fas fa-trash"></i> Supprimer Camion
+            </button>
+        </form>
+    </div>
+
+    <script>
+    function confirmDelete(id, matricule, capacite, etat) {
+        Swal.fire({
+            title: 'Êtes-vous sûr ?',
+            html: `
+                <div class="text-left">
+                    <p>Vous êtes sur le point de supprimer le camion suivant :</p>
+                    <div class="alert alert-warning">
+                        <strong>Informations du camion :</strong><br>
+                        - Matricule : ${matricule}<br>
+                        - Capacité : ${capacite} tonnes<br>
+                        - État : ${etat}
+                    </div>
+                    <p class="text-danger"><i class="fas fa-exclamation-triangle"></i> Cette action est irréversible !</p>
+                </div>
+            `,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Oui, supprimer !',
+            cancelButtonText: 'Annuler',
+            reverseButtons: true,
+            input: 'text',
+            inputLabel: 'Tapez "SUPPRIMER" pour confirmer',
+            inputValidator: (value) => {
+                if (value.toUpperCase() !== 'SUPPRIMER') {
+                    return 'Vous devez taper "SUPPRIMER" pour confirmer';
+                }
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                document.getElementById('deleteForm' + id).submit();
+            }
+        });
+    }
+    </script>
+{% endblock %} 

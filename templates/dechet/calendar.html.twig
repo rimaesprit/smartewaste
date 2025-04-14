@@ -1,0 +1,188 @@
+{% extends 'BackBase.html.twig' %}
+
+{% block title %}Calendrier des dépôts de déchets{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@5.10.1/main.min.css">
+    <style>
+        #calendar {
+            height: 650px;
+        }
+        .fc-event {
+            cursor: pointer;
+        }
+        .event-tooltip {
+            max-width: 300px;
+        }
+    </style>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.10.1/main.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tippy.js@6.3.7/dist/tippy.umd.min.js"></script>
+{% endblock %}
+
+{% block body %}
+<div class="page-inner mt-4">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title">Calendrier des dépôts de déchets</h4>
+                    <p class="card-category">Visualisez les dépôts de déchets sur un calendrier interactif</p>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-4">
+                        <div class="col-md-12 d-flex justify-content-between">
+                            <div>
+                                <button id="prev-month" class="btn btn-sm btn-primary">
+                                    <i class="fas fa-chevron-left"></i> Mois précédent
+                                </button>
+                                <button id="next-month" class="btn btn-sm btn-primary">
+                                    Mois suivant <i class="fas fa-chevron-right"></i>
+                                </button>
+                                <button id="today" class="btn btn-sm btn-info">
+                                    Aujourd'hui
+                                </button>
+                            </div>
+                            <div>
+                                <div class="btn-group" role="group">
+                                    <button id="view-month" class="btn btn-sm btn-secondary active">Mois</button>
+                                    <button id="view-week" class="btn btn-sm btn-secondary">Semaine</button>
+                                    <button id="view-day" class="btn btn-sm btn-secondary">Jour</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="calendar"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Légende des types de déchets -->
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title">Légende</h4>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex flex-wrap justify-content-between">
+                        <div class="d-flex align-items-center mb-2">
+                            <span class="badge bg-primary me-2" style="width: 30px; height: 15px;"></span>
+                            <span>Plastique</span>
+                        </div>
+                        <div class="d-flex align-items-center mb-2">
+                            <span class="badge bg-warning me-2" style="width: 30px; height: 15px;"></span>
+                            <span>Papier</span>
+                        </div>
+                        <div class="d-flex align-items-center mb-2">
+                            <span class="badge bg-success me-2" style="width: 30px; height: 15px;"></span>
+                            <span>Verre</span>
+                        </div>
+                        <div class="d-flex align-items-center mb-2">
+                            <span class="badge bg-secondary me-2" style="width: 30px; height: 15px;"></span>
+                            <span>Métal</span>
+                        </div>
+                        <div class="d-flex align-items-center mb-2">
+                            <span class="badge bg-info me-2" style="width: 30px; height: 15px;"></span>
+                            <span>Organique</span>
+                        </div>
+                        <div class="d-flex align-items-center mb-2">
+                            <span class="badge bg-danger me-2" style="width: 30px; height: 15px;"></span>
+                            <span>Électronique</span>
+                        </div>
+                        <div class="d-flex align-items-center mb-2">
+                            <span class="badge bg-dark me-2" style="width: 30px; height: 15px;"></span>
+                            <span>Dangereux</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var calendarEl = document.getElementById('calendar');
+    
+    var calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'dayGridMonth',
+        headerToolbar: {
+            left: '',
+            center: 'title',
+            right: ''
+        },
+        locale: 'fr',
+        firstDay: 1, // Lundi comme premier jour de la semaine
+        dayMaxEvents: true, // Permet d'afficher "plus" si trop d'événements
+        events: {
+            url: '{{ path('app_dechet_calendar', {'id': 'data'}) }}',
+            failure: function() {
+                alert('Erreur lors du chargement des événements!');
+            }
+        },
+        eventDidMount: function(info) {
+            // Utiliser Tippy.js pour afficher les tooltips
+            tippy(info.el, {
+                content: info.event.extendedProps.description,
+                placement: 'top',
+                allowHTML: true,
+                theme: 'light',
+                arrow: true
+            });
+        },
+        eventClick: function(info) {
+            // Rediriger vers la page de détail du déchet
+            window.location.href = info.event.url;
+        }
+    });
+    
+    calendar.render();
+    
+    // Gestion des boutons de navigation
+    document.getElementById('prev-month').addEventListener('click', function() {
+        calendar.prev();
+    });
+    
+    document.getElementById('next-month').addEventListener('click', function() {
+        calendar.next();
+    });
+    
+    document.getElementById('today').addEventListener('click', function() {
+        calendar.today();
+    });
+    
+    // Gestion des vues
+    document.getElementById('view-month').addEventListener('click', function() {
+        calendar.changeView('dayGridMonth');
+        toggleActiveClass(this);
+    });
+    
+    document.getElementById('view-week').addEventListener('click', function() {
+        calendar.changeView('timeGridWeek');
+        toggleActiveClass(this);
+    });
+    
+    document.getElementById('view-day').addEventListener('click', function() {
+        calendar.changeView('timeGridDay');
+        toggleActiveClass(this);
+    });
+    
+    function toggleActiveClass(button) {
+        // Supprimer la classe active de tous les boutons
+        document.querySelectorAll('.btn-group .btn').forEach(function(btn) {
+            btn.classList.remove('active');
+        });
+        
+        // Ajouter la classe active au bouton cliqué
+        button.classList.add('active');
+    }
+});
+</script>
+{% endblock %} 

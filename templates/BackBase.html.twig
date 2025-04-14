@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>{% block title %}Kaiadmin - Bootstrap 5 Admin Dashboard{% endblock %}</title>
+    <meta
+      content="width=device-width, initial-scale=1.0, shrink-to-fit=no"
+      name="viewport"
+    />
+    <link
+      rel="icon"
+      href="{{ asset('Back_Assets/img/kaiadmin/favicon.ico') }}"
+      type="image/x-icon"
+    />
+
+    <!-- Fonts and icons -->
+    <script src="{{ asset('Back_Assets/js/plugin/webfont/webfont.min.js') }}"></script>
+    <script>
+      WebFont.load({
+        google: { families: ["Public Sans:300,400,500,600,700"] },
+        custom: {
+          families: [
+            "Font Awesome 5 Solid",
+            "Font Awesome 5 Regular",
+            "Font Awesome 5 Brands",
+            "simple-line-icons",
+          ],
+          urls: ["{{ asset('Back_Assets/css/fonts.min.css') }}"],
+        },
+        active: function () {
+          sessionStorage.fonts = true;
+        },
+      });
+    </script>
+
+    <!-- CSS Files -->
+    <link rel="stylesheet" href="{{ asset('Back_Assets/css/bootstrap.min.css') }}" />
+    <link rel="stylesheet" href="{{ asset('Back_Assets/css/plugins.min.css') }}" />
+    <link rel="stylesheet" href="{{ asset('Back_Assets/css/kaiadmin.min.css') }}" />
+
+    <!-- CSS Just for demo purpose, don't include it in your project -->
+    <!-- <link rel="stylesheet" href="{{ asset('Back_Assets/css/demo.css') }}" /> -->
+    <!-- SweetAlert2 CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+
+    <!-- SweetAlert2 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    {% block stylesheets %}{% endblock %}
+  </head>
+  <body>
+    <div class="wrapper">
+      <!-- Sidebar -->
+      <div class="sidebar" data-background-color="dark">
+        <div class="sidebar-logo">
+          <!-- Logo Header -->
+          <div class="logo-header" data-background-color="dark">
+            <a href="{{ path('app_front_home') }}" class="logo">
+              <img
+                src="{{ asset('Back_Assets/img/kaiadmin/logo_light.svg') }}"
+                alt="navbar brand"
+                class="navbar-brand"
+                height="20"
+              />
+            </a>
+            <div class="nav-toggle">
+              <button class="btn btn-toggle toggle-sidebar">
+                <i class="gg-menu-right"></i>
+              </button>
+              <button class="btn btn-toggle sidenav-toggler">
+                <i class="gg-menu-left"></i>
+              </button>
+            </div>
+            <button class="topbar-toggler more">
+              <i class="gg-more-vertical-alt"></i>
+            </button>
+          </div>
+          <!-- End Logo Header -->
+        </div>
+        <div class="sidebar-wrapper scrollbar scrollbar-inner">
+          <div class="sidebar-content">
+            <ul class="nav nav-secondary">
+              <li class="nav-item">
+                <a href="#">
+                  <i class="fas fa-home"></i>
+                  <p>Tableau de bord</p>
+                </a>
+              </li>
+              
+              {% if is_granted('ROLE_ADMIN') %}
+              <li class="nav-section">
+                <span class="sidebar-mini-icon">
+                  <i class="fa fa-ellipsis-h"></i>
+                </span>
+                <h4 class="text-section">Administration</h4>
+              </li>
+              
+              <li class="nav-item">
+                <a href="#">
+                  <i class="fas fa-users"></i>
+                  <p>Gestion des utilisateurs</p>
+                </a>
+              </li>
+              {% endif %}
+              
+              <li class="nav-section">
+                <span class="sidebar-mini-icon">
+                  <i class="fa fa-ellipsis-h"></i>
+                </span>
+                <h4 class="text-section">Gestion des Camions</h4>
+              </li>
+              
+              <li class="nav-item">
+                <a data-bs-toggle="collapse" href="#camions">
+                  <i class="fas fa-truck"></i>
+                  <p>Camions</p>
+                  <span class="caret"></span>
+                </a>
+                <div class="collapse" id="camions">
+                  <ul class="nav nav-collapse">
+                    <li>
+                      <a href="{{ path('app_camion_index') }}">
+                        <span class="sub-item">Liste des camions</span>
+                      </a>
+                    </li>
+                    <li>
+                      <a href="{{ path('app_camion_new') }}">
+                        <span class="sub-item">Ajouter un camion</span>
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+              </li>
+              
+              <li class="nav-item">
+                <a data-bs-toggle="collapse" href="#camions_fonctionnalites">
+                  <i class="fas fa-cogs"></i>
+                  <p>Fonctionnalités Camions</p>
+                  <span class="caret"></span>
+                </a>
+                <div class="collapse" id="camions_fonctionnalites">
+                  <ul class="nav nav-collapse">
+                    <li>
+                      <a href="{{ path('app_camion_statistics') }}">
+                        <span class="sub-item">Statistiques</span>
+                      </a>
+                    </li>
+                    <!-- Removed the route for 'app_camion_eco_compare' -->
+                  </ul>
+                </div>
+              </li>
+              
+              <li class="nav-section">
+                <span class="sidebar-mini-icon">
+                  <i class="fa fa-ellipsis-h"></i>
+                </span>
+                <h4 class="text-section">Gestion des Déchets</h4>
+              </li>
+              
+              <li class="nav-item">
+                <a data-bs-toggle="collapse" href="#dechets">
+                  <i class="fas fa-trash"></i>
+                  <p>Déchets</p>
+                  <span class="caret"></span>
+                </a>
+                <div class="collapse" id="dechets">
+                  <ul class="nav nav-collapse">
+                    <li>
+                      <a href="{{ path('app_dechet_index') }}">
+                        <span class="sub-item">Liste des déchets</span>
+                      </a>
+                    </li>
+                    <li>
+                      <a href="{{ path('app_dechet_new') }}">
+                        <span class="sub-item">Ajouter un déchet</span>
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+              </li>
+              
+              <li class="nav-item">
+                <a data-bs-toggle="collapse" href="#dechets_fonctionnalites">
+                  <i class="fas fa-chart-pie"></i>
+                  <p>Analyses & Traitement</p>
+                  <span class="caret"></span>
+                </a>
+                <div class="collapse" id="dechets_fonctionnalites">
+                  <ul class="nav nav-collapse">
+                    <li>
+                      <a href="{{ path('app_dechet_calendar', {'id': 'calendar'}) }}">
+                        <span class="sub-item">Calendrier des dépôts</span>
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+              </li>
+              
+              <!-- Ajout de la section Gestion des Citoyens -->
+              <li class="nav-section">
+                <span class="sidebar-mini-icon">
+                  <i class="fa fa-ellipsis-h"></i>
+                </span>
+                <h4 class="text-section">Gestion des Citoyens</h4>
+              </li>
+              
+              <li class="nav-item">
+                <a data-bs-toggle="collapse" href="#reclamations">
+                  <i class="fas fa-clipboard-list"></i>
+                  <p>Réclamations</p>
+                  <span class="caret"></span>
+                </a>
+                <div class="collapse" id="reclamations">
+                  <ul class="nav nav-collapse">
+                    <li>
+                      <a href="#">
+                        <span class="sub-item">Liste des réclamations</span>
+                      </a>
+                    </li>
+                    <li>
+                      <a href="#">
+                        <span class="sub-item">Ajouter une réclamation</span>
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+              </li>
+              
+              <li class="nav-item">
+                <a data-bs-toggle="collapse" href="#signalements">
+                  <i class="fas fa-exclamation-triangle"></i>
+                  <p>Signalements</p>
+                  <span class="caret"></span>
+                </a>
+                <div class="collapse" id="signalements">
+                  <ul class="nav nav-collapse">
+                    <li>
+                      <a href="#">
+                        <span class="sub-item">Liste des signalements</span>
+                      </a>
+                    </li>
+                    <li>
+                      <a href="#">
+                        <span class="sub-item">Ajouter un signalement</span>
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+              </li>
+              <!-- Fin de la section Gestion des Citoyens -->
+              
+              <li class="nav-section">
+                <span class="sidebar-mini-icon">
+                  <i class="fa fa-ellipsis-h"></i>
+                </span>
+                <h4 class="text-section">Gestion des Poubelles</h4>
+              </li>
+              
+              <li class="nav-item">
+                <a data-bs-toggle="collapse" href="#poubelles">
+                  <i class="fas fa-trash-alt"></i>
+                  <p>Poubelles</p>
+                  <span class="caret"></span>
+                </a>
+                <div class="collapse" id="poubelles">
+                  <ul class="nav nav-collapse">
+                    <li>
+                      <a href="#">
+                        <span class="sub-item">Liste des poubelles</span>
+                      </a>
+                    </li>
+                    <li>
+                      <a href="#">
+                        <span class="sub-item">Ajouter une poubelle</span>
+                      </a>
+                    </li>
+                    <li>
+                      <a href="#">
+                        <span class="sub-item">Statistiques de remplissage</span>
+                      </a>
+                    </li>
+                    <li>
+                      <a href="#">
+                        <span class="sub-item">Alertes poubelles critiques</span>
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+              </li>
+              
+              <li class="nav-item">
+                <a data-bs-toggle="collapse" href="#bienetres">
+                  <i class="fas fa-comment"></i>
+                  <p>Avis de Bien-être</p>
+                  <span class="caret"></span>
+                </a>
+                <div class="collapse" id="bienetres">
+                  <ul class="nav nav-collapse">
+                    <li>
+                      <a href="#">
+                        <span class="sub-item">Liste des avis</span>
+                      </a>
+                    </li>
+                    <li>
+                      <a href="#">
+                        <span class="sub-item">Ajouter un avis</span>
+                      </a>
+                    </li>
+                    <li>
+                      <a href="#">
+                        <span class="sub-item">Statistiques des sentiments</span>
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+              </li>
+              
+              <li class="nav-section">
+                <span class="sidebar-mini-icon">
+                  <i class="fa fa-ellipsis-h"></i>
+                </span>
+                <h4 class="text-section">Paramètres</h4>
+              </li>
+              <li class="nav-item">
+                <a href="#">
+                  <i class="fas fa-user"></i>
+                  <p>Mon Profil</p>
+                </a>
+              </li>
+              <li class="nav-item">
+                <a href="#">
+                  <i class="fas fa-sign-out-alt"></i>
+                  <p>Déconnexion</p>
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <!-- End Sidebar -->
+
+      <div class="main-panel">
+        <div class="main-header">
+          <div class="main-header-logo">
+            <!-- Logo Header -->
+            <div class="logo-header" data-background-color="dark">
+              <a href="#" class="logo">
+                <img
+                  src="{{ asset('Back_Assets/img/kaiadmin/logo_light.svg') }}"
+                  alt="navbar brand"
+                  class="navbar-brand"
+                  height="20"
+                />
+              </a>
+              <div class="nav-toggle">
+                <button class="btn btn-toggle toggle-sidebar">
+                  <i class="gg-menu-right"></i>
+                </button>
+                <button class="btn btn-toggle sidenav-toggler">
+                  <i class="gg-menu-left"></i>
+                </button>
+              </div>
+              <button class="topbar-toggler more">
+                <i class="gg-more-vertical-alt"></i>
+              </button>
+            </div>
+            <!-- End Logo Header -->
+          </div>
+          <!-- Navbar Header -->
+          <nav
+            class="navbar navbar-header navbar-header-transparent navbar-expand-lg border-bottom"
+          >
+            <div class="container-fluid">
+              <nav
+                class="navbar navbar-header-left navbar-expand-lg navbar-form nav-search p-0 d-none d-lg-flex"
+              >
+                <div class="input-group">
+                  <div class="input-group-prepend">
+                    <button type="submit" class="btn btn-search pe-1">
+                      <i class="fa fa-search search-icon"></i>
+                    </button>
+                  </div>
+                  <input
+                    type="text"
+                    placeholder="Search ..."
+                    class="form-control"
+                  />
+                </div>
+              </nav>
+
+              <ul class="navbar-nav topbar-nav ms-md-auto align-items-center">
+                <li
+                  class="nav-item topbar-icon dropdown hidden-caret d-flex d-lg-none"
+                >
+                  <a
+                    class="nav-link dropdown-toggle"
+                    data-bs-toggle="dropdown"
+                    href="#"
+                    role="button"
+                    aria-expanded="false"
+                    aria-haspopup="true"
+                  >
+                    <i class="fa fa-search"></i>
+                  </a>
+                  <ul class="dropdown-menu dropdown-search animated fadeIn">
+                    <form class="navbar-left navbar-form nav-search">
+                      <div class="input-group">
+                        <input
+                          type="text"
+                          placeholder="Search ..."
+                          class="form-control"
+                        />
+                      </div>
+                    </form>
+                  </ul>
+                </li>
+                <!-- Other navbar items can be added here -->
+                <li class="nav-item topbar-user dropdown hidden-caret">
+                  <a
+                    class="dropdown-toggle profile-pic"
+                    data-bs-toggle="dropdown"
+                    href="#"
+                    aria-expanded="false"
+                  >
+                    <div class="avatar-sm">
+                      <img
+                        src="{{ asset('Back_Assets/img/profile.jpg') }}"
+                        alt="..."
+                        class="avatar-img rounded-circle"
+                      />
+                    </div>
+                    <span class="profile-username">
+                      <span class="op-7">Hi,</span>
+                      <span class="fw-bold">Admin</span>
+                    </span>
+                  </a>
+                  <ul class="dropdown-menu dropdown-user animated fadeIn">
+                    <div class="dropdown-user-scroll scrollbar-outer">
+                      <li>
+                        <div class="user-box">
+                          <div class="avatar-lg">
+                            <img
+                              src="{{ asset('Back_Assets/img/profile.jpg') }}"
+                              alt="image profile"
+                              class="avatar-img rounded"
+                            />
+                          </div>
+                          <div class="u-text">
+                            <h4>Admin</h4>
+                            <p class="text-muted">admin@example.com</p>
+                            <a
+                              href="#"
+                              class="btn btn-xs btn-secondary btn-sm"
+                              >View Profile</a
+                            >
+                          </div>
+                        </div>
+                      </li>
+                      <li>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" href="#">My Profile</a>
+                        <a class="dropdown-item" href="#">Logout</a>
+                      </li>
+                    </div>
+                  </ul>
+                </li>
+              </ul>
+            </div>
+          </nav>
+          <!-- End Navbar -->
+        </div>
+
+        <div class="container">
+          <div class="page-inner">
+            {% block body %}{% endblock %}
+          </div>
+        </div>
+
+        <footer class="footer">
+          <div class="container-fluid d-flex justify-content-between">
+            <nav class="pull-left">
+              <ul class="nav">
+                <li class="nav-item">
+                  <a class="nav-link" href="http://www.themekita.com">
+                    ThemeKita
+                  </a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="#"> Help </a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" href="#"> Licenses </a>
+                </li>
+              </ul>
+            </nav>
+            <div class="copyright">
+              2024, made with <i class="fa fa-heart heart text-danger"></i> by
+              <a href="http://www.themekita.com">ThemeKita</a>
+            </div>
+          </div>
+        </footer>
+      </div>
+
+      <!-- Custom template | don't include it in your project! -->
+      <div class="custom-template">
+        <div class="title">Settings</div>
+        <div class="custom-content">
+          <div class="switcher">
+            <div class="switch-block">
+              <h4>Logo Header</h4>
+              <div class="btnSwitch">
+                <button
+                  type="button"
+                  class="selected changeLogoHeaderColor"
+                  data-color="dark"
+                ></button>
+                <button
+                  type="button"
+                  class="changeLogoHeaderColor"
+                  data-color="blue"
+                ></button>
+                <!-- Other buttons can be added here -->
+              </div>
+            </div>
+            <!-- Other switch blocks can be added here -->
+          </div>
+        </div>
+        <div class="custom-toggle">
+          <i class="icon-settings"></i>
+        </div>
+      </div>
+      <!-- End Custom template -->
+    </div>
+    
+    <!--   Core JS Files   -->
+    <script src="{{ asset('Back_Assets/js/core/jquery-3.7.1.min.js') }}"></script>
+    <script src="{{ asset('Back_Assets/js/core/popper.min.js') }}"></script>
+    <script src="{{ asset('Back_Assets/js/core/bootstrap.min.js') }}"></script>
+
+    <!-- jQuery Scrollbar -->
+    <script src="{{ asset('Back_Assets/js/plugin/jquery-scrollbar/jquery.scrollbar.min.js') }}"></script>
+
+    <!-- Chart JS -->
+    <script src="{{ asset('Back_Assets/js/plugin/chart.js/chart.min.js') }}"></script>
+
+    <!-- jQuery Sparkline -->
+    <script src="{{ asset('Back_Assets/js/plugin/jquery.sparkline/jquery.sparkline.min.js') }}"></script>
+
+    <!-- Chart Circle -->
+    <script src="{{ asset('Back_Assets/js/plugin/chart-circle/circles.min.js') }}"></script>
+
+    <!-- Datatables -->
+    <script src="{{ asset('Back_Assets/js/plugin/datatables/datatables.min.js') }}"></script>
+
+    <!-- Bootstrap Notify -->
+    <script src="{{ asset('Back_Assets/js/plugin/bootstrap-notify/bootstrap-notify.min.js') }}"></script>
+
+    <!-- jQuery Vector Maps -->
+    <script src="{{ asset('Back_Assets/js/plugin/jsvectormap/jsvectormap.min.js') }}"></script>
+    <script src="{{ asset('Back_Assets/js/plugin/jsvectormap/world.js') }}"></script>
+
+    <!-- Sweet Alert -->
+    <script src="{{ asset('Back_Assets/js/plugin/sweetalert/sweetalert.min.js') }}"></script>
+
+    <!-- Kaiadmin JS -->
+    <script src="{{ asset('Back_Assets/js/kaiadmin.min.js') }}"></script>
+
+    <!-- Kaiadmin DEMO methods, don't include it in your project! -->
+    <script src="{{ asset('Back_Assets/js/setting-demo.js') }}"></script>
+    <script src="{{ asset('Back_Assets/js/demo.js') }}"></script>
+    
+    {% block javascripts %}
+      {% block importmap %}{{ importmap('app') }}{% endblock %}
+      
+      <script>
+        // Empêcher les erreurs de fichiers map manquants
+        document.addEventListener('DOMContentLoaded', function() {
+          // Désactiver la recherche de fichiers .map
+          function disableSourceMapping() {
+            if (typeof bootstrap !== 'undefined' && bootstrap.Tooltip) {
+              bootstrap.Tooltip.Default.allowList = {};
+            }
+            
+            // Désactiver les charts et les maps
+            window.skipChartInitialization = true;
+            window.skipMapInitialization = true;
+          }
+          
+          // Appliquer la désactivation
+          disableSourceMapping();
+          
+          // Si des erreurs persistent, intercepter les requêtes de fichiers .map
+          const originalFetch = window.fetch;
+          window.fetch = function(url, options) {
+            if (typeof url === 'string' && url.endsWith('.map')) {
+              console.log('Demande de fichier .map interceptée:', url);
+              return Promise.resolve(new Response('', {
+                status: 200,
+                statusText: 'OK'
+              }));
+            }
+            return originalFetch(url, options);
+          };
+        });
+      </script>
+    {% endblock %}
+  </body>
+</html>

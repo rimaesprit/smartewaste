@@ -1,0 +1,286 @@
+{% extends 'BackBase.html.twig' %}
+
+{% block title %}Nouveau Camion{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .form-floating {
+            position: relative;
+            margin-bottom: 1rem;
+        }
+        .form-floating > .form-control,
+        .form-floating > .form-select {
+            height: calc(3.5rem + 2px);
+            padding: 1rem 0.75rem;
+        }
+        .form-floating > label {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            padding: 1rem 0.75rem;
+            pointer-events: none;
+            border: 1px solid transparent;
+            transform-origin: 0 0;
+            transition: opacity .1s ease-in-out,transform .1s ease-in-out;
+        }
+        .form-floating > .form-control:focus ~ label,
+        .form-floating > .form-control:not(:placeholder-shown) ~ label,
+        .form-floating > .form-select ~ label {
+            opacity: .65;
+            transform: scale(.85) translateY(-0.5rem) translateX(0.15rem);
+        }
+        .invalid-feedback {
+            display: none;
+            width: 100%;
+            margin-top: 0.25rem;
+            font-size: 0.875em;
+            color: #dc3545;
+        }
+        .was-validated .form-control:invalid,
+        .form-control.is-invalid {
+            border-color: #dc3545;
+            padding-right: calc(1.5em + 0.75rem);
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23dc3545'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath stroke-linejoin='round' d='M5.8 3.6h.4L6 6.5z'/%3e%3ccircle cx='6' cy='8.2' r='.6' fill='%23dc3545' stroke='none'/%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right calc(0.375em + 0.1875rem) center;
+            background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+    <div class="container-fluid px-4">
+        <h1 class="mt-4">
+            <i class="fas fa-truck me-2"></i>Ajouter un nouveau camion
+        </h1>
+        <ol class="breadcrumb mb-4">
+            <li class="breadcrumb-item"><a href="{{ path('app_camion_index') }}">Camions</a></li>
+            <li class="breadcrumb-item active">Nouveau</li>
+        </ol>
+
+        {# Messages Flash #}
+        {% for type, messages in app.flashes %}
+            {% for message in messages %}
+                {% set alertClass = type == 'error' ? 'danger' : type %}
+                <div class="alert alert-{{ alertClass }} alert-dismissible fade show" role="alert">
+                    {% if message is iterable %}
+                        {% if message.title is defined %}
+                            <strong>{{ message.title }}</strong><br>
+                        {% endif %}
+                        {% if message.message is defined %}
+                            {{ message.message }}
+                        {% else %}
+                            {{ message|join(', ') }}
+                        {% endif %}
+                    {% else %}
+                        {{ message }}
+                    {% endif %}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endfor %}
+
+        <div class="card mb-4">
+            <div class="card-header">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <i class="fas fa-truck me-1"></i>
+                        Informations du camion
+                    </div>
+                    <div class="small text-muted">
+                        * Champs obligatoires
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                {{ form_start(form, {'attr': {'class': 'needs-validation', 'novalidate': 'novalidate'}}) }}
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                {{ form_widget(form.matricule, {
+                                    'attr': {
+                                        'class': 'form-control' ~ (form_errors(form.matricule) ? ' is-invalid' : ''),
+                                        'placeholder': 'Ex: TN-123',
+                                        'data-bs-toggle': 'tooltip',
+                                        'data-bs-placement': 'top',
+                                        'title': 'Format: XX-000 ou XXX-0000 (lettres majuscules)'
+                                    }
+                                }) }}
+                                {{ form_label(form.matricule, 'Matricule *') }}
+                                <div class="invalid-feedback">
+                                    {{ form_errors(form.matricule) ?: 'Veuillez entrer une matricule valide (format: XX-000 ou XXX-0000).' }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                {{ form_widget(form.modele, {
+                                    'attr': {
+                                        'class': 'form-control' ~ (form_errors(form.modele) ? ' is-invalid' : ''),
+                                        'placeholder': 'Ex: Mercedes Actros 1845',
+                                        'data-bs-toggle': 'tooltip',
+                                        'data-bs-placement': 'top',
+                                        'title': 'Indiquez le modèle du camion'
+                                    }
+                                }) }}
+                                {{ form_label(form.modele, 'Modèle *') }}
+                                <div class="invalid-feedback">
+                                    {{ form_errors(form.modele) ?: 'Veuillez entrer le modèle du camion.' }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                {{ form_widget(form.capacite, {
+                                    'attr': {
+                                        'class': 'form-control' ~ (form_errors(form.capacite) ? ' is-invalid' : ''),
+                                        'placeholder': 'Capacité',
+                                        'data-bs-toggle': 'tooltip',
+                                        'data-bs-placement': 'top',
+                                        'title': 'Capacité entre 1 et 50 tonnes'
+                                    }
+                                }) }}
+                                {{ form_label(form.capacite, 'Capacité (tonnes) *') }}
+                                <div class="invalid-feedback">
+                                    {{ form_errors(form.capacite) ?: 'La capacité doit être comprise entre 1 et 50 tonnes.' }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                {{ form_widget(form.etat, {
+                                    'attr': {
+                                        'class': 'form-select' ~ (form_errors(form.etat) ? ' is-invalid' : ''),
+                                        'data-bs-toggle': 'tooltip',
+                                        'data-bs-placement': 'top',
+                                        'title': 'Sélectionnez l\'état actuel du camion'
+                                    }
+                                }) }}
+                                {{ form_label(form.etat, 'État *') }}
+                                <div class="invalid-feedback">
+                                    {{ form_errors(form.etat) ?: 'Veuillez sélectionner un état.' }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                {{ form_widget(form.type_moteur, {
+                                    'attr': {
+                                        'class': 'form-select' ~ (form_errors(form.type_moteur) ? ' is-invalid' : ''),
+                                        'data-bs-toggle': 'tooltip',
+                                        'data-bs-placement': 'top',
+                                        'title': 'Sélectionnez le type de moteur'
+                                    }
+                                }) }}
+                                {{ form_label(form.type_moteur, 'Type de Moteur *') }}
+                                <div class="invalid-feedback">
+                                    {{ form_errors(form.type_moteur) ?: 'Veuillez sélectionner un type de moteur.' }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                {{ form_widget(form.emission_co2, {
+                                    'attr': {
+                                        'class': 'form-control' ~ (form_errors(form.emission_co2) ? ' is-invalid' : ''),
+                                        'placeholder': 'Émissions CO2',
+                                        'data-bs-toggle': 'tooltip',
+                                        'data-bs-placement': 'top',
+                                        'title': 'Émissions entre 0 et 1000 g/km'
+                                    }
+                                }) }}
+                                {{ form_label(form.emission_co2, 'Émissions CO2 (g/km) *') }}
+                                <div class="invalid-feedback">
+                                    {{ form_errors(form.emission_co2) ?: 'Les émissions doivent être comprises entre 0 et 1000 g/km.' }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                {{ form_widget(form.consommation, {
+                                    'attr': {
+                                        'class': 'form-control' ~ (form_errors(form.consommation) ? ' is-invalid' : ''),
+                                        'placeholder': 'Consommation',
+                                        'data-bs-toggle': 'tooltip',
+                                        'data-bs-placement': 'top',
+                                        'title': 'Consommation entre 0 et 50 L/100km'
+                                    }
+                                }) }}
+                                {{ form_label(form.consommation, 'Consommation (L/100km) *') }}
+                                <div class="invalid-feedback">
+                                    {{ form_errors(form.consommation) ?: 'La consommation doit être comprise entre 0 et 50 L/100km.' }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                {{ form_widget(form.annee_fabrication, {
+                                    'attr': {
+                                        'class': 'form-control' ~ (form_errors(form.annee_fabrication) ? ' is-invalid' : ''),
+                                        'placeholder': 'Année',
+                                        'data-bs-toggle': 'tooltip',
+                                        'data-bs-placement': 'top',
+                                        'title': 'Année entre 2000 et 2024'
+                                    }
+                                }) }}
+                                {{ form_label(form.annee_fabrication, 'Année de Fabrication *') }}
+                                <div class="invalid-feedback">
+                                    {{ form_errors(form.annee_fabrication) ?: 'L\'année doit être comprise entre 2000 et 2024.' }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="form-floating">
+                                {{ form_widget(form.kilometrage, {
+                                    'attr': {
+                                        'class': 'form-control' ~ (form_errors(form.kilometrage) ? ' is-invalid' : ''),
+                                        'placeholder': 'Kilométrage',
+                                        'data-bs-toggle': 'tooltip',
+                                        'data-bs-placement': 'top',
+                                        'title': 'Kilométrage doit être positif'
+                                    }
+                                }) }}
+                                {{ form_label(form.kilometrage, 'Kilométrage *') }}
+                                <div class="invalid-feedback">
+                                    {{ form_errors(form.kilometrage) ?: 'Le kilométrage doit être un nombre positif.' }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 d-flex justify-content-between">
+                        <a href="{{ path('app_camion_index') }}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left me-1"></i>Retour à la liste
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-1"></i>Enregistrer
+                        </button>
+                    </div>
+                {{ form_end(form) }}
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        // Initialiser les tooltips
+        document.addEventListener('DOMContentLoaded', function() {
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+        });
+    </script>
+{% endblock %} 

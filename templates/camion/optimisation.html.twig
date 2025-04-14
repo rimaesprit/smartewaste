@@ -1,0 +1,65 @@
+{% extends 'BackBase.html.twig' %}
+
+{% block title %}Optimisation des trajets{% endblock %}
+
+{% block body %}
+    <div class="container-fluid px-4">
+        <h1 class="mt-4 mb-4">Optimisation des trajets de collecte</h1>
+        
+        <div class="card mb-4">
+            <div class="card-header">
+                <i class="fas fa-route me-1"></i>
+                Sélectionnez un camion pour optimiser son trajet
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6 mx-auto">
+                        {% for message in app.flashes('warning') %}
+                            <div class="alert alert-warning">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                        
+                        <form method="post" action="{{ path('app_camion_optimisation') }}">
+                            <div class="mb-3">
+                                <label for="camion_id" class="form-label">Camion</label>
+                                <select name="camion_id" id="camion_id" class="form-select" required>
+                                    <option value="">Sélectionnez un camion</option>
+                                    {% for camion in camions %}
+                                        <option value="{{ camion.id }}">{{ camion.matricule }} (Capacité: {{ camion.capacite }} tonnes)</option>
+                                    {% endfor %}
+                                </select>
+                                <div class="form-text">Seuls les camions en service sont affichés</div>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-calculator me-1"></i> Calculer l'itinéraire optimal
+                            </button>
+                            
+                            <a href="{{ path('app_camion_index') }}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left me-1"></i> Retour à la liste
+                            </a>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card mb-4">
+            <div class="card-header">
+                <i class="fas fa-info-circle me-1"></i>
+                À propos de l'optimisation des trajets
+            </div>
+            <div class="card-body">
+                <p>L'optimisation des trajets de collecte permet de:</p>
+                <ul>
+                    <li>Réduire la consommation de carburant</li>
+                    <li>Diminuer les temps de trajet</li>
+                    <li>Optimiser l'efficacité des collectes</li>
+                    <li>Réduire l'empreinte carbone</li>
+                </ul>
+                <p>L'algorithme utilise la méthode du "plus proche voisin" pour calculer un itinéraire optimal entre les différents points de collecte.</p>
+            </div>
+        </div>
+    </div>
+{% endblock %} 

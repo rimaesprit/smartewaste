@@ -1,0 +1,180 @@
+{% extends 'BackBase.html.twig' %}
+{% import _self as macros %}
+
+{% block title %}Assigner des déchets à un camion{% endblock %}
+
+{% block body %}
+    <div class="d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-4">
+        <div>
+            <h3 class="fw-bold mb-3">Assigner des déchets à un camion</h3>
+            <h6 class="op-7 mb-2">Assignation groupée de déchets à un même camion</h6>
+        </div>
+        <div class="ms-md-auto py-2 py-md-0">
+            <a href="{{ path('app_dechet_index') }}" class="btn btn-secondary btn-round mr-2">
+                <i class="bi bi-arrow-left"></i> Retour à la liste
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title">
+                        <i class="bi bi-list-check"></i> Déchets sélectionnés ({{ dechets|length }})
+                    </h4>
+                </div>
+                <div class="card-body">
+                    {% if dechets|length > 0 %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Type</th>
+                                        <th>Poids (kg)</th>
+                                        <th>Date de dépôt</th>
+                                        <th>Camion actuel</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for dechet in dechets %}
+                                        <tr>
+                                            <td><input type="checkbox" name="dechet_ids[]" value="{{ dechet.id }}" class="dechet-checkbox"></td>
+                                            <td>{{ dechet.id }}</td>
+                                            <td>{{ dechet.poids }}</td>
+                                            <td>{{ dechet.dateDepot|date('d/m/Y') }}</td>
+                                            <td>
+                                                {% if dechet.camion %}
+                                                    <a href="{{ path('app_camion_show', {'id': dechet.camion.id}) }}">
+                                                        {{ dechet.camion.matricule }}
+                                                    </a>
+                                                {% else %}
+                                                    <span class="text-muted">Non assigné</span>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                                <tfoot>
+                                    <tr class="table-secondary">
+                                        <th colspan="2">Total</th>
+                                        <th>{{ dechets|reduce((carry, d) => carry + d.poids, 0)|number_format(2, '.', ' ') }} kg</th>
+                                        <th colspan="2"></th>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-warning">
+                            <i class="bi bi-exclamation-triangle"></i> Aucun déchet sélectionné.
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="card-title">
+                        <i class="bi bi-truck"></i> Assigner à un camion
+                    </h4>
+                </div>
+                <div class="card-body">
+                    {% if dechets|length > 0 %}
+                        <form method="post" action="{{ path('app_dechet_batch_assign') }}?ids={{ app.request.query.get('ids') }}">
+                            <div class="mb-4">
+                                <label for="camion_id" class="form-label">Sélectionner un camion</label>
+                                <select id="camion_id" name="camion_id" class="form-select" required>
+                                    <option value="">-- Choisir un camion --</option>
+                                    {% for camion in camions %}
+                                        {% if camion.etat == 'en_service' %}
+                                            <option value="{{ camion.id }}">
+                                                {{ camion.matricule }} ({{ camion.capacite }} t)
+                                                {% if camion.dechets|length > 0 %}
+                                                    - {{ camion.dechets|reduce((carry, d) => carry + d.poids, 0)|number_format(2, '.', ' ') }} kg utilisés
+                                                {% else %}
+                                                    - Vide
+                                                {% endif %}
+                                            </option>
+                                        {% else %}
+                                            <option value="{{ camion.id }}" disabled>
+                                                {{ camion.matricule }} ({{ camion.etat == 'en_maintenance' ? 'En maintenance' : 'Hors service' }})
+                                            </option>
+                                        {% endif %}
+                                    {% endfor %}
+                                </select>
+                                <div class="form-text">
+                                    Seuls les camions en service sont disponibles pour l'assignation
+                                </div>
+                            </div>
+                            
+                            <div class="alert alert-info">
+                                <i class="bi bi-info-circle"></i> L'assignation va modifier le camion pour tous les déchets sélectionnés.
+                            </div>
+                            
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-check-circle"></i> Assigner
+                                </button>
+                                <a href="{{ path('app_dechet_index') }}" class="btn btn-outline-secondary">
+                                    <i class="bi bi-x-circle"></i> Annuler
+                                </a>
+                            </div>
+                        </form>
+                    {% else %}
+                        <div class="alert alert-danger">
+                            Impossible de procéder à l'assignation sans déchets sélectionnés.
+                        </div>
+                        <div class="d-grid">
+                            <a href="{{ path('app_dechet_index') }}" class="btn btn-secondary">
+                                <i class="bi bi-arrow-left"></i> Retour à la liste des déchets
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Facultatif: Ajouter une confirmation avant soumission du formulaire
+            const form = document.querySelector('form');
+            if (form) {
+                form.addEventListener('submit', function(e) {
+                    const camionSelect = document.getElementById('camion_id');
+                    const selectedOption = camionSelect.options[camionSelect.selectedIndex];
+                    
+                    if (!selectedOption.value) {
+                        e.preventDefault();
+                        alert('Veuillez sélectionner un camion');
+                        return;
+                    }
+                    
+                    if (!confirm(`Êtes-vous sûr de vouloir assigner ces ${{{ dechets|length }}} déchet(s) au camion ${selectedOption.text}?`)) {
+                        e.preventDefault();
+                    }
+                });
+            }
+        });
+    </script>
+{% endblock %}
+
+{% macro getBadgeColor(type) %}
+    {% set colors = {
+        'plastique': 'primary',
+        'papier': 'warning',
+        'verre': 'success',
+        'metal': 'secondary',
+        'organique': 'info',
+        'electronique': 'danger',
+        'dangereux': 'dark'
+    } %}
+    
+    {{ colors[type] ?? 'secondary' }}
+{% endmacro %} 

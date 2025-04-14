@@ -1,0 +1,210 @@
+{% extends 'BackBase.html.twig' %}
+
+{% block title %}Résultat d'optimisation de trajet{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A==" crossorigin="" />
+    <style>
+        #map { height: 500px; }
+        .route-info { max-height: 500px; overflow-y: auto; }
+    </style>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js" integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA==" crossorigin=""></script>
+{% endblock %}
+
+{% block body %}
+    <div class="container-fluid px-4">
+        <h1 class="mt-4 mb-4">Itinéraire optimisé pour le camion {{ camion.matricule }}</h1>
+        
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <i class="fas fa-map me-1"></i>
+                        Carte de l'itinéraire
+                    </div>
+                    <div class="card-body">
+                        <div id="map"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <i class="fas fa-list me-1"></i>
+                        Détails de l'itinéraire
+                    </div>
+                    <div class="card-body route-info">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Ordre</th>
+                                    <th>Type de déchet</th>
+                                    <th>Poids</th>
+                                    <th>Date de dépôt</th>
+                                    <th>Distance (km)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Départ</td>
+                                    <td>Dépôt central</td>
+                                    <td>-</td>
+                                    <td>-</td>
+                                    <td>0</td>
+                                </tr>
+                                {% set totalDistance = 0 %}
+                                {% for etape in itineraire %}
+                                    {% set totalDistance = totalDistance + etape.distance %}
+                                    <tr>
+                                        <td>{{ loop.index }}</td>
+                                        <td>
+                                            {% if etape.point.id == 'depot' %}
+                                                Retour au dépôt
+                                            {% else %}
+                                                {{ etape.point.type|capitalize }}
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if etape.point.id == 'depot' %}
+                                                -
+                                            {% else %}
+                                                {{ etape.point.poids }} kg
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            {% if etape.point.id == 'depot' %}
+                                                -
+                                            {% else %}
+                                                {{ etape.point.date_depot }}
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ etape.distance|number_format(2) }} km</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                            <tfoot>
+                                <tr class="table-dark">
+                                    <td colspan="4" class="text-end fw-bold">Distance totale:</td>
+                                    <td class="fw-bold">{{ totalDistance|number_format(2) }} km</td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <i class="fas fa-chart-pie me-1"></i>
+                        Statistiques de l'itinéraire
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="card bg-primary text-white mb-4">
+                                    <div class="card-body">
+                                        <h5 class="card-title">Distance totale</h5>
+                                        <h2 class="display-4">{{ totalDistance|number_format(2) }}</h2>
+                                        <p>kilomètres</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card bg-success text-white mb-4">
+                                    <div class="card-body">
+                                        <h5 class="card-title">Points de collecte</h5>
+                                        <h2 class="display-4">{{ itineraire|length - 1 }}</h2>
+                                        <p>points</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="card bg-info text-white mb-4">
+                                    <div class="card-body">
+                                        <h5 class="card-title">Économie estimée</h5>
+                                        <h2 class="display-4">{{ (totalDistance * 0.15)|number_format(2) }}</h2>
+                                        <p>litres de carburant</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card bg-warning text-dark mb-4">
+                                    <div class="card-body">
+                                        <h5 class="card-title">Temps estimé</h5>
+                                        <h2 class="display-4">{{ (totalDistance / 40 * 60)|number_format(0) }}</h2>
+                                        <p>minutes</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="mb-4">
+            <a href="{{ path('app_camion_optimisation') }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left me-1"></i> Retour
+            </a>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialiser la carte
+            var map = L.map('map').setView([{{ depot.latitude }}, {{ depot.longitude }}], 13);
+            
+            // Ajouter le fond de carte OpenStreetMap
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(map);
+            
+            // Créer un marqueur pour le dépôt
+            var depotIcon = L.icon({
+                iconUrl: 'https://cdn.rawgit.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
+                shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
+                iconSize: [25, 41],
+                iconAnchor: [12, 41],
+                popupAnchor: [1, -34],
+                shadowSize: [41, 41]
+            });
+            
+            L.marker([{{ depot.latitude }}, {{ depot.longitude }}], {icon: depotIcon})
+             .bindPopup('<strong>Dépôt central</strong><br>Point de départ et d\'arrivée')
+             .addTo(map);
+            
+            // Créer les marqueurs pour les points de collecte
+            var points = [];
+            {% for point in pointsCollecte %}
+                var marker = L.marker([{{ point.latitude }}, {{ point.longitude }}])
+                    .bindPopup('<strong>Point #{{ loop.index }}</strong><br>Type: {{ point.type|capitalize }}<br>Poids: {{ point.poids }} kg<br>Date: {{ point.date_depot }}')
+                    .addTo(map);
+                points.push([{{ point.latitude }}, {{ point.longitude }}]);
+            {% endfor %}
+            
+            // Tracer l'itinéraire
+            var routePoints = [[{{ depot.latitude }}, {{ depot.longitude }}]];
+            {% for etape in itineraire %}
+                {% if etape.point.id != 'depot' %}
+                    routePoints.push([{{ etape.point.latitude }}, {{ etape.point.longitude }}]);
+                {% endif %}
+            {% endfor %}
+            routePoints.push([{{ depot.latitude }}, {{ depot.longitude }}]);
+            
+            var polyline = L.polyline(routePoints, {color: 'blue', weight: 3}).addTo(map);
+            
+            // Ajuster la vue pour englober tout l'itinéraire
+            map.fitBounds(polyline.getBounds());
+        });
+    </script>
+{% endblock %} 

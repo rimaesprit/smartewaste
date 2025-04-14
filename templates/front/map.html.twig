@@ -1,0 +1,184 @@
+{% extends 'FrontBase.html.twig' %}
+
+{% block title %}Carte des Collectes - SmartWaste System{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <style>
+        #map {
+            height: 600px;
+            width: 100%;
+            border-radius: 10px;
+        }
+        .map-legend {
+            padding: 10px;
+            background: white;
+            border-radius: 5px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+        }
+        .legend-item {
+            margin: 5px 0;
+            display: flex;
+            align-items: center;
+        }
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+        .camion-marker { background-color: #28a745; }
+    </style>
+{% endblock %}
+
+{% block body %}
+    <!-- Map Header Section -->
+    <section class="section pt-5 mt-5">
+        <div class="container" data-aos="fade-up">
+            <div class="section-title">
+                <h2>Carte des Collectes</h2>
+                <div><span>Suivez nos</span> <span class="description-title">Camions en temps réel</span></div>
+                <p class="mt-3">Notre flotte de camions est équipée de GPS pour vous permettre de suivre en temps réel les opérations de collecte de déchets dans votre région.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Map Section -->
+    <section class="section">
+        <div class="container" data-aos="fade-up">
+            <div class="row">
+                <div class="col-lg-9">
+                    <div id="map" class="shadow"></div>
+                </div>
+                <div class="col-lg-3">
+                    <div class="map-legend">
+                        <h4>Légende</h4>
+                        <div class="legend-item">
+                            <div class="legend-color camion-marker"></div>
+                            <span>Camion</span>
+                        </div>
+                    </div>
+
+                    <div class="card mt-4">
+                        <div class="card-header">
+                            <h5>Statistiques</h5>
+                        </div>
+                        <div class="card-body">
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    Total des camions
+                                    <span class="badge bg-primary rounded-pill" id="total-camions">{{ camions|length }}</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mt-5">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5>Liste des Camions</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Matricule</th>
+                                            <th>Modèle</th>
+                                            <th>Type de carburant</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="camions-table">
+                                        {% for camion in camions %}
+                                        <tr>
+                                            <td>{{ camion.id }}</td>
+                                            <td>{{ camion.matricule }}</td>
+                                            <td>{{ camion.modele }}</td>
+                                            <td>{{ camion.typeCarburant }}</td>
+                                            <td>
+                                                <button class="btn btn-sm btn-primary btn-locate" data-id="{{ camion.id }}">
+                                                    <i class="bi bi-geo-alt"></i> Localiser
+                                                </button>
+                                            </td>
+                                        </tr>
+                                        {% else %}
+                                        <tr>
+                                            <td colspan="5" class="text-center">Aucun camion disponible</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize the map
+            const map = L.map('map').setView([48.8534, 2.3488], 12);
+
+            // Add the tile layer (OpenStreetMap)
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(map);
+
+            // Camions data
+            const camionsData = {{ camions_json|raw }};
+            const markers = {};
+
+            // Create markers for each camion
+            camionsData.forEach(camion => {
+                // Create marker icon
+                const markerIcon = L.divIcon({
+                    className: 'custom-marker',
+                    html: `<div style="background-color: #28a745; width: 20px; height: 20px; border-radius: 50%; display: flex; justify-content: center; align-items: center;"><i class="bi bi-truck" style="color: white; font-size: 12px;"></i></div>`,
+                    iconSize: [20, 20]
+                });
+
+                // Create marker
+                const marker = L.marker(camion.coordinates, { icon: markerIcon }).addTo(map);
+                marker.bindPopup(`
+                    <strong>Camion #${camion.id}</strong><br>
+                    Matricule: ${camion.matricule}<br>
+                    Modèle: ${camion.modele}<br>
+                `);
+                
+                // Store marker reference
+                markers[camion.id] = marker;
+            });
+
+            // Fit map to show all markers
+            if (Object.keys(markers).length > 0) {
+                const group = new L.featureGroup(Object.values(markers));
+                map.fitBounds(group.getBounds().pad(0.1));
+            }
+
+            // Add event listeners to locate buttons
+            document.querySelectorAll('.btn-locate').forEach(button => {
+                button.addEventListener('click', function() {
+                    const camionId = this.getAttribute('data-id');
+                    const marker = markers[camionId];
+                    
+                    if (marker) {
+                        map.setView(marker.getLatLng(), 15);
+                        marker.openPopup();
+                    }
+                });
+            });
+        });
+    </script>
+{% endblock %} 
