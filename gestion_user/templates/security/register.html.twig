@@ -1,0 +1,270 @@
+{% extends 'FrontBase.html.twig' %}
+
+{% block title %}Inscription - SmartWaste{% endblock %}
+
+{% block stylesheets %}
+{{ parent() }}
+<style>
+    .invalid-feedback {
+        display: block;
+        width: 100%;
+        margin-top: 0.25rem;
+        font-size: 80%;
+        color: #dc3545;
+    }
+    .is-invalid {
+        border-color: #dc3545;
+    }
+</style>
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<!-- Ajout de SweetAlert2 -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.querySelector('form.needs-validation');
+        
+        // Vérifie s'il y a des erreurs à afficher
+        let errors = [];
+        
+        {% if not registrationForm.vars.valid %}
+            {% for error in registrationForm.vars.errors %}
+                errors.push("{{ error.message }}");
+            {% endfor %}
+        {% endif %}
+        
+        {% for field in ['firstName', 'lastName', 'email', 'plainPassword', 'confirmPassword', 'agreeTerms'] %}
+            {% if registrationForm[field] is defined and not registrationForm[field].vars.valid %}
+                {% for error in registrationForm[field].vars.errors %}
+                    errors.push("{{ error.message }}");
+                {% endfor %}
+            {% endif %}
+        {% endfor %}
+        
+        // Si des erreurs existent, les afficher dans SweetAlert
+        if (errors.length > 0) {
+            Swal.fire({
+                title: 'Erreur de validation',
+                html: '<ul style="text-align: left;"><li>' + errors.join('</li><li>') + '</li></ul>',
+                icon: 'error',
+                confirmButtonText: 'OK'
+            });
+        }
+        
+        // Fonction de validation de mot de passe complexe
+        function validatePassword(password) {
+            // Vérifier la présence d'au moins une lettre majuscule
+            const hasUpperCase = /[A-Z]/.test(password);
+            // Vérifier la présence d'au moins un chiffre
+            const hasNumber = /[0-9]/.test(password);
+            // Vérifier la présence d'au moins un caractère spécial
+            const hasSymbol = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password);
+            // Vérifier la longueur minimale
+            const hasMinLength = password.length >= 8;
+            
+            const errors = [];
+            if (!hasMinLength) errors.push("Le mot de passe doit contenir au moins 8 caractères");
+            if (!hasUpperCase) errors.push("Le mot de passe doit contenir au moins une lettre majuscule");
+            if (!hasNumber) errors.push("Le mot de passe doit contenir au moins un chiffre");
+            if (!hasSymbol) errors.push("Le mot de passe doit contenir au moins un caractère spécial");
+            
+            return {
+                valid: hasUpperCase && hasNumber && hasSymbol && hasMinLength,
+                errors: errors
+            };
+        }
+        
+        // Capture du formulaire pour validation côté client
+        form.addEventListener('submit', function(event) {
+            const passwordField = form.querySelector('[name$="[plainPassword]"]');
+            const confirmPasswordField = form.querySelector('[name$="[confirmPassword]"]');
+            let clientErrors = [];
+            let isValid = true;
+            
+            // Valider le format du mot de passe
+            if (passwordField && passwordField.value) {
+                const passwordValidation = validatePassword(passwordField.value);
+                if (!passwordValidation.valid) {
+                    isValid = false;
+                    clientErrors = clientErrors.concat(passwordValidation.errors);
+                }
+            }
+            
+            // Vérifier que les deux mots de passe correspondent
+            if (passwordField && confirmPasswordField && 
+                passwordField.value && confirmPasswordField.value) {
+                if (passwordField.value !== confirmPasswordField.value) {
+                    isValid = false;
+                    clientErrors.push("Les mots de passe ne correspondent pas");
+                }
+            }
+            
+            // Vérifier les autres champs requis
+            if (!form.checkValidity()) {
+                isValid = false;
+                
+                // Récupérer toutes les erreurs des champs invalides
+                const invalidInputs = form.querySelectorAll(':invalid');
+                
+                invalidInputs.forEach(function(input) {
+                    if (input.validationMessage && !input.name.includes('password')) {
+                        clientErrors.push(input.validationMessage);
+                    } else if (input.name && !input.name.includes('password')) {
+                        clientErrors.push(`Le champ ${input.name} est invalide.`);
+                    }
+                });
+            }
+            
+            if (!isValid) {
+                event.preventDefault();
+                event.stopPropagation();
+                
+                if (clientErrors.length > 0) {
+                    Swal.fire({
+                        title: 'Formulaire incomplet',
+                        html: '<ul style="text-align: left;"><li>' + clientErrors.join('</li><li>') + '</li></ul>',
+                        icon: 'warning',
+                        confirmButtonText: 'OK'
+                    });
+                }
+            }
+            
+            form.classList.add('was-validated');
+        });
+    });
+</script>
+{% endblock %}
+
+{% block body %}
+<div class="container">
+    <div class="row mt-5 justify-content-center">
+        <div class="col-lg-6 col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-body p-4">
+                    <div class="text-center mb-4">
+                        <h2 class="font-weight-bold text-primary">Créer un compte</h2>
+                        <p class="text-muted">Inscrivez-vous pour accéder au système</p>
+                    </div>
+
+                    {% if app.flashes('error') is defined and app.flashes('error')|length > 0 %}
+                        <div style="display:none;" id="flash-errors" 
+                             data-errors="{{ app.flashes('error')|json_encode }}"></div>
+                    {% endif %}
+                    
+                    {% if app.flashes('success') is defined and app.flashes('success')|length > 0 %}
+                        <div style="display:none;" id="flash-success" 
+                             data-messages="{{ app.flashes('success')|json_encode }}"></div>
+                    {% endif %}
+
+                    {{ form_start(registrationForm, {'attr': {'class': 'needs-validation', 'novalidate': 'novalidate'}}) }}
+                    
+                        {# Les erreurs seront gérées par SweetAlert #}
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                {{ form_label(registrationForm.firstName) }}
+                                {{ form_widget(registrationForm.firstName, {
+                                    'attr': {
+                                        'class': 'form-control ' ~ (registrationForm.firstName.vars.valid ? '' : 'is-invalid')
+                                    }
+                                }) }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                {{ form_label(registrationForm.lastName) }}
+                                {{ form_widget(registrationForm.lastName, {
+                                    'attr': {
+                                        'class': 'form-control ' ~ (registrationForm.lastName.vars.valid ? '' : 'is-invalid')
+                                    }
+                                }) }}
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form_label(registrationForm.email) }}
+                            {{ form_widget(registrationForm.email, {
+                                'attr': {
+                                    'class': 'form-control ' ~ (registrationForm.email.vars.valid ? '' : 'is-invalid')
+                                }
+                            }) }}
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form_label(registrationForm.plainPassword) }}
+                            {{ form_widget(registrationForm.plainPassword, {
+                                'attr': {
+                                    'class': 'form-control ' ~ (registrationForm.plainPassword.vars.valid ? '' : 'is-invalid')
+                                }
+                            }) }}
+                            <small class="form-text text-muted">
+                                Le mot de passe doit contenir au moins 8 caractères, une lettre majuscule, un chiffre et un caractère spécial.
+                            </small>
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form_label(registrationForm.confirmPassword) }}
+                            {{ form_widget(registrationForm.confirmPassword, {
+                                'attr': {
+                                    'class': 'form-control ' ~ (registrationForm.confirmPassword.vars.valid ? '' : 'is-invalid')
+                                }
+                            }) }}
+                        </div>
+
+                        <div class="mb-3 form-check">
+                            {{ form_widget(registrationForm.agreeTerms, {
+                                'attr': {
+                                    'class': 'form-check-input ' ~ (registrationForm.agreeTerms.vars.valid ? '' : 'is-invalid')
+                                }
+                            }) }}
+                            {{ form_label(registrationForm.agreeTerms, null, {'label_attr': {'class': 'form-check-label'}}) }}
+                        </div>
+
+                        <div class="d-grid gap-2 mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg">S'inscrire</button>
+                        </div>
+
+                        <div class="text-center mt-3">
+                            <span class="text-muted">Vous avez déjà un compte ?</span>
+                            <a href="{{ path('app_login') }}" class="text-primary">Se connecter</a>
+                        </div>
+                    {{ form_end(registrationForm) }}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Afficher les messages flash avec SweetAlert
+    document.addEventListener('DOMContentLoaded', function() {
+        // Traiter les messages d'erreur flash
+        const flashErrorsElement = document.getElementById('flash-errors');
+        if (flashErrorsElement) {
+            const errors = JSON.parse(flashErrorsElement.dataset.errors);
+            if (errors && errors.length > 0) {
+                Swal.fire({
+                    title: 'Erreur',
+                    html: errors.join('<br>'),
+                    icon: 'error',
+                    confirmButtonText: 'OK'
+                });
+            }
+        }
+        
+        // Traiter les messages de succès flash
+        const flashSuccessElement = document.getElementById('flash-success');
+        if (flashSuccessElement) {
+            const messages = JSON.parse(flashSuccessElement.dataset.messages);
+            if (messages && messages.length > 0) {
+                Swal.fire({
+                    title: 'Succès',
+                    html: messages.join('<br>'),
+                    icon: 'success',
+                    confirmButtonText: 'OK'
+                });
+            }
+        }
+    });
+</script>
+{% endblock %} 

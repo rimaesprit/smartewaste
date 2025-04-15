@@ -1,0 +1,149 @@
+{% extends 'BackBase.html.twig' %}
+
+{% block title %}Détails de l'utilisateur - SmartWaste{% endblock %}
+
+{% block body %}
+<div class="d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-4">
+    <div>
+        <h3 class="fw-bold mb-3">Détails de l'utilisateur</h3>
+        <h6 class="op-7 mb-2">Informations complètes du profil</h6>
+    </div>
+    <div class="ms-md-auto py-2 py-md-0">
+        <a href="{{ path('app_admin_users') }}" class="btn btn-secondary btn-round btn-sm me-2">
+            <i class="fas fa-arrow-left"></i> Retour à la liste
+        </a>
+        <a href="{{ path('app_admin_user_edit', {'id': user.id}) }}" class="btn btn-warning btn-round btn-sm">
+            <i class="fas fa-edit"></i> Modifier
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-4">
+        <div class="card card-profile">
+            <div class="card-header" style="background-image: url('{{ asset('Back_Assets/img/profilebg.jpg') }}')">
+                <div class="profile-picture">
+                    <div class="avatar avatar-xl">
+                        <img src="{{ asset('Back_Assets/img/profile.jpg') }}" alt="..." class="avatar-img rounded-circle">
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="user-profile text-center">
+                    <div class="name">{{ user.fullName }}</div>
+                    <div class="job">{{ 'ROLE_ADMIN' in user.roles ? 'Administrateur' : 'Utilisateur' }}</div>
+                    <div class="desc">{{ user.email }}</div>
+                    
+                    <div class="view-profile mt-4">
+                        <div class="d-flex justify-content-center">
+                            {% if user.isVerified %}
+                                <span class="badge bg-success p-2"><i class="fa fa-check-circle me-1"></i> Compte vérifié</span>
+                            {% else %}
+                                <span class="badge bg-danger p-2"><i class="fa fa-times-circle me-1"></i> Compte non vérifié</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">Informations détaillées</div>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <tbody>
+                            <tr>
+                                <th style="width: 30%">ID</th>
+                                <td>{{ user.id }}</td>
+                            </tr>
+                            <tr>
+                                <th>Prénom</th>
+                                <td>{{ user.firstName }}</td>
+                            </tr>
+                            <tr>
+                                <th>Nom</th>
+                                <td>{{ user.lastName }}</td>
+                            </tr>
+                            <tr>
+                                <th>Email</th>
+                                <td>{{ user.email }}</td>
+                            </tr>
+                            <tr>
+                                <th>Rôles</th>
+                                <td>
+                                    {% for role in user.roles %}
+                                        {% if role == 'ROLE_ADMIN' %}
+                                            <span class="badge bg-primary me-1">Administrateur</span>
+                                        {% elseif role == 'ROLE_USER' %}
+                                            <span class="badge bg-info me-1">Utilisateur</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary me-1">{{ role }}</span>
+                                        {% endif %}
+                                    {% endfor %}
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Statut de vérification</th>
+                                <td>
+                                    {% if user.isVerified %}
+                                        <span class="text-success"><i class="fa fa-check-circle"></i> Compte vérifié</span>
+                                    {% else %}
+                                        <span class="text-danger"><i class="fa fa-times-circle"></i> Compte non vérifié</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">Actions</div>
+            </div>
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <a href="{{ path('app_admin_user_edit', {'id': user.id}) }}" class="btn btn-warning">
+                        <i class="fa fa-edit me-1"></i> Modifier l'utilisateur
+                    </a>
+                    <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                        <i class="fa fa-trash me-1"></i> Supprimer l'utilisateur
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de confirmation de suppression -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel">Confirmer la suppression</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Êtes-vous sûr de vouloir supprimer l'utilisateur <strong>{{ user.fullName }}</strong> ?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <form method="post" action="{{ path('app_admin_user_delete', {'id': user.id}) }}">
+                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ user.id) }}">
+                    <button type="submit" class="btn btn-danger">Supprimer</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}SmartWaste - Gestion des déchets intelligente{% endblock %}</title>
+  <meta name="description" content="Gestion des déchets intelligente et écologique">
+  <meta name="keywords" content="déchets, recyclage, gestion, écologie">
+
+  <!-- Favicons -->
+  <link href="{{ asset('assets/img/favicon.png') }}" rel="icon">
+  <link href="{{ asset('assets/img/apple-touch-icon.png') }}" rel="apple-touch-icon">
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com" rel="preconnect">
+  <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Raleway:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+
+  <!-- Vendor CSS Files -->
+  <link href="{{ asset('assets/vendor/bootstrap/css/bootstrap.min.css') }}" rel="stylesheet">
+  <link href="{{ asset('assets/vendor/bootstrap-icons/bootstrap-icons.css') }}" rel="stylesheet">
+  <link href="{{ asset('assets/vendor/aos/aos.css') }}" rel="stylesheet">
+  <link href="{{ asset('assets/vendor/glightbox/css/glightbox.min.css') }}" rel="stylesheet">
+  <link href="{{ asset('assets/vendor/swiper/swiper-bundle.min.css') }}" rel="stylesheet">
+
+  <!-- Main CSS File -->
+  <link href="{{ asset('assets/css/front-style.css') }}" rel="stylesheet">
+
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+
+  <!-- Custom CSS -->
+  <link href="{{ asset('css/front-styles.css') }}" rel="stylesheet">
+
+  {% block stylesheets %}
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;600;700&family=Montserrat:wght@300;400;500;600;700&family=Raleway:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- AOS Animation Library -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    
+    <!-- GLightbox -->
+    <link href="https://cdn.jsdelivr.net/npm/glightbox/dist/css/glightbox.min.css" rel="stylesheet">
+    
+    <!-- Swiper Slider -->
+    <link href="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.css" rel="stylesheet">
+    
+    <!-- Main CSS File -->
+    <link href="{{ asset('assets/css/front-style.css') }}" rel="stylesheet">
+  {% endblock %}
+
+  <!-- =======================================================
+  * Template Name: Bootslander
+  * Template URL: https://bootstrapmade.com/bootslander-free-bootstrap-landing-page-template/
+  * Updated: Aug 07 2024 with Bootstrap v5.3.3
+  * Author: BootstrapMade.com
+  * License: https://bootstrapmade.com/license/
+  ======================================================== -->
+</head>
+
+<body class="index-page">
+
+  <header id="header" class="fixed-top">
+    <div class="container d-flex align-items-center justify-content-between">
+
+      <a href="{{ path('app_front_home') }}" class="logo d-flex align-items-center me-auto me-lg-0">
+        <img src="{{ asset('assets/img/logo.png') }}" alt="SmartWaste">
+        <h1>SmartWaste<span>.</span></h1>
+      </a>
+
+      <nav id="navbar" class="navbar">
+        <ul>
+          <li><a href="{{ path('app_home') }}" class="{{ app.request.get('_route') == 'app_home' ? 'active' : '' }}">Accueil</a></li>
+          
+          {% if app.user %}
+          <li class="dropdown">
+            <a href="#" class="{% if app.request.get('_route') starts with 'app_profile' %}active{% endif %}">
+              <span>Mon Compte</span> <i class="bi bi-chevron-down"></i>
+            </a>
+            <ul>
+              <li><a href="#" class="{{ app.request.get('_route') == 'app_profile' ? 'active' : '' }}">Mon profil</a></li>
+              {% if is_granted('ROLE_ADMIN') %}
+              <li><a href="#" class="{{ app.request.get('_route') == 'app_admin_users' ? 'active' : '' }}">Gestion des utilisateurs</a></li>
+              {% endif %}
+            </ul>
+          </li>
+          {% endif %}
+        </ul>
+        <i class="mobile-nav-toggle mobile-nav-show bi bi-list"></i>
+        <i class="mobile-nav-toggle mobile-nav-hide d-none bi bi-x"></i>
+      </nav>
+
+      <div class="auth-buttons">
+        {% if app.user %}
+          <a class="btn-login" href="{{ path('app_logout') }}">Déconnexion</a>
+        {% else %}
+          <a class="btn-secondary me-2" href="{{ path('app_register') }}">S'inscrire</a>
+          <a class="btn-login" href="{{ path('app_login') }}">Se Connecter</a>
+        {% endif %}
+      </div>
+
+    </div>
+  </header>
+
+  <main class="main">
+    {% block body %}{% endblock %}
+  </main>
+
+  <footer id="footer" class="footer">
+    <div class="container">
+      <div class="row gy-4">
+        <div class="col-lg-5 col-md-12 footer-info">
+          <a href="{{ path('app_front_home') }}" class="logo d-flex align-items-center">
+            <img src="{{ asset('assets/img/logo.png') }}" alt="SmartWaste">
+            <span>SmartWaste</span>
+          </a>
+          <p>Solution innovante pour une gestion intelligente des déchets urbains. Ensemble, préservons notre environnement pour les générations futures.</p>
+          <div class="social-links d-flex mt-4">
+            <a href="#" class="twitter"><i class="bi bi-twitter"></i></a>
+            <a href="#" class="facebook"><i class="bi bi-facebook"></i></a>
+            <a href="#" class="instagram"><i class="bi bi-instagram"></i></a>
+            <a href="#" class="linkedin"><i class="bi bi-linkedin"></i></a>
+          </div>
+        </div>
+        
+        <div class="col-lg-2 col-6 footer-links">
+          <h4>Liens Utiles</h4>
+          <ul>
+            <li><a href="{{ path('app_front_home') }}">Accueil</a></li>
+            <li><a href="{{ path('app_front_about') }}">À propos</a></li>
+            <li><a href="{{ path('app_front_services') }}">Services</a></li>
+            <li><a href="#">Conditions d'utilisation</a></li>
+            <li><a href="#">Politique de confidentialité</a></li>
+          </ul>
+        </div>
+        
+        <div class="col-lg-2 col-6 footer-links">
+          <h4>Nos Services</h4>
+          <ul>
+            <li><a href="{{ path('app_front_services') }}">Collecte des déchets</a></li>
+            <li><a href="{{ path('app_front_services') }}">Recyclage</a></li>
+            <li><a href="{{ path('app_front_services') }}">Compostage</a></li>
+            <li><a href="{{ path('app_front_services') }}">Conseil environnemental</a></li>
+            <li><a href="{{ path('app_front_services') }}">Valorisation énergétique</a></li>
+          </ul>
+        </div>
+        
+        <div class="col-lg-3 col-md-12 footer-contact text-center text-md-start">
+          <h4>Contactez-nous</h4>
+          <p>
+            123 Avenue Écologique <br>
+            75001 Paris<br>
+            France <br><br>
+            <strong>Téléphone:</strong> +33 1 23 45 67 89<br>
+            <strong>Email:</strong> contact@smartwaste.com<br>
+          </p>
+        </div>
+      </div>
+    </div>
+    
+    <div class="container mt-4">
+      <div class="copyright text-center">
+        &copy; 2024 <strong>Gestion Utilisateurs</strong>. Tous droits réservés
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scroll Top -->
+  <a href="#" id="scroll-top" class="scroll-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
+
+  <!-- Vendor JS Files -->
+  <script src="{{ asset('assets/vendor/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
+  <script src="{{ asset('assets/vendor/php-email-form/validate.js') }}"></script>
+  <script src="{{ asset('assets/vendor/aos/aos.js') }}"></script>
+  <script src="{{ asset('assets/vendor/glightbox/js/glightbox.min.js') }}"></script>
+  <script src="{{ asset('assets/vendor/purecounter/purecounter_vanilla.js') }}"></script>
+  <script src="{{ asset('assets/vendor/swiper/swiper-bundle.min.js') }}"></script>
+
+  <!-- Main JS File -->
+  <script src="{{ asset('assets/js/main.js') }}"></script>
+
+  <!-- Bootstrap Bundle with Popper -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+  {% block javascripts %}
+    {% block importmap %}{{ importmap('app') }}{% endblock %}
+  {% endblock %}
+
+</body>
+
+</html> 

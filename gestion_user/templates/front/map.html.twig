@@ -1,0 +1,258 @@
+{% extends 'FrontBase.html.twig' %}
+
+{% block title %}Carte des Collectes - SmartWaste System{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <style>
+        #map {
+            height: 600px;
+            width: 100%;
+            border-radius: 10px;
+        }
+        .map-legend {
+            padding: 10px;
+            background: white;
+            border-radius: 5px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+        }
+        .legend-item {
+            margin: 5px 0;
+            display: flex;
+            align-items: center;
+        }
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+        .en_service { background-color: #28a745; }
+        .en_maintenance { background-color: #ffc107; }
+        .hors_service { background-color: #dc3545; }
+    </style>
+{% endblock %}
+
+{% block body %}
+    <!-- Map Header Section -->
+    <section class="section pt-5 mt-5">
+        <div class="container" data-aos="fade-up">
+            <div class="section-title">
+                <h2>Carte des Collectes</h2>
+                <div><span>Suivez nos</span> <span class="description-title">Camions en temps réel</span></div>
+                <p class="mt-3">Notre flotte de camions est équipée de GPS pour vous permettre de suivre en temps réel les opérations de collecte de déchets dans votre région.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Map Section -->
+    <section class="section">
+        <div class="container" data-aos="fade-up">
+            <div class="row">
+                <div class="col-lg-9">
+                    <div id="map" class="shadow"></div>
+                </div>
+                <div class="col-lg-3">
+                    <div class="map-legend">
+                        <h4>Légende</h4>
+                        <div class="legend-item">
+                            <div class="legend-color en_service"></div>
+                            <span>En service</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color en_maintenance"></div>
+                            <span>En maintenance</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color hors_service"></div>
+                            <span>Hors service</span>
+                        </div>
+                    </div>
+
+                    <div class="card mt-4">
+                        <div class="card-header">
+                            <h5>Statistiques</h5>
+                        </div>
+                        <div class="card-body">
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    Camions en service
+                                    <span class="badge bg-success rounded-pill" id="camions-en-service">0</span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    Camions en maintenance
+                                    <span class="badge bg-warning rounded-pill" id="camions-en-maintenance">0</span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    Camions hors service
+                                    <span class="badge bg-danger rounded-pill" id="camions-hors-service">0</span>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    Total des camions
+                                    <span class="badge bg-primary rounded-pill" id="total-camions">{{ camions|length }}</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mt-5">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5>Liste des Camions</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Matricule</th>
+                                            <th>Capacité</th>
+                                            <th>État</th>
+                                            <th>Déchets collectés</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="camions-table">
+                                        <tr>
+                                            <td colspan="6" class="text-center">Chargement des données...</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize the map
+            const map = L.map('map').setView([48.8534, 2.3488], 12);
+
+            // Add the tile layer (OpenStreetMap)
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(map);
+
+            // Create markers for each truck
+            const markers = [];
+            let enService = 0;
+            let enMaintenance = 0;
+            let horsService = 0;
+
+            // Fetch camions data from API
+            fetch('{{ path('app_api_camions') }}')
+                .then(response => response.json())
+                .then(camions => {
+                    // Clear table
+                    document.getElementById('camions-table').innerHTML = '';
+
+                    // Process each camion
+                    camions.forEach(camion => {
+                        // Update stats counters
+                        if (camion.etat === 'en_service') {
+                            enService++;
+                        } else if (camion.etat === 'en_maintenance') {
+                            enMaintenance++;
+                        } else {
+                            horsService++;
+                        }
+
+                        // Create marker icon based on truck state
+                        const markerIcon = L.divIcon({
+                            className: 'custom-marker',
+                            html: `<div style="background-color: ${getColorForState(camion.etat)}; width: 20px; height: 20px; border-radius: 50%; display: flex; justify-content: center; align-items: center;"><i class="bi bi-truck" style="color: white; font-size: 12px;"></i></div>`,
+                            iconSize: [20, 20]
+                        });
+
+                        // Create marker
+                        const marker = L.marker([camion.lat, camion.lng], { icon: markerIcon }).addTo(map);
+                        marker.bindPopup(`
+                            <strong>Camion #${camion.id}</strong><br>
+                            Matricule: ${camion.matricule}<br>
+                            État: ${formatState(camion.etat)}<br>
+                            Capacité: ${camion.capacite} tonnes<br>
+                            Déchets collectés: ${camion.nombreDechets}
+                        `);
+                        markers.push(marker);
+
+                        // Add to table
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${camion.id}</td>
+                            <td>${camion.matricule}</td>
+                            <td>${camion.capacite} tonnes</td>
+                            <td><span class="badge bg-${getBadgeColor(camion.etat)}">${formatState(camion.etat)}</span></td>
+                            <td>${camion.nombreDechets}</td>
+                            <td>
+                                <button class="btn btn-sm btn-primary" onclick="locateCamion(${camion.lat}, ${camion.lng})">
+                                    <i class="bi bi-geo-alt"></i> Localiser
+                                </button>
+                            </td>
+                        `;
+                        document.getElementById('camions-table').appendChild(row);
+                    });
+
+                    // Update stats display
+                    document.getElementById('camions-en-service').textContent = enService;
+                    document.getElementById('camions-en-maintenance').textContent = enMaintenance;
+                    document.getElementById('camions-hors-service').textContent = horsService;
+                    document.getElementById('total-camions').textContent = camions.length;
+
+                    // Fit map to show all markers
+                    if (markers.length > 0) {
+                        const group = new L.featureGroup(markers);
+                        map.fitBounds(group.getBounds().pad(0.1));
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching data:', error);
+                    document.getElementById('camions-table').innerHTML = '<tr><td colspan="6" class="text-center text-danger">Erreur lors du chargement des données</td></tr>';
+                });
+
+            // Helper functions
+            function getColorForState(state) {
+                switch (state) {
+                    case 'en_service': return '#28a745';
+                    case 'en_maintenance': return '#ffc107';
+                    case 'hors_service': return '#dc3545';
+                    default: return '#6c757d';
+                }
+            }
+
+            function getBadgeColor(state) {
+                switch (state) {
+                    case 'en_service': return 'success';
+                    case 'en_maintenance': return 'warning';
+                    case 'hors_service': return 'danger';
+                    default: return 'secondary';
+                }
+            }
+
+            function formatState(state) {
+                switch (state) {
+                    case 'en_service': return 'En service';
+                    case 'en_maintenance': return 'En maintenance';
+                    case 'hors_service': return 'Hors service';
+                    default: return state;
+                }
+            }
+
+            // Add function to locate a camion to global scope
+            window.locateCamion = function(lat, lng) {
+                map.setView([lat, lng], 15);
+            };
+        });
+    </script>
+{% endblock %} 
