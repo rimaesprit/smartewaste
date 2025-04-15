@@ -1,0 +1,46 @@
+# This file is the entry point to configure your own services.
+# Files in the packages/ subdirectory configure your dependencies.
+
+# Put parameters here that don't need to change on each machine where the app is deployed
+# https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
+parameters:
+    app.locales: 'en|fr'
+    locale: 'fr'
+    # Utilisation d'une valeur par défaut au lieu de APP_HOST
+    router.request_context.host: 'localhost'
+    router.request_context.scheme: 'https'
+    # Répertoire pour les photos des réclamations
+    reclamations_directory: '%kernel.project_dir%/public/uploads/reclamations'
+
+services:
+    # default configuration for services in *this* file
+    _defaults:
+        autowire: true      # Automatically injects dependencies in your services.
+        autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
+
+    # makes classes in src/ available to be used as services
+    # this creates a service per class whose id is the fully-qualified class name
+    App\:
+        resource: '../src/'
+        exclude:
+            - '../src/DependencyInjection/'
+            - '../src/Entity/'
+            - '../src/Kernel.php'
+            - '../src/Repository/ImageRepository.php'
+
+    # add more service definitions when explicit configuration is needed
+    # please note that last definitions always *replace* previous ones
+
+    # Configuration du service EmailVerifier
+    # App\Service\EmailVerifier:
+    #    arguments:
+    #        $mailer: '@mailer.mailer'
+    #        $entityManager: '@doctrine.orm.entity_manager'
+    #        $urlGenerator: '@router'
+    #        $logger: '@logger'
+    #        $params: '@parameter_bag'
+    #        $requestStack: '@request_stack'
+    
+    # Enregistrer notre MimeTypeGuesser personnalisé qui ne dépend pas de fileinfo
+    App\Mime\CustomMimeTypeGuesser:
+        tags: ['mime.mime_type_guesser']

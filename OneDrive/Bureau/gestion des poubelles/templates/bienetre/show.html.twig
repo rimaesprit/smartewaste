@@ -1,0 +1,148 @@
+{% extends 'BackBase.html.twig' %}
+
+{% block title %}Détails de l'Avis{% endblock %}
+
+{% block stylesheets %}
+<style>
+    .rate-stars {
+        color: #ffc107;
+        font-size: 1.5rem;
+    }
+    .sentiment-badge {
+        padding: 5px 10px;
+        border-radius: 20px;
+        color: white;
+        font-weight: bold;
+    }
+    .sentiment-Positif {
+        background-color: #28a745;
+    }
+    .sentiment-Neutre {
+        background-color: #6c757d;
+    }
+    .sentiment-Négatif {
+        background-color: #dc3545;
+    }
+    .sentiment-Indéterminé {
+        background-color: #17a2b8;
+    }
+    .review-box {
+        background-color: #f8f9fa;
+        padding: 20px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="page-inner">
+    <div class="page-header">
+        <h4 class="page-title">Gestion des Avis de Bien-être</h4>
+        <ul class="breadcrumbs">
+            <li class="nav-home">
+                <a href="{{ path('app_home') }}">
+                    <i class="fas fa-home"></i>
+                </a>
+            </li>
+            <li class="separator">
+                <i class="fas fa-angle-right"></i>
+            </li>
+            <li class="nav-item">
+                <a href="{{ path('app_bienetre_index') }}">Avis</a>
+            </li>
+            <li class="separator">
+                <i class="fas fa-angle-right"></i>
+            </li>
+            <li class="nav-item">
+                <a href="#">Détails</a>
+            </li>
+        </ul>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <div class="d-flex align-items-center">
+                        <h4 class="card-title">Détails de l'avis #{{ bienetre.id }}</h4>
+                        <div class="ml-auto">
+                            <a href="{{ path('app_bienetre_edit', {'id': bienetre.id}) }}" class="btn btn-primary btn-round">
+                                <i class="fa fa-edit mr-2"></i> Modifier
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="font-weight-bold">Nom:</label>
+                                <p>{{ bienetre.nom }}</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="font-weight-bold">Poubelle concernée:</label>
+                                {% if bienetre.poubelle %}
+                                    <p>
+                                        <a href="{{ path('app_poubelle_show', {'id': bienetre.poubelle.id}) }}">
+                                            {{ bienetre.poubelle }}
+                                        </a>
+                                    </p>
+                                {% else %}
+                                    <p class="text-muted">Non spécifié</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="font-weight-bold">Note:</label>
+                                <p class="rate-stars">
+                                    {% for i in 1..5 %}
+                                        {% if i <= bienetre.rate %}
+                                            <i class="fas fa-star"></i>
+                                        {% else %}
+                                            <i class="far fa-star"></i>
+                                        {% endif %}
+                                    {% endfor %}
+                                    <span class="ml-2 text-muted">({{ bienetre.rate }}/5)</span>
+                                </p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="font-weight-bold">Sentiment:</label>
+                                <p><span class="sentiment-badge sentiment-{{ bienetre.sentiment }}">{{ bienetre.sentiment }}</span></p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label class="font-weight-bold">Avis:</label>
+                                <div class="review-box">
+                                    {{ bienetre.review|nl2br }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-action">
+                    <a href="{{ path('app_bienetre_index') }}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left mr-2"></i> Retour à la liste
+                    </a>
+                    <form method="post" action="{{ path('app_bienetre_delete', {'id': bienetre.id}) }}" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cet avis?');" style="display: inline-block; float: right;">
+                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ bienetre.id) }}">
+                        <button class="btn btn-danger">
+                            <i class="fa fa-trash mr-2"></i> Supprimer
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

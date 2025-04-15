@@ -1,0 +1,238 @@
+{% extends 'BackBase.html.twig' %}
+
+{% block title %}Modifier une poubelle{% endblock %}
+
+{% block stylesheets %}
+{{ parent() }}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" 
+     integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+     crossorigin=""/>
+<style>
+    .form-section {
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 25px;
+        box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    }
+    .section-title {
+        border-bottom: 2px solid #dee2e6;
+        padding-bottom: 10px;
+        margin-bottom: 20px;
+        color: #495057;
+    }
+    .form-group label {
+        font-weight: 500;
+    }
+    .form-control:focus {
+        border-color: #80bdff;
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    }
+    .map-container {
+        height: 400px;
+        margin-top: 15px;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+    .invalid-feedback {
+        font-size: 85%;
+    }
+    .btn-geolocation {
+        margin-bottom: 15px;
+    }
+    #map {
+        height: 300px;
+        border-radius: 4px;
+        z-index: 1;
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-edit"></i> Modifier la poubelle
+                        </h3>
+                    </div>
+                    <div class="card-body">
+                        {% for label, messages in app.flashes %}
+                            {% for message in messages %}
+                                <div class="alert alert-{{ label == 'error' ? 'danger' : label }}">
+                                    {{ message }}
+                                </div>
+                            {% endfor %}
+                        {% endfor %}
+                        
+                        {{ include('poubelle/_form.html.twig', {'button_label': 'Mettre à jour'}) }}
+                    </div>
+                    <div class="card-footer">
+                        <a href="{{ path('app_poubelle_index') }}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Retour à la liste
+                        </a>
+                        {{ include('poubelle/_delete_form.html.twig') }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+     integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+     crossorigin=""></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Récupérer les coordonnées existantes ou utiliser Paris par défaut
+        var latitude = {{ poubelle.latitude|default(48.8566) }};
+        var longitude = {{ poubelle.longitude|default(2.3522) }};
+        
+        // Initialiser la carte
+        var map = L.map('map').setView([latitude, longitude], 13);
+        
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+        
+        // Ajouter un marqueur déplaçable
+        var marker = L.marker([latitude, longitude], {
+            draggable: true
+        }).addTo(map);
+        
+        // Mettre à jour les coordonnées lorsque le marqueur est déplacé
+        marker.on('dragend', function(event) {
+            var position = marker.getLatLng();
+            document.getElementById('{{ form.latitude.vars.id }}').value = position.lat.toFixed(6);
+            document.getElementById('{{ form.longitude.vars.id }}').value = position.lng.toFixed(6);
+        });
+        
+        // Fonction de géolocalisation
+        document.getElementById('geolocate-btn').addEventListener('click', function() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function(position) {
+                    var lat = position.coords.latitude;
+                    var lng = position.coords.longitude;
+                    
+                    // Mettre à jour les champs du formulaire
+                    document.getElementById('{{ form.latitude.vars.id }}').value = lat.toFixed(6);
+                    document.getElementById('{{ form.longitude.vars.id }}').value = lng.toFixed(6);
+                    
+                    // Mettre à jour le marqueur et centrer la carte
+                    marker.setLatLng([lat, lng]);
+                    map.setView([lat, lng], 16);
+                }, function(error) {
+                    alert('Erreur de géolocalisation: ' + error.message);
+                });
+            } else {
+                alert('La géolocalisation n\'est pas supportée par votre navigateur.');
+            }
+        });
+        
+        // Prévisualiser la barre de progression
+        var niveauInput = document.getElementById('{{ form.niveauRemplissage.vars.id }}');
+        var progressBar = document.getElementById('preview-progress-bar');
+        
+        niveauInput.addEventListener('input', function() {
+            var value = this.value;
+            progressBar.style.width = value + '%';
+            progressBar.setAttribute('aria-valuenow', value);
+            progressBar.textContent = value + '%';
+            
+            // Changer la couleur en fonction du niveau
+            if (value > 70) {
+                progressBar.className = 'progress-bar bg-danger';
+            } else if (value > 50) {
+                progressBar.className = 'progress-bar bg-warning';
+            } else {
+                progressBar.className = 'progress-bar bg-success';
+            }
+        });
+        
+        // Validation du formulaire côté client
+        const form = document.querySelector('form');
+        form.addEventListener('submit', function(event) {
+            let hasError = false;
+            
+            // Vérifier la localisation
+            const localisationInput = document.getElementById('{{ form.localisation.vars.id }}');
+            if (!localisationInput.value.trim()) {
+                localisationInput.classList.add('is-invalid');
+                localisationInput.nextElementSibling.textContent = 'La localisation est obligatoire';
+                hasError = true;
+            } else {
+                localisationInput.classList.remove('is-invalid');
+                localisationInput.classList.add('is-valid');
+            }
+            
+            // Vérifier l'adresse
+            const adresseInput = document.getElementById('{{ form.adresse.vars.id }}');
+            if (!adresseInput.value.trim()) {
+                adresseInput.classList.add('is-invalid');
+                adresseInput.nextElementSibling.textContent = 'L\'adresse est obligatoire';
+                hasError = true;
+            } else {
+                adresseInput.classList.remove('is-invalid');
+                adresseInput.classList.add('is-valid');
+            }
+            
+            // Vérifier le niveau de remplissage
+            const niveauInput = document.getElementById('{{ form.niveauRemplissage.vars.id }}');
+            if (!niveauInput.value || niveauInput.value < 0 || niveauInput.value > 100) {
+                niveauInput.classList.add('is-invalid');
+                niveauInput.nextElementSibling.textContent = 'Le niveau de remplissage doit être entre 0 et 100';
+                hasError = true;
+            } else {
+                niveauInput.classList.remove('is-invalid');
+                niveauInput.classList.add('is-valid');
+            }
+            
+            // Vérifier le type
+            const typeSelect = document.getElementById('{{ form.type.vars.id }}');
+            if (!typeSelect.value) {
+                typeSelect.classList.add('is-invalid');
+                typeSelect.nextElementSibling.textContent = 'Le type de poubelle est obligatoire';
+                hasError = true;
+            } else {
+                typeSelect.classList.remove('is-invalid');
+                typeSelect.classList.add('is-valid');
+            }
+            
+            // Vérifier le statut
+            const statutSelect = document.getElementById('{{ form.statut.vars.id }}');
+            if (!statutSelect.value) {
+                statutSelect.classList.add('is-invalid');
+                statutSelect.nextElementSibling.textContent = 'Le statut est obligatoire';
+                hasError = true;
+            } else {
+                statutSelect.classList.remove('is-invalid');
+                statutSelect.classList.add('is-valid');
+            }
+            
+            if (hasError) {
+                event.preventDefault();
+                
+                // Afficher un message d'erreur en haut du formulaire
+                const alertDiv = document.createElement('div');
+                alertDiv.className = 'alert alert-danger';
+                alertDiv.innerHTML = '<i class="fas fa-exclamation-triangle me-2"></i> Veuillez corriger les erreurs dans le formulaire.';
+                
+                const firstError = document.querySelector('.is-invalid');
+                if (firstError) {
+                    firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+                
+                const existingAlert = document.querySelector('.alert.alert-danger');
+                if (!existingAlert) {
+                    form.prepend(alertDiv);
+                }
+            }
+        });
+    });
+</script>
+{% endblock %} 

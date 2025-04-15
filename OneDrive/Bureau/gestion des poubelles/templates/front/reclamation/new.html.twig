@@ -1,0 +1,97 @@
+{% extends 'FrontBase.html.twig' %}
+
+{% block title %}Nouvelle Réclamation{% endblock %}
+
+{% block body %}
+<section class="page-section">
+    <div class="container">
+        <div class="section-header">
+            <h2>Nouvelle Réclamation</h2>
+            <p>Soumettez votre réclamation à l'administration</p>
+        </div>
+        
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card">
+                    <div class="card-body p-4">
+                        {{ form_start(form, {'attr': {'class': 'needs-validation', 'novalidate': 'novalidate'}}) }}
+                        
+                        <div class="mb-4">
+                            {{ form_label(form.typeRec, 'Type de réclamation', {'label_attr': {'class': 'form-label'}}) }}
+                            {{ form_widget(form.typeRec, {'attr': {'class': 'form-select'}}) }}
+                            <div class="invalid-feedback">
+                                {{ form_errors(form.typeRec) }}
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            {{ form_label(form.reclamation, 'Détails de votre réclamation', {'label_attr': {'class': 'form-label'}}) }}
+                            {{ form_widget(form.reclamation, {'attr': {'class': 'form-control', 'rows': '5', 'placeholder': 'Veuillez décrire votre problème en détail...'}}) }}
+                            <div class="form-text">Soyez précis dans votre description pour faciliter le traitement de votre demande.</div>
+                            <div class="invalid-feedback">
+                                {{ form_errors(form.reclamation) }}
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            {{ form_label(form.address, 'Adresse concernée', {'label_attr': {'class': 'form-label'}}) }}
+                            {{ form_widget(form.address, {'attr': {'class': 'form-control', 'placeholder': 'Adresse liée à votre réclamation'}}) }}
+                            <div class="invalid-feedback">
+                                {{ form_errors(form.address) }}
+                            </div>
+                        </div>
+                        
+                        {% if form.photoFile is defined %}
+                        <div class="mb-4">
+                            {{ form_label(form.photoFile, 'Photo (optionnelle)', {'label_attr': {'class': 'form-label'}}) }}
+                            <div class="input-group">
+                                {{ form_widget(form.photoFile, {'attr': {'class': 'form-control'}}) }}
+                            </div>
+                            <div class="form-text">Formats acceptés: JPG, PNG, GIF. Taille max: 5MB</div>
+                            <div class="invalid-feedback">
+                                {{ form_errors(form.photoFile) }}
+                            </div>
+                        </div>
+                        {% endif %}
+                        
+                        <div class="d-flex justify-content-between mt-4">
+                            <a href="{{ path('app_reclamation_index') }}" class="btn btn-outline-secondary">
+                                <i class="bi bi-arrow-left me-2"></i>Retour
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check-circle me-2"></i>Soumettre ma réclamation
+                            </button>
+                        </div>
+                        
+                        {{ form_end(form) }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script>
+    // Validation du formulaire côté client
+    (function() {
+        'use strict';
+        
+        // Fetch all forms we want to apply validation to
+        var forms = document.querySelectorAll('.needs-validation');
+        
+        // Loop over them and prevent submission
+        Array.prototype.slice.call(forms).forEach(function(form) {
+            form.addEventListener('submit', function(event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+    })();
+</script>
+{% endblock %} 

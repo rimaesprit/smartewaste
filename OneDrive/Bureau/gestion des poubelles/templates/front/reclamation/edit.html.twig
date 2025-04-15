@@ -1,0 +1,132 @@
+{% extends 'FrontBase.html.twig' %}
+
+{% block title %}Modifier la Réclamation{% endblock %}
+
+{% block body %}
+<section class="page-section">
+    <div class="container">
+        <div class="section-header">
+            <h2>Modifier la Réclamation</h2>
+            <p>Mettre à jour les informations de votre réclamation</p>
+        </div>
+        
+        {% for label, messages in app.flashes(['success', 'error', 'warning', 'info']) %}
+            {% for message in messages %}
+                <div class="alert alert-{{ label == 'error' ? 'danger' : label }} alert-dismissible fade show">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endfor %}
+        
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card">
+                    <div class="card-body p-4">
+                        {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+                        
+                        <div class="mb-4">
+                            {{ form_label(form.typeRec, 'Type de réclamation', {'label_attr': {'class': 'form-label fw-bold'}}) }}
+                            {{ form_widget(form.typeRec, {'attr': {'class': 'form-select'}}) }}
+                            <div class="text-danger">
+                                {{ form_errors(form.typeRec) }}
+                            </div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            {{ form_label(form.reclamation, 'Détails de votre réclamation', {'label_attr': {'class': 'form-label fw-bold'}}) }}
+                            {{ form_widget(form.reclamation, {'attr': {'class': 'form-control', 'rows': '5'}}) }}
+                            <div class="text-danger">
+                                {{ form_errors(form.reclamation) }}
+                            </div>
+                            <div class="form-text">Soyez précis dans votre description pour faciliter le traitement de votre demande.</div>
+                        </div>
+                        
+                        {% if form.address is defined %}
+                        <div class="mb-4">
+                            {{ form_label(form.address, 'Adresse concernée', {'label_attr': {'class': 'form-label fw-bold'}}) }}
+                            {{ form_widget(form.address, {'attr': {'class': 'form-control'}}) }}
+                            <div class="text-danger">
+                                {{ form_errors(form.address) }}
+                            </div>
+                        </div>
+                        {% endif %}
+                        
+                        {% if form.adresse is defined %}
+                        <div class="mb-4">
+                            {{ form_label(form.adresse, 'Adresse concernée', {'label_attr': {'class': 'form-label fw-bold'}}) }}
+                            {{ form_widget(form.adresse, {'attr': {'class': 'form-control'}}) }}
+                            <div class="text-danger">
+                                {{ form_errors(form.adresse) }}
+                            </div>
+                        </div>
+                        {% endif %}
+                        
+                        {% if form.photoFile is defined %}
+                        <div class="mb-4">
+                            {{ form_label(form.photoFile, 'Photo (optionnelle)', {'label_attr': {'class': 'form-label fw-bold'}}) }}
+                            {{ form_widget(form.photoFile, {'attr': {'class': 'form-control'}}) }}
+                            <div class="text-danger">
+                                {{ form_errors(form.photoFile) }}
+                            </div>
+                            <div class="form-text">Formats acceptés: JPG, PNG, GIF. Taille max: 5MB</div>
+                            
+                            {% if reclamation.photoName %}
+                            <div class="mt-2">
+                                <div class="d-flex align-items-center">
+                                    <div class="me-3">
+                                        <img src="{{ asset('uploads/' ~ reclamation.photoName) }}" alt="Photo actuelle" class="img-thumbnail" style="max-height: 100px;">
+                                    </div>
+                                    {% if form.deletePhoto is defined %}
+                                    <div class="form-check">
+                                        {{ form_widget(form.deletePhoto, {'attr': {'class': 'form-check-input'}}) }}
+                                        {{ form_label(form.deletePhoto, 'Supprimer cette photo', {'label_attr': {'class': 'form-check-label'}}) }}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                        
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle me-2"></i> Vous ne pouvez modifier votre réclamation que tant qu'elle est en attente de traitement.
+                        </div>
+                        
+                        {# Rendre les champs restants #}
+                        {{ form_rest(form) }}
+                        
+                        <div class="d-flex justify-content-between mt-4">
+                            <a href="{{ path('app_front_reclamation_index') }}" class="btn btn-outline-secondary">
+                                <i class="bi bi-arrow-left me-2"></i>Retour à la liste
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check-circle me-2"></i>Enregistrer les modifications
+                            </button>
+                        </div>
+                        
+                        {{ form_end(form) }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script>
+    // Désactivation des scripts problématiques
+    window.addEventListener('DOMContentLoaded', function() {
+        // Désactiver les scripts qui causent des erreurs
+        window.skipChartInitialization = true;
+        window.skipMapInitialization = true;
+        
+        // Désactiver la recherche de fichiers map manquants
+        if (typeof bootstrap !== 'undefined' && bootstrap.Tooltip) {
+            bootstrap.Tooltip.Default.allowList = {};
+        }
+    });
+</script>
+{% endblock %} 

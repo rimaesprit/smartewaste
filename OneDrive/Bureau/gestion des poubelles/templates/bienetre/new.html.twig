@@ -1,0 +1,213 @@
+{% extends 'BackBase.html.twig' %}
+
+{% block title %}Nouvel Avis{% endblock %}
+
+{% block body %}
+<div class="page-inner">
+    <div class="page-header">
+        <h4 class="page-title">Gestion des Avis de Bien-être</h4>
+        <ul class="breadcrumbs">
+            <li class="nav-home">
+                <a href="{{ path('app_home') }}">
+                    <i class="fas fa-home"></i>
+                </a>
+            </li>
+            <li class="separator">
+                <i class="fas fa-angle-right"></i>
+            </li>
+            <li class="nav-item">
+                <a href="{{ path('app_bienetre_index') }}">Avis</a>
+            </li>
+            <li class="separator">
+                <i class="fas fa-angle-right"></i>
+            </li>
+            <li class="nav-item">
+                <a href="#">Ajouter</a>
+            </li>
+        </ul>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Ajouter un nouvel avis</div>
+                </div>
+                <div class="card-body">
+                    {% for label, messages in app.flashes %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ label == 'error' ? 'danger' : label }}">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    {% endfor %}
+                
+                    {{ form_start(form, {'attr': {'novalidate': 'novalidate', 'class': 'needs-validation'}}) }}
+                    
+                    {% if not form.vars.valid and form.vars.submitted %}
+                        <div class="alert alert-danger">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            Veuillez corriger les erreurs ci-dessous pour pouvoir soumettre le formulaire.
+                        </div>
+                    {% endif %}
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                {{ form_label(form.nom) }} <span class="text-danger">*</span>
+                                {{ form_widget(form.nom) }}
+                                <small class="form-text text-muted">{{ form_help(form.nom) }}</small>
+                                <div class="invalid-feedback d-block">
+                                    {{ form_errors(form.nom) }}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                {{ form_label(form.rate) }} <span class="text-danger">*</span>
+                                {{ form_widget(form.rate) }}
+                                <small class="form-text text-muted">{{ form_help(form.rate) }}</small>
+                                <div class="invalid-feedback d-block">
+                                    {{ form_errors(form.rate) }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                {{ form_label(form.review) }} <span class="text-danger">*</span>
+                                {{ form_widget(form.review) }}
+                                <small class="form-text text-muted">{{ form_help(form.review) }}</small>
+                                <div class="invalid-feedback d-block">
+                                    {{ form_errors(form.review) }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                {{ form_label(form.poubelle) }} <span class="text-danger">*</span>
+                                {{ form_widget(form.poubelle) }}
+                                <small class="form-text text-muted">{{ form_help(form.poubelle) }}</small>
+                                <div class="invalid-feedback d-block">
+                                    {{ form_errors(form.poubelle) }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-3 mb-3">
+                        <p class="text-muted"><span class="text-danger">*</span> Champs obligatoires</p>
+                    </div>
+                </div>
+                <div class="card-action">
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-save mr-2"></i> Enregistrer
+                    </button>
+                    <a href="{{ path('app_bienetre_index') }}" class="btn btn-danger">
+                        <i class="fas fa-times mr-2"></i> Annuler
+                    </a>
+                </div>
+                {{ form_end(form) }}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Validation du formulaire côté client
+        const form = document.querySelector('form');
+        form.addEventListener('submit', function(event) {
+            let hasError = false;
+            
+            // Vérifier le nom
+            const nomInput = document.getElementById('{{ form.nom.vars.id }}');
+            if (!nomInput.value.trim()) {
+                nomInput.classList.add('is-invalid');
+                const errorDiv = nomInput.nextElementSibling.nextElementSibling;
+                errorDiv.textContent = 'Le nom est obligatoire';
+                hasError = true;
+            } else if (nomInput.value.trim().length < 2) {
+                nomInput.classList.add('is-invalid');
+                const errorDiv = nomInput.nextElementSibling.nextElementSibling;
+                errorDiv.textContent = 'Le nom doit contenir au moins 2 caractères';
+                hasError = true;
+            } else {
+                nomInput.classList.remove('is-invalid');
+                nomInput.classList.add('is-valid');
+            }
+            
+            // Vérifier la note
+            const rateInput = document.getElementById('{{ form.rate.vars.id }}');
+            if (!rateInput.value) {
+                rateInput.classList.add('is-invalid');
+                const errorDiv = rateInput.nextElementSibling.nextElementSibling;
+                errorDiv.textContent = 'La note est obligatoire';
+                hasError = true;
+            } else if (rateInput.value < 1 || rateInput.value > 5) {
+                rateInput.classList.add('is-invalid');
+                const errorDiv = rateInput.nextElementSibling.nextElementSibling;
+                errorDiv.textContent = 'La note doit être entre 1 et 5';
+                hasError = true;
+            } else {
+                rateInput.classList.remove('is-invalid');
+                rateInput.classList.add('is-valid');
+            }
+            
+            // Vérifier l'avis
+            const reviewInput = document.getElementById('{{ form.review.vars.id }}');
+            if (!reviewInput.value.trim()) {
+                reviewInput.classList.add('is-invalid');
+                const errorDiv = reviewInput.nextElementSibling.nextElementSibling;
+                errorDiv.textContent = 'L\'avis est obligatoire';
+                hasError = true;
+            } else if (reviewInput.value.trim().length < 10) {
+                reviewInput.classList.add('is-invalid');
+                const errorDiv = reviewInput.nextElementSibling.nextElementSibling;
+                errorDiv.textContent = 'L\'avis doit contenir au moins 10 caractères';
+                hasError = true;
+            } else {
+                reviewInput.classList.remove('is-invalid');
+                reviewInput.classList.add('is-valid');
+            }
+            
+            // Vérifier la poubelle sélectionnée
+            const poubelleSelect = document.getElementById('{{ form.poubelle.vars.id }}');
+            if (!poubelleSelect.value) {
+                poubelleSelect.classList.add('is-invalid');
+                const errorDiv = poubelleSelect.nextElementSibling.nextElementSibling;
+                errorDiv.textContent = 'Veuillez sélectionner une poubelle';
+                hasError = true;
+            } else {
+                poubelleSelect.classList.remove('is-invalid');
+                poubelleSelect.classList.add('is-valid');
+            }
+            
+            if (hasError) {
+                event.preventDefault();
+                
+                // Afficher un message d'erreur en haut du formulaire
+                const alertDiv = document.createElement('div');
+                alertDiv.className = 'alert alert-danger';
+                alertDiv.innerHTML = '<i class="fas fa-exclamation-triangle me-2"></i> Veuillez corriger les erreurs dans le formulaire.';
+                
+                const firstError = document.querySelector('.is-invalid');
+                if (firstError) {
+                    firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+                
+                const existingAlert = document.querySelector('.alert.alert-danger');
+                if (!existingAlert) {
+                    form.prepend(alertDiv);
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}

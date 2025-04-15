@@ -1,0 +1,109 @@
+{% extends 'FrontBase.html.twig' %}
+
+{% block title %}Mes Réclamations{% endblock %}
+
+{% block body %}
+<section class="page-section">
+    <div class="container">
+        <div class="section-header">
+            <h2>Mes Réclamations</h2>
+            <p>Suivez l'état de vos demandes adressées à la mairie</p>
+        </div>
+        
+        <div class="d-flex justify-content-end mb-4">
+            <a href="{{ path('app_front_reclamation_new') }}" class="btn btn-primary">
+                <i class="bi bi-plus-circle me-2"></i>Nouvelle réclamation
+            </a>
+        </div>
+        
+        {% for message in app.flashes('success') %}
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+        
+        <div class="row gy-4">
+            {% if reclamations|length > 0 %}
+                {% for reclamation in reclamations %}
+                    <div class="col-lg-6 mb-4">
+                        <div class="card h-100">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">{{ reclamation.typeRec }}</h5>
+                                {% if reclamation.etatRec == 'Pending' %}
+                                    <span class="badge bg-warning">En attente</span>
+                                {% elseif reclamation.etatRec == 'In Progress' %}
+                                    <span class="badge bg-info">En cours</span>
+                                {% elseif reclamation.etatRec == 'Resolved' %}
+                                    <span class="badge bg-success">Résolue</span>
+                                {% elseif reclamation.etatRec == 'Rejected' %}
+                                    <span class="badge bg-danger">Rejetée</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">{{ reclamation.etatRec }}</span>
+                                {% endif %}
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <small class="text-muted">Soumise le {{ reclamation.dateRec ? reclamation.dateRec|date('d/m/Y à H:i') : '' }}</small>
+                                </div>
+                                <p class="card-text">{{ reclamation.reclamation|slice(0, 150) }}{% if reclamation.reclamation|length > 150 %}...{% endif %}</p>
+                                
+                                <div class="d-flex justify-content-between mt-4">
+                                    <a href="{{ path('app_front_reclamation_show', {'id': reclamation.id}) }}" class="btn btn-outline-primary btn-sm">
+                                        <i class="bi bi-eye me-1"></i> Voir détails
+                                    </a>
+                                    
+                                    {% if reclamation.etatRec == 'Pending' %}
+                                    <div>
+                                        <a href="{{ path('app_front_reclamation_edit', {'id': reclamation.id}) }}" class="btn btn-outline-secondary btn-sm me-1">
+                                            <i class="bi bi-pencil me-1"></i> Modifier
+                                        </a>
+                                        <button type="button" class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteModal{{ reclamation.id }}">
+                                            <i class="bi bi-trash me-1"></i> Supprimer
+                                        </button>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Modal de confirmation de suppression -->
+                    <div class="modal fade" id="deleteModal{{ reclamation.id }}" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="deleteModalLabel">Confirmation de suppression</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    Êtes-vous sûr de vouloir supprimer cette réclamation ?
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                                    <form method="post" action="{{ path('app_front_reclamation_delete', {'id': reclamation.id}) }}" style="display:inline;">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ reclamation.id) }}">
+                                        <button type="submit" class="btn btn-danger">Supprimer</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="col-12">
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle me-2"></i> Vous n'avez pas encore de réclamations.
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+        
+        <div class="mt-4">
+            <a href="{{ path('app_citoyen_dashboard') }}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-2"></i> Retour au tableau de bord
+            </a>
+        </div>
+    </div>
+</section>
+{% endblock %} 

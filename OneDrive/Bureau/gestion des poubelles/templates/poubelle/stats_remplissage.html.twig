@@ -1,0 +1,138 @@
+{% extends 'BackBase.html.twig' %}
+
+{% block title %}Statistiques de remplissage{% endblock %}
+
+{% block stylesheets %}
+<style>
+    .card-stats {
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    .card-stats .icon-big {
+        font-size: 3em;
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="page-inner">
+    <div class="page-header">
+        <h4 class="page-title">Gestion des Poubelles</h4>
+        <ul class="breadcrumbs">
+            <li class="nav-home">
+                <a href="{{ path('app_home') }}">
+                    <i class="fas fa-home"></i>
+                </a>
+            </li>
+            <li class="separator">
+                <i class="fas fa-angle-right"></i>
+            </li>
+            <li class="nav-item">
+                <a href="{{ path('app_poubelle_index') }}">Poubelles</a>
+            </li>
+            <li class="separator">
+                <i class="fas fa-angle-right"></i>
+            </li>
+            <li class="nav-item">
+                <a href="#">Statistiques</a>
+            </li>
+        </ul>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Statistiques de remplissage des poubelles</div>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="remplissageChart" style="width: 100%; height: 400px;"></canvas>
+                    </div>
+                </div>
+                <div class="card-action">
+                    <a href="{{ path('app_poubelle_index') }}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left mr-2"></i> Retour à la liste
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var ctx = document.getElementById('remplissageChart').getContext('2d');
+    var labels = {{ labels|raw }};
+    var data = {{ data|raw }};
+    
+    // Créer des couleurs en fonction du taux de remplissage
+    var backgroundColors = [];
+    var borderColors = [];
+    
+    data.forEach(function(value) {
+        if (value > 80) {
+            backgroundColors.push('rgba(220, 53, 69, 0.5)');
+            borderColors.push('rgb(220, 53, 69)');
+        } else if (value > 50) {
+            backgroundColors.push('rgba(255, 193, 7, 0.5)');
+            borderColors.push('rgb(255, 193, 7)');
+        } else {
+            backgroundColors.push('rgba(40, 167, 69, 0.5)');
+            borderColors.push('rgb(40, 167, 69)');
+        }
+    });
+    
+    var chart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Niveau de remplissage (%)',
+                data: data,
+                backgroundColor: backgroundColors,
+                borderColor: borderColors,
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 100,
+                    title: {
+                        display: true,
+                        text: 'Niveau de remplissage (%)'
+                    }
+                },
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Localisation des poubelles'
+                    }
+                }
+            },
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Niveaux de remplissage des poubelles'
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            var value = context.raw;
+                            var status = value > 80 ? 'Critique' : (value > 50 ? 'À surveiller' : 'Normal');
+                            return value + '% - ' + status;
+                        }
+                    }
+                }
+            }
+        }
+    });
+});
+</script>
+{% endblock %} 
