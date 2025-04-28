@@ -1,0 +1,327 @@
+{% extends 'BackBase.html.twig' %}
+
+{% block title %}Prédictions de Collecte{% endblock %}
+
+{% block body %}
+    <div class="d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-4">
+        <div>
+            <h3 class="fw-bold mb-3">Prédictions de Collecte</h3>
+            <h6 class="op-7 mb-2">Estimation des quantités de déchets à collecter basée sur l'intelligence artificielle</h6>
+        </div>
+        <div class="ms-md-auto py-2 py-md-0">
+            <a href="{{ path('app_dechet_index') }}" class="btn btn-secondary btn-round mr-2">
+                <i class="bi bi-arrow-left"></i> Retour à la liste
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="card-title mb-0">Données Historiques</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-4">
+                        <div class="col-md-6 text-center">
+                            <div class="card-category">Poids Total Collecté</div>
+                            <div class="card-title fw-bold fs-3">{{ history.total_weight|number_format(2, ',', ' ') }} kg</div>
+                        </div>
+                        <div class="col-md-6">
+                            <canvas id="typePieChart" height="150"></canvas>
+                        </div>
+                    </div>
+                    
+                    <h6 class="fw-bold">Répartition par type de déchet</h6>
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Type</th>
+                                    <th>Poids (kg)</th>
+                                    <th>Pourcentage</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for type, weight in history.by_type %}
+                                    <tr>
+                                        <td><span class="badge" style="background-color: {{ getTypeColor(type) }}">{{ type|capitalize }}</span></td>
+                                        <td>{{ weight|number_format(2, ',', ' ') }}</td>
+                                        <td>{{ (weight / history.total_weight * 100)|round(2) }}%</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h5 class="card-title mb-0">Activité par Jour de la Semaine</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="dayBarChart" height="280"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h5 class="card-title mb-0">Prédictions pour les 7 prochains jours</h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle-fill"></i> Ces prédictions sont basées sur un algorithme d'intelligence artificielle
+                        analysant les tendances historiques de collecte. Elles sont fournies à titre indicatif pour aider à la planification.
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-8">
+                            <canvas id="predictionChart" height="250"></canvas>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="prediction-summary">
+                                <h6 class="fw-bold">Résumé des prédictions</h6>
+                                <p>Période: du {{ array_keys(predictions)|first }} au {{ array_keys(predictions)|last }}</p>
+                                <p>Poids total estimé: <span class="fw-bold">
+                                    {{ predictions|reduce((carry, pred) => carry + pred.total, 0)|number_format(2, ',', ' ') }} kg
+                                </span></p>
+                                <hr>
+                                <h6>Recommandations:</h6>
+                                <ul>
+                                    <li>Préparer {{ (predictions|reduce((carry, pred) => carry + pred.total, 0) / 500)|round(0, 'ceil') }} 
+                                    camions pour la collecte</li>
+                                    <li>Mettre l'accent sur la collecte de: 
+                                        {% set maxType = '' %}
+                                        {% set maxWeight = 0 %}
+                                        {% for type, weight in history.by_type %}
+                                            {% if weight > maxWeight %}
+                                                {% set maxType = type %}
+                                                {% set maxWeight = weight %}
+                                            {% endif %}
+                                        {% endfor %}
+                                        <span class="badge" style="background-color: {{ getTypeColor(maxType) }}">
+                                            {{ maxType|capitalize }}
+                                        </span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="table-responsive mt-4">
+                        <table class="table table-hover table-striped">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Jour</th>
+                                    <th>Total (kg)</th>
+                                    {% for type in history.by_type|keys %}
+                                        <th>{{ type|capitalize }}</th>
+                                    {% endfor %}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for date, data in predictions %}
+                                    <tr>
+                                        <td>{{ date }}</td>
+                                        <td>{{ data.day_name }}</td>
+                                        <td class="fw-bold">{{ data.total|number_format(2, ',', ' ') }}</td>
+                                        {% for type in history.by_type|keys %}
+                                            <td>{{ data.by_type[type] is defined ? data.by_type[type]|number_format(2, ',', ' ') : '0,00' }}</td>
+                                        {% endfor %}
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Fonction pour convertir les jours de la semaine numérique en texte
+            function getDayName(dayNum) {
+                const days = ['', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'];
+                return days[dayNum] || '';
+            }
+            
+            // Données pour le graphique en camembert des types
+            const typePieData = {
+                labels: [
+                    {% for type, weight in history.by_type %}
+                        '{{ type|capitalize }}',
+                    {% endfor %}
+                ],
+                datasets: [{
+                    data: [
+                        {% for type, weight in history.by_type %}
+                            {{ weight }},
+                        {% endfor %}
+                    ],
+                    backgroundColor: [
+                        {% for type, weight in history.by_type %}
+                            '{{ getTypeColor(type) }}',
+                        {% endfor %}
+                    ],
+                    borderWidth: 1
+                }]
+            };
+            
+            // Configuration du graphique en camembert
+            const typePieConfig = {
+                type: 'pie',
+                data: typePieData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            labels: {
+                                font: {
+                                    size: 10
+                                }
+                            }
+                        }
+                    }
+                }
+            };
+            
+            // Données pour le graphique en barres des jours
+            const dayBarData = {
+                labels: [
+                    {% for dayNum, weight in history.by_day %}
+                        '{{ getDayName(dayNum) }}',
+                    {% endfor %}
+                ],
+                datasets: [{
+                    label: 'Poids collecté (kg)',
+                    data: [
+                        {% for dayNum, weight in history.by_day %}
+                            {{ weight }},
+                        {% endfor %}
+                    ],
+                    backgroundColor: 'rgba(75, 192, 192, 0.7)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 1
+                }]
+            };
+            
+            // Configuration du graphique en barres
+            const dayBarConfig = {
+                type: 'bar',
+                data: dayBarData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            };
+            
+            // Données pour le graphique de prédiction
+            const predictionData = {
+                labels: [
+                    {% for date, data in predictions %}
+                        '{{ date }} ({{ data.day_name }})',
+                    {% endfor %}
+                ],
+                datasets: [
+                    {
+                        label: 'Total',
+                        data: [
+                            {% for date, data in predictions %}
+                                {{ data.total }},
+                            {% endfor %}
+                        ],
+                        backgroundColor: 'rgba(54, 162, 235, 0.7)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 2,
+                        type: 'line',
+                        fill: false,
+                        tension: 0.4
+                    },
+                    {% for type in history.by_type|keys %}
+                        {
+                            label: '{{ type|capitalize }}',
+                            data: [
+                                {% for date, data in predictions %}
+                                    {{ data.by_type[type] is defined ? data.by_type[type] : 0 }},
+                                {% endfor %}
+                            ],
+                            backgroundColor: '{{ getTypeColor(type) }}',
+                            borderColor: '{{ getTypeColor(type) }}',
+                            borderWidth: 1
+                        },
+                    {% endfor %}
+                ]
+            };
+            
+            // Configuration du graphique de prédiction
+            const predictionConfig = {
+                type: 'bar',
+                data: predictionData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            stacked: true
+                        },
+                        y: {
+                            stacked: true,
+                            beginAtZero: true
+                        }
+                    }
+                }
+            };
+            
+            // Création des graphiques
+            new Chart(document.getElementById('typePieChart'), typePieConfig);
+            new Chart(document.getElementById('dayBarChart'), dayBarConfig);
+            new Chart(document.getElementById('predictionChart'), predictionConfig);
+        });
+    </script>
+{% endblock %}
+
+{% macro getTypeColor(type) %}
+    {% set colors = {
+        'plastique': '#3498db',
+        'papier': '#f1c40f',
+        'verre': '#2ecc71',
+        'metal': '#95a5a6',
+        'organique': '#27ae60',
+        'electronique': '#e74c3c',
+        'dangereux': '#c0392b'
+    } %}
+    
+    {{ colors[type] ?? '#34495e' }}
+{% endmacro %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .prediction-summary {
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            height: 100%;
+        }
+    </style>
+{% endblock %} 

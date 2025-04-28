@@ -1,0 +1,255 @@
+{% extends 'BackBase.html.twig' %}
+
+{% block title %}Statistiques des Camions{% endblock %}
+
+{% block body %}
+    <div class="d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-4">
+        <div>
+            <h3 class="fw-bold mb-3">Tableau de Bord - Camions</h3>
+            <h6 class="op-7 mb-2">Analyse de la flotte et des opérations</h6>
+        </div>
+        <div class="ms-md-auto py-2 py-md-0">
+            <a href="{{ path('app_camion_index') }}" class="btn btn-secondary btn-round mr-2">
+                <i class="bi bi-arrow-left"></i> Retour à la liste
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- KPI Cards -->
+        <div class="col-sm-6 col-md-3">
+            <div class="card card-stats card-round bg-success text-white">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-5">
+                            <div class="icon-big text-center">
+                                <i class="bi bi-truck"></i>
+                            </div>
+                        </div>
+                        <div class="col-7 col-stats">
+                            <div class="numbers">
+                                <p class="card-category">En Service</p>
+                                <h4 class="card-title">{{ stats.en_service }}</h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-md-3">
+            <div class="card card-stats card-round bg-warning text-white">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-5">
+                            <div class="icon-big text-center">
+                                <i class="bi bi-tools"></i>
+                            </div>
+                        </div>
+                        <div class="col-7 col-stats">
+                            <div class="numbers">
+                                <p class="card-category">En Maintenance</p>
+                                <h4 class="card-title">{{ stats.en_maintenance }}</h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-md-3">
+            <div class="card card-stats card-round bg-danger text-white">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-5">
+                            <div class="icon-big text-center">
+                                <i class="bi bi-x-circle"></i>
+                            </div>
+                        </div>
+                        <div class="col-7 col-stats">
+                            <div class="numbers">
+                                <p class="card-category">Hors Service</p>
+                                <h4 class="card-title">{{ stats.hors_service }}</h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-md-3">
+            <div class="card card-stats card-round bg-primary text-white">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-5">
+                            <div class="icon-big text-center">
+                                <i class="bi bi-percent"></i>
+                            </div>
+                        </div>
+                        <div class="col-7 col-stats">
+                            <div class="numbers">
+                                <p class="card-category">Capacité Utilisée</p>
+                                <h4 class="card-title">{{ stats.capacity_usage }}%</h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mt-4">
+        <!-- Déchets par camion -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Déchets collectés par camion</div>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="camionsChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Répartition des types de déchets -->
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Répartition par type de déchet (kg)</div>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="dechetsChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">État de la flotte - {{ stats.total }} camions au total</div>
+                </div>
+                <div class="card-body">
+                    <div class="progress" style="height: 30px;">
+                        {% set en_service_percent = stats.total > 0 ? (stats.en_service / stats.total * 100)|round : 0 %}
+                        {% set en_maintenance_percent = stats.total > 0 ? (stats.en_maintenance / stats.total * 100)|round : 0 %}
+                        {% set hors_service_percent = stats.total > 0 ? (stats.hors_service / stats.total * 100)|round : 0 %}
+                        
+                        <div class="progress-bar bg-success" role="progressbar" style="width: {{ en_service_percent }}%" 
+                            aria-valuenow="{{ en_service_percent }}" aria-valuemin="0" aria-valuemax="100">
+                            En service ({{ en_service_percent }}%)
+                        </div>
+                        <div class="progress-bar bg-warning" role="progressbar" style="width: {{ en_maintenance_percent }}%" 
+                            aria-valuenow="{{ en_maintenance_percent }}" aria-valuemin="0" aria-valuemax="100">
+                            En maintenance ({{ en_maintenance_percent }}%)
+                        </div>
+                        <div class="progress-bar bg-danger" role="progressbar" style="width: {{ hors_service_percent }}%" 
+                            aria-valuenow="{{ hors_service_percent }}" aria-valuemin="0" aria-valuemax="100">
+                            Hors service ({{ hors_service_percent }}%)
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Données pour le graphique des camions
+            const camionsData = {
+                labels: [
+                    {% for matricule, count in stats.dechets_par_camion %}
+                        '{{ matricule }}',
+                    {% endfor %}
+                ],
+                datasets: [{
+                    label: 'Nombre de déchets collectés',
+                    data: [
+                        {% for matricule, count in stats.dechets_par_camion %}
+                            {{ count }},
+                        {% endfor %}
+                    ],
+                    backgroundColor: 'rgba(54, 162, 235, 0.7)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                }]
+            };
+
+            // Données pour le graphique des types de déchets
+            const dechetsData = {
+                labels: [
+                    {% for type, weight in stats.types_dechets %}
+                        '{{ type|capitalize }}',
+                    {% endfor %}
+                ],
+                datasets: [{
+                    label: 'Poids (kg)',
+                    data: [
+                        {% for type, weight in stats.types_dechets %}
+                            {{ weight }},
+                        {% endfor %}
+                    ],
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.7)',
+                        'rgba(54, 162, 235, 0.7)',
+                        'rgba(255, 206, 86, 0.7)',
+                        'rgba(75, 192, 192, 0.7)',
+                        'rgba(153, 102, 255, 0.7)',
+                        'rgba(255, 159, 64, 0.7)',
+                        'rgba(199, 199, 199, 0.7)'
+                    ],
+                    borderColor: [
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(153, 102, 255, 1)',
+                        'rgba(255, 159, 64, 1)',
+                        'rgba(199, 199, 199, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            };
+
+            // Configuration du graphique des camions
+            const camionsConfig = {
+                type: 'bar',
+                data: camionsData,
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    },
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            };
+
+            // Configuration du graphique des types de déchets
+            const dechetsConfig = {
+                type: 'pie',
+                data: dechetsData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right'
+                        }
+                    }
+                }
+            };
+
+            // Création des graphiques
+            new Chart(document.getElementById('camionsChart'), camionsConfig);
+            new Chart(document.getElementById('dechetsChart'), dechetsConfig);
+        });
+    </script>
+{% endblock %} 

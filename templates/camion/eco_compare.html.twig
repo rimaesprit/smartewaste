@@ -1,0 +1,485 @@
+{% extends 'BackBase.html.twig' %}
+
+{% block title %}Comparaison Environnementale des Camions{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .eco-score {
+            text-align: center;
+            font-size: 1.8rem;
+            font-weight: bold;
+            padding: 15px;
+            border-radius: 50%;
+            width: 80px;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto;
+            color: white;
+        }
+        
+        .score-excellent { background-color: #27ae60; }
+        .score-bon { background-color: #2ecc71; }
+        .score-moyen { background-color: #f1c40f; }
+        .score-mediocre { background-color: #e67e22; }
+        .score-mauvais { background-color: #e74c3c; }
+        
+        .chart-container {
+            height: 350px;
+            width: 100%;
+        }
+        
+        .camion-card {
+            transition: transform 0.3s;
+        }
+        
+        .camion-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        
+        .camion-compare-header {
+            position: relative;
+            padding-bottom: 15px;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .camion-compare-header .badge {
+            position: absolute;
+            top: 0;
+            right: 0;
+        }
+    </style>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
+
+{% block body %}
+    <div class="container-fluid px-4">
+        <h1 class="mt-4 mb-4">Comparaison Environnementale des Camions</h1>
+        
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <i class="fas fa-filter me-1"></i>
+                        Sélectionner les camions à comparer
+                    </div>
+                    <div class="card-body">
+                        <form method="post" action="{{ path('app_camion_eco_compare') }}">
+                            <div class="row">
+                                {% for camion in camions %}
+                                    <div class="col-md-3 mb-3">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" name="camions[]" value="{{ camion.id }}" id="camion{{ camion.id }}"
+                                                {% for camionCompare in camionsCompares %}
+                                                    {% if camionCompare.id == camion.id %}
+                                                        checked
+                                                    {% endif %}
+                                                {% endfor %}
+                                            >
+                                            <label class="form-check-label" for="camion{{ camion.id }}">
+                                                {{ camion.matricule }} 
+                                                <span class="badge {% if camion.scoreEnvironnemental >= 80 %}bg-success{% elseif camion.scoreEnvironnemental >= 60 %}bg-info{% elseif camion.scoreEnvironnemental >= 40 %}bg-warning{% elseif camion.scoreEnvironnemental >= 20 %}bg-warning text-dark{% else %}bg-danger{% endif %}">
+                                                    Score: {{ camion.scoreEnvironnemental }}/100
+                                                </span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                            <div>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-sync-alt me-1"></i> Comparer
+                                </button>
+                                
+                                <a href="{{ path('app_camion_index') }}" class="btn btn-secondary">
+                                    <i class="fas fa-arrow-left me-1"></i> Retour
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Graphiques de comparaison -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <i class="fas fa-chart-bar me-1"></i>
+                        Score Environnemental Global
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container">
+                            <canvas id="scoreChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <i class="fas fa-chart-pie me-1"></i>
+                        Répartition par Type de Moteur
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container">
+                            <canvas id="typeChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <i class="fas fa-chart-line me-1"></i>
+                        Émissions CO2 (g/km)
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container">
+                            <canvas id="emissionChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <i class="fas fa-gas-pump me-1"></i>
+                        Consommation (L/100km)
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container">
+                            <canvas id="consommationChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <i class="fas fa-chart-radar me-1"></i>
+                        Analyse Multidimensionnelle (Radar)
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container">
+                            <canvas id="radarChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <i class="fas fa-leaf me-1"></i>
+                        Niveaux Écologiques
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container">
+                            <canvas id="niveauChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Fiches détaillées des camions comparés -->
+        <h2 class="mb-4">Fiches Détaillées</h2>
+        
+        <div class="row mb-4">
+            {% for camion in camionsCompares %}
+                <div class="col-md-4 mb-4">
+                    <div class="card camion-card">
+                        <div class="card-header camion-compare-header">
+                            <h5>{{ camion.matricule }}</h5>
+                            <span class="badge {% if camion.scoreEnvironnemental >= 80 %}bg-success{% elseif camion.scoreEnvironnemental >= 60 %}bg-info{% elseif camion.scoreEnvironnemental >= 40 %}bg-warning{% elseif camion.scoreEnvironnemental >= 20 %}bg-warning text-dark{% else %}bg-danger{% endif %}">
+                                {{ camion.niveauEcologique }}
+                            </span>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-4">
+                                <div class="eco-score {% if camion.scoreEnvironnemental >= 80 %}score-excellent{% elseif camion.scoreEnvironnemental >= 60 %}score-bon{% elseif camion.scoreEnvironnemental >= 40 %}score-moyen{% elseif camion.scoreEnvironnemental >= 20 %}score-mediocre{% else %}score-mauvais{% endif %}">
+                                    {{ camion.scoreEnvironnemental }}
+                                </div>
+                                <p class="text-center text-muted mt-2">Score environnemental</p>
+                            </div>
+                            
+                            <table class="table table-striped">
+                                <tbody>
+                                    <tr>
+                                        <th>Type de moteur</th>
+                                        <td>{{ camion.typeMoteur|capitalize }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Émissions CO2</th>
+                                        <td>{{ camion.emissionCo2 }} g/km</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Consommation</th>
+                                        <td>{{ camion.consommation }} L/100km</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Année</th>
+                                        <td>{{ camion.anneeFabrication ? camion.anneeFabrication : 'Non définie' }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Kilométrage</th>
+                                        <td>{{ camion.kilometrage|number_format(0, ',', ' ') }} km</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            
+                            <a href="{{ path('app_camion_show', {'id': camion.id}) }}" class="btn btn-outline-primary">
+                                <i class="fas fa-info-circle me-1"></i> Détails
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Configuration des couleurs
+            const colors = [
+                '#3498db', '#e74c3c', '#2ecc71', '#f1c40f', '#9b59b6',
+                '#1abc9c', '#e67e22', '#34495e', '#7f8c8d', '#27ae60'
+            ];
+            
+            // Graphique du score environnemental
+            const scoreCtx = document.getElementById('scoreChart').getContext('2d');
+            new Chart(scoreCtx, {
+                type: 'bar',
+                data: {
+                    labels: {{ labels|json_encode|raw }},
+                    datasets: [{
+                        label: 'Score environnemental (sur 100)',
+                        data: {{ scoreEnvironnemental|json_encode|raw }},
+                        backgroundColor: colors,
+                        borderColor: colors.map(color => color.replace('0.7', '1')),
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            title: {
+                                display: true,
+                                text: 'Score'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Camions'
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // Graphique des émissions CO2
+            const emissionCtx = document.getElementById('emissionChart').getContext('2d');
+            new Chart(emissionCtx, {
+                type: 'bar',
+                data: {
+                    labels: {{ labels|json_encode|raw }},
+                    datasets: [{
+                        label: 'Émissions CO2 (g/km)',
+                        data: {{ emissions|json_encode|raw }},
+                        backgroundColor: '#e74c3c',
+                        borderColor: '#c0392b',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'g/km'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Camions'
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // Graphique de consommation
+            const consommationCtx = document.getElementById('consommationChart').getContext('2d');
+            new Chart(consommationCtx, {
+                type: 'bar',
+                data: {
+                    labels: {{ labels|json_encode|raw }},
+                    datasets: [{
+                        label: 'Consommation (L/100km)',
+                        data: {{ consommations|json_encode|raw }},
+                        backgroundColor: '#f1c40f',
+                        borderColor: '#f39c12',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'L/100km'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Camions'
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // Graphique par type de moteur
+            const typeCtx = document.getElementById('typeChart').getContext('2d');
+            new Chart(typeCtx, {
+                type: 'pie',
+                data: {
+                    labels: ['Électrique', 'Hybride', 'Gaz', 'Biodiesel', 'Diesel'],
+                    datasets: [{
+                        data: [
+                            {{ statsMoteurs.electrique }},
+                            {{ statsMoteurs.hybride }},
+                            {{ statsMoteurs.gaz }},
+                            {{ statsMoteurs.biodiesel }},
+                            {{ statsMoteurs.diesel }}
+                        ],
+                        backgroundColor: ['#2ecc71', '#3498db', '#9b59b6', '#f1c40f', '#e74c3c'],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right'
+                        }
+                    }
+                }
+            });
+            
+            // Graphique radar pour analyse multidimensionnelle
+            const radarCtx = document.getElementById('radarChart').getContext('2d');
+            
+            // Préparer les datasets pour chaque camion
+            const radarDatasets = [];
+            let index = 0;
+            
+            {% for matricule, data in radarData %}
+                radarDatasets.push({
+                    label: '{{ matricule }}',
+                    data: [
+                        {{ data.emission }},
+                        {{ data.consommation }},
+                        {{ data.age }},
+                        {{ data.type }},
+                        {{ data.score_global }}
+                    ],
+                    backgroundColor: colors[index % colors.length].replace('1)', '0.2)'),
+                    borderColor: colors[index % colors.length],
+                    borderWidth: 2,
+                    pointRadius: 5,
+                    pointBackgroundColor: colors[index % colors.length]
+                });
+                index++;
+            {% endfor %}
+            
+            new Chart(radarCtx, {
+                type: 'radar',
+                data: {
+                    labels: [
+                        'Émissions CO2',
+                        'Consommation',
+                        'Âge',
+                        'Type moteur',
+                        'Score global'
+                    ],
+                    datasets: radarDatasets
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            angleLines: {
+                                display: true
+                            },
+                            suggestedMin: 0,
+                            suggestedMax: 100
+                        }
+                    }
+                }
+            });
+            
+            // Graphique des niveaux écologiques
+            const niveauCtx = document.getElementById('niveauChart').getContext('2d');
+            new Chart(niveauCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Excellent', 'Bon', 'Moyen', 'Médiocre', 'Mauvais'],
+                    datasets: [{
+                        data: [
+                            {{ statsNiveaux['Excellent'] }},
+                            {{ statsNiveaux['Bon'] }},
+                            {{ statsNiveaux['Moyen'] }},
+                            {{ statsNiveaux['Médiocre'] }},
+                            {{ statsNiveaux['Mauvais'] }}
+                        ],
+                        backgroundColor: ['#27ae60', '#2ecc71', '#f1c40f', '#e67e22', '#e74c3c'],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right'
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+{% endblock %} 

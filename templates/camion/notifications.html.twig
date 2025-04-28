@@ -1,0 +1,145 @@
+{% extends 'BackBase.html.twig' %}
+
+{% block title %}Notifications des Camions en Tournée{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .notification-card {
+            border-left: 4px solid #28a745;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+        }
+        
+        .notification-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .notification-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+            padding-bottom: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .notification-badge {
+            background-color: #28a745;
+            color: white;
+            font-size: 0.8rem;
+            padding: 3px 8px;
+            border-radius: 20px;
+        }
+        
+        .notification-time {
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
+        
+        .notification-destination {
+            font-weight: 500;
+            margin-bottom: 5px;
+        }
+        
+        .notification-duration {
+            font-size: 0.9rem;
+            color: #495057;
+        }
+        
+        .empty-container {
+            text-align: center;
+            padding: 50px 0;
+        }
+        
+        .empty-icon {
+            font-size: 3rem;
+            color: #6c757d;
+            margin-bottom: 20px;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+    <div class="container py-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="mb-0">
+                <i class="fas fa-bell text-primary me-2"></i>
+                Notifications des Camions en Tournée
+            </h2>
+            <a href="{{ path('app_camion_index') }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left me-2"></i> Retour à la liste
+            </a>
+        </div>
+        
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Camions actuellement en tournée</h5>
+                <span class="badge bg-primary">{{ camions|length }}</span>
+            </div>
+            <div class="card-body">
+                {% if camions|length > 0 %}
+                    <div class="row">
+                        {% for camion in camions %}
+                            <div class="col-md-6 col-lg-4">
+                                <div class="card notification-card">
+                                    <div class="card-body">
+                                        <div class="notification-header">
+                                            <h5 class="mb-0">{{ camion.matricule }}</h5>
+                                            <span class="notification-badge">En tournée</span>
+                                        </div>
+                                        <div class="notification-time">
+                                            <i class="fas fa-clock me-1"></i>
+                                            Départ: {{ camion.debutTournee ? camion.debutTournee|date('d/m/Y H:i') : 'N/A' }}
+                                        </div>
+                                        <div class="notification-destination">
+                                            <i class="fas fa-map-marker-alt me-1"></i>
+                                            Destination: {{ camion.destination ?? 'Non spécifiée' }}
+                                        </div>
+                                        <div class="notification-duration">
+                                            <i class="fas fa-stopwatch me-1"></i>
+                                            Durée: {{ camion.dureeTournee ?? 'N/A' }}
+                                        </div>
+                                        <div class="mt-3 d-flex justify-content-between">
+                                            <a href="{{ path('app_camion_show', {'id': camion.id}) }}" class="btn btn-sm btn-info">
+                                                <i class="fas fa-eye me-1"></i> Détails
+                                            </a>
+                                            <form method="post" action="{{ path('app_camion_terminer_tournee', {'id': camion.id}) }}">
+                                                <input type="hidden" name="_token" value="{{ csrf_token('terminer-tournee' ~ camion.id) }}">
+                                                <button type="submit" class="btn btn-sm btn-success">
+                                                    <i class="fas fa-check me-1"></i> Terminer
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="empty-container">
+                        <div class="empty-icon">
+                            <i class="fas fa-truck-loading"></i>
+                        </div>
+                        <h4>Aucun camion en tournée actuellement</h4>
+                        <p class="text-muted">Les notifications apparaîtront ici lorsque des camions seront en tournée.</p>
+                        <a href="{{ path('app_camion_index') }}" class="btn btn-primary mt-3">
+                            <i class="fas fa-truck me-2"></i> Gérer les camions
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        // Rafraîchir la page toutes les 30 secondes pour mettre à jour les durées
+        setTimeout(function() {
+            window.location.reload();
+        }, 30000);
+    </script>
+{% endblock %} 

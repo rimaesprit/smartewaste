@@ -1,0 +1,379 @@
+{% extends 'BackBase.html.twig' %}
+
+{% block title %}Historique et analyse des déchets{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .dashboard-card {
+            transition: transform 0.3s;
+        }
+        .dashboard-card:hover {
+            transform: translateY(-5px);
+        }
+        .chart-container {
+            height: 350px;
+            width: 100%;
+        }
+    </style>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
+
+{% block body %}
+    <div class="container-fluid px-4">
+        <h1 class="mt-4 mb-4">Historique et analyse des déchets</h1>
+        
+        <!-- Métriques principales -->
+        <div class="row mb-4">
+            <div class="col-xl-3 col-md-6">
+                <div class="card bg-primary text-white mb-4 dashboard-card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <div class="text-xs font-weight-bold text-white text-uppercase mb-1">Total des déchets</div>
+                                <div class="h3 mb-0 font-weight-bold">{{ metriques.total_dechets }}</div>
+                            </div>
+                            <div class="fa-3x">
+                                <i class="fas fa-trash"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6">
+                <div class="card bg-success text-white mb-4 dashboard-card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <div class="text-xs font-weight-bold text-white text-uppercase mb-1">Poids total</div>
+                                <div class="h3 mb-0 font-weight-bold">{{ metriques.poids_total|number_format(2) }} kg</div>
+                            </div>
+                            <div class="fa-3x">
+                                <i class="fas fa-weight"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6">
+                <div class="card bg-info text-white mb-4 dashboard-card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <div class="text-xs font-weight-bold text-white text-uppercase mb-1">Poids traité</div>
+                                <div class="h3 mb-0 font-weight-bold">{{ metriques.poids_traite|number_format(2) }} kg</div>
+                            </div>
+                            <div class="fa-3x">
+                                <i class="fas fa-recycle"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-md-6">
+                <div class="card bg-warning text-white mb-4 dashboard-card">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <div class="text-xs font-weight-bold text-white text-uppercase mb-1">Taux de traitement</div>
+                                <div class="h3 mb-0 font-weight-bold">{{ metriques.taux_traitement|number_format(2) }}%</div>
+                            </div>
+                            <div class="fa-3x">
+                                <i class="fas fa-chart-pie"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Graphiques -->
+        <div class="row mb-4">
+            <div class="col-xl-6">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <i class="fas fa-chart-area me-1"></i>
+                        Évolution des déchets par mois
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container">
+                            <canvas id="evolutionChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-6">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <i class="fas fa-chart-pie me-1"></i>
+                        Répartition par type de déchet
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container">
+                            <canvas id="typeChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row mb-4">
+            <div class="col-xl-6">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <i class="fas fa-chart-bar me-1"></i>
+                        Évolution du traitement
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container">
+                            <canvas id="traitementChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-6">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <i class="fas fa-chart-bar me-1"></i>
+                        Composition des déchets par mois
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container">
+                            <canvas id="compositionChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Tableau détaillé -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <i class="fas fa-table me-1"></i>
+                Détails par mois
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered table-striped">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Mois</th>
+                                <th>Total (kg)</th>
+                                <th>Traité (kg)</th>
+                                <th>Non traité (kg)</th>
+                                <th>Taux de traitement</th>
+                                <th>Type principal</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for mois, donnees in analyseParMois %}
+                                {% set taux = donnees.total > 0 ? (donnees.traite / donnees.total * 100) : 0 %}
+                                {% set type_principal = '' %}
+                                {% set max_poids = 0 %}
+                                {% for type, poids in donnees.types %}
+                                    {% if poids > max_poids %}
+                                        {% set max_poids = poids %}
+                                        {% set type_principal = type %}
+                                    {% endif %}
+                                {% endfor %}
+                                <tr>
+                                    <td>{{ mois }}</td>
+                                    <td>{{ donnees.total|number_format(2) }}</td>
+                                    <td>{{ donnees.traite|number_format(2) }}</td>
+                                    <td>{{ donnees.non_traite|number_format(2) }}</td>
+                                    <td>
+                                        <div class="progress" style="height: 20px;">
+                                            <div class="progress-bar bg-success" role="progressbar" style="width: {{ taux }}%;" aria-valuenow="{{ taux }}" aria-valuemin="0" aria-valuemax="100">{{ taux|number_format(2) }}%</div>
+                                        </div>
+                                    </td>
+                                    <td>{{ type_principal|capitalize }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <div class="mb-4">
+            <a href="{{ path('app_dechet_index') }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left me-1"></i> Retour
+            </a>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Configuration des couleurs par type de déchet
+            const typeColors = {
+                'plastique': '#3498db',
+                'papier': '#f1c40f',
+                'verre': '#2ecc71',
+                'metal': '#95a5a6',
+                'organique': '#27ae60',
+                'electronique': '#e74c3c',
+                'dangereux': '#c0392b'
+            };
+            
+            // Graphique d'évolution par mois
+            const evolutionCtx = document.getElementById('evolutionChart').getContext('2d');
+            new Chart(evolutionCtx, {
+                type: 'line',
+                data: {
+                    labels: {{ chartData.mois|json_encode|raw }},
+                    datasets: [
+                        {
+                            label: 'Poids total',
+                            data: {{ chartData.poids_total|json_encode|raw }},
+                            borderColor: '#3498db',
+                            backgroundColor: 'rgba(52, 152, 219, 0.2)',
+                            tension: 0.4,
+                            fill: true
+                        },
+                        {
+                            label: 'Poids traité',
+                            data: {{ chartData.poids_traite|json_encode|raw }},
+                            borderColor: '#2ecc71',
+                            backgroundColor: 'rgba(46, 204, 113, 0.2)',
+                            tension: 0.4,
+                            fill: true
+                        },
+                        {
+                            label: 'Poids non traité',
+                            data: {{ chartData.poids_non_traite|json_encode|raw }},
+                            borderColor: '#e74c3c',
+                            backgroundColor: 'rgba(231, 76, 60, 0.2)',
+                            tension: 0.4,
+                            fill: true
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Poids (kg)'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Mois'
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // Graphique de répartition par type
+            const typeCtx = document.getElementById('typeChart').getContext('2d');
+            new Chart(typeCtx, {
+                type: 'pie',
+                data: {
+                    labels: {{ chartData.types|json_encode|raw }}.map(type => type.charAt(0).toUpperCase() + type.slice(1)),
+                    datasets: [{
+                        data: {{ chartData.poids_par_type|json_encode|raw }},
+                        backgroundColor: Object.values(typeColors),
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right'
+                        }
+                    }
+                }
+            });
+            
+            // Graphique d'évolution du traitement
+            const traitementCtx = document.getElementById('traitementChart').getContext('2d');
+            new Chart(traitementCtx, {
+                type: 'bar',
+                data: {
+                    labels: {{ chartData.evolution_traitement.dates|json_encode|raw }},
+                    datasets: [{
+                        label: 'Poids traité',
+                        data: {{ chartData.evolution_traitement.valeurs|json_encode|raw }},
+                        backgroundColor: 'rgba(46, 204, 113, 0.7)',
+                        borderColor: 'rgba(46, 204, 113, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Poids traité (kg)'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Mois de traitement'
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // Graphique de composition par mois (stacked bar)
+            const compositionCtx = document.getElementById('compositionChart').getContext('2d');
+            
+            // Préparer les datasets pour chaque type de déchet
+            const compositionDatasets = [];
+            {% for type in chartData.types %}
+                compositionDatasets.push({
+                    label: '{{ type|capitalize }}',
+                    data: {{ chartData.details_par_type[type]|json_encode|raw }},
+                    backgroundColor: '{{ typeColors[type] }}',
+                    borderColor: '{{ typeColors[type] }}',
+                    borderWidth: 1
+                });
+            {% endfor %}
+            
+            new Chart(compositionCtx, {
+                type: 'bar',
+                data: {
+                    labels: {{ chartData.mois|json_encode|raw }},
+                    datasets: compositionDatasets
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            stacked: true,
+                            title: {
+                                display: true,
+                                text: 'Mois'
+                            }
+                        },
+                        y: {
+                            stacked: true,
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Poids (kg)'
+                            }
+                        }
+                    }
+                }
+            });
+        });
+    </script>
+{% endblock %} 

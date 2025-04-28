@@ -1,0 +1,142 @@
+{% extends 'BackBase.html.twig' %}
+
+{% block title %}Nouveau Déchet{% endblock %}
+
+{% block body %}
+    <div class="container mt-4">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h1 class="h3 mb-0">Ajouter un Nouveau Déchet</h1>
+            </div>
+            <div class="card-body">
+                {{ form_start(form, {'attr': {'id': 'dechetForm', 'class': 'needs-validation', 'novalidate': 'novalidate'}}) }}
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                {{ form_label(form.type_dechet, 'Type de Déchet', {'label_attr': {'class': 'form-label'}}) }}
+                                {{ form_widget(form.type_dechet, {
+                                    'attr': {
+                                        'class': 'form-control',
+                                        'required': 'required'
+                                    }
+                                }) }}
+                                <div class="invalid-feedback">
+                                    Veuillez sélectionner un type de déchet
+                                </div>
+                            </div>
+
+                            <div class="form-group mb-3">
+                                {{ form_label(form.poids, 'Poids (kg)', {'label_attr': {'class': 'form-label'}}) }}
+                                {{ form_widget(form.poids, {
+                                    'attr': {
+                                        'class': 'form-control',
+                                        'min': '1',
+                                        'max': '1000',
+                                        'step': '1',
+                                        'required': 'required',
+                                        'pattern': '[0-9]*',
+                                        'inputmode': 'numeric',
+                                        'onkeypress': 'return (event.charCode >= 48 && event.charCode <= 57)'
+                                    }
+                                }) }}
+                                <div class="invalid-feedback">
+                                    Le poids doit être un nombre entier entre 1 et 1000 kg
+                                </div>
+                            </div>
+
+                            <div class="form-group mb-3">
+                                {{ form_label(form.date_depot, 'Date de Dépôt', {'label_attr': {'class': 'form-label'}}) }}
+                                {{ form_widget(form.date_depot, {
+                                    'attr': {
+                                        'class': 'form-control',
+                                        'required': 'required',
+                                        'max': "now"|date('Y-m-d')
+                                    }
+                                }) }}
+                                <div class="invalid-feedback">
+                                    La date ne peut pas être dans le futur
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                {{ form_label(form.camion, 'Camion', {'label_attr': {'class': 'form-label'}}) }}
+                                {{ form_widget(form.camion, {
+                                    'attr': {
+                                        'class': 'form-control',
+                                        'required': 'required'
+                                    }
+                                }) }}
+                                <div class="invalid-feedback">
+                                    Veuillez sélectionner un camion
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-4">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save"></i> Enregistrer
+                        </button>
+                        <a href="{{ path('app_dechet_index') }}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Retour à la liste
+                        </a>
+                    </div>
+                {{ form_end(form) }}
+            </div>
+        </div>
+    </div>
+
+    <script>
+    // Validation côté client
+    (function() {
+        'use strict';
+        const forms = document.querySelectorAll('.needs-validation');
+        
+        Array.from(forms).forEach(form => {
+            form.addEventListener('submit', event => {
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+
+        // Validation personnalisée pour la date
+        const dateInput = document.querySelector('#{{ form.date_depot.vars.id }}');
+        if (dateInput) {
+            // Définir la date du jour comme valeur par défaut
+            const today = new Date();
+            const formattedDate = today.toISOString().split('T')[0];
+            dateInput.value = formattedDate;
+            
+            dateInput.addEventListener('change', function() {
+                const selectedDate = new Date(this.value);
+                const today = new Date();
+                today.setHours(0, 0, 0, 0); // Réinitialiser l'heure pour comparer uniquement les dates
+                
+                if (selectedDate > today) {
+                    this.setCustomValidity('La date ne peut pas être dans le futur');
+                } else {
+                    this.setCustomValidity('');
+                }
+            });
+        }
+
+        // Validation personnalisée pour le poids
+        const poidsInput = document.querySelector('#{{ form.poids.vars.id }}');
+        if (poidsInput) {
+            poidsInput.addEventListener('input', function() {
+                const poids = parseInt(this.value);
+                if (isNaN(poids) || poids < 1 || poids > 1000 || !Number.isInteger(poids)) {
+                    this.setCustomValidity('Le poids doit être un nombre entier entre 1 et 1000 kg');
+                } else {
+                    this.setCustomValidity('');
+                }
+            });
+        }
+    })();
+    </script>
+{% endblock %} 

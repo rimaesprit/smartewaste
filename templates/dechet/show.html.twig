@@ -1,0 +1,123 @@
+{% extends 'BackBase.html.twig' %}
+
+{% block title %}Détails du Déchet{% endblock %}
+
+{% block body %}
+    <div class="container mt-4">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h1 class="h3 mb-0">Détails du Déchet</h1>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <table class="table">
+                            <tbody>
+                                <tr>
+                                    <th>Type de Déchet</th>
+                                    <td>
+                                        {% if dechet.typeDechet == 'plastique' %}
+                                            <span class="badge bg-primary">Plastique</span>
+                                        {% elseif dechet.typeDechet == 'verre' %}
+                                            <span class="badge bg-info">Verre</span>
+                                        {% elseif dechet.typeDechet == 'papier' %}
+                                            <span class="badge bg-secondary">Papier</span>
+                                        {% elseif dechet.typeDechet == 'metal' %}
+                                            <span class="badge bg-dark">Métal</span>
+                                        {% elseif dechet.typeDechet == 'organique' %}
+                                            <span class="badge bg-success">Organique</span>
+                                        {% elseif dechet.typeDechet == 'electronique' %}
+                                            <span class="badge bg-warning">Électronique</span>
+                                        {% elseif dechet.typeDechet == 'dangereux' %}
+                                            <span class="badge bg-danger">Dangereux</span>
+                                        {% else %}
+                                            <span class="badge bg-light text-dark">Autre</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>Poids</th>
+                                    <td>{{ dechet.poids }} kg</td>
+                                </tr>
+                                <tr>
+                                    <th>Date de Dépôt</th>
+                                    <td>{{ dechet.dateDepot ? dechet.dateDepot|date('Y-m-d H:i') : '' }}</td>
+                                </tr>
+                                <tr>
+                                    <th>Camion Assigné</th>
+                                    <td>
+                                        {% if dechet.camion %}
+                                            <a href="{{ path('app_camion_show', {'id': dechet.camion.id}) }}">
+                                                {{ dechet.camion.matricule }}
+                                            </a>
+                                        {% else %}
+                                            <span class="text-muted">Non assigné</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-4">
+                    <div>
+                        <h3 class="fw-bold mb-3">Gestion des Déchets</h3>
+                        <h6 class="op-7 mb-2">Détails du déchet</h6>
+                    </div>
+                    <div class="ms-md-auto py-2 py-md-0">
+                        <div class="card-footer d-flex justify-content-between">
+                            <a href="{{ path('app_dechet_index') }}" class="btn btn-outline-success">
+                                <i class="fas fa-arrow-left me-1"></i> Retour à la liste
+                            </a>
+                            <div class="d-flex gap-2">
+                                <a href="{{ path('app_dechet_edit', {'id': dechet.id}) }}" class="btn btn-success">
+                                    <i class="fas fa-edit me-1"></i> Modifier
+                                </a>
+                                {{ include('dechet/_delete_form.html.twig') }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    function confirmDelete(id, type, poids, dateDepot) {
+        Swal.fire({
+            title: 'Êtes-vous sûr ?',
+            html: `
+                <div class="text-left">
+                    <p>Vous êtes sur le point de supprimer le déchet suivant :</p>
+                    <div class="alert alert-warning">
+                        <strong>Informations du déchet :</strong><br>
+                        - Type : ${type}<br>
+                        - Poids : ${poids} kg<br>
+                        - Date de dépôt : ${dateDepot}
+                    </div>
+                    <p class="text-danger"><i class="fas fa-exclamation-triangle"></i> Cette action est irréversible !</p>
+                </div>
+            `,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Oui, supprimer !',
+            cancelButtonText: 'Annuler',
+            reverseButtons: true,
+            input: 'text',
+            inputLabel: 'Tapez "SUPPRIMER" pour confirmer',
+            inputValidator: (value) => {
+                if (value.toUpperCase() !== 'SUPPRIMER') {
+                    return 'Vous devez taper "SUPPRIMER" pour confirmer';
+                }
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                document.getElementById('deleteForm' + id).submit();
+            }
+        });
+    }
+    </script>
+{% endblock %} 

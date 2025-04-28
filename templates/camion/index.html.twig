@@ -1,0 +1,774 @@
+{% extends 'BackBase.html.twig' %}
+
+{% block title %}Gestion des Camions{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .card {
+            border-radius: 15px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+            border: none;
+            margin-bottom: 30px;
+        }
+        
+        .card-header {
+            background-color: transparent;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+            padding: 20px 25px;
+        }
+        
+        .card-title {
+            font-weight: 600;
+            font-size: 18px;
+            color: #2c3e50;
+        }
+        
+        .table-container {
+            padding: 0 10px;
+        }
+        
+        .data-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0 8px;
+        }
+        
+        .data-table thead th {
+            border: none;
+            color: #8392AB;
+            font-size: 13px;
+            font-weight: 500;
+            text-transform: uppercase;
+            padding: 15px 15px;
+        }
+        
+        .data-table thead th.sortable {
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .data-table thead th.sortable:hover {
+            color: #28a745;
+        }
+        
+        .data-table thead th.sortable i {
+            margin-left: 5px;
+            font-size: 10px;
+        }
+        
+        .data-table tbody tr {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.03);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .data-table tbody tr:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .data-table tbody td {
+            padding: 18px 15px;
+            vertical-align: middle;
+            border-top: none;
+            font-size: 14px;
+        }
+        
+        .data-table tbody tr td:first-child {
+            border-top-left-radius: 10px;
+            border-bottom-left-radius: 10px;
+        }
+        
+        .data-table tbody tr td:last-child {
+            border-top-right-radius: 10px;
+            border-bottom-right-radius: 10px;
+        }
+        
+        .btn-modern {
+            border-radius: 50px;
+            padding: 8px 20px;
+            font-weight: 500;
+            font-size: 14px;
+            transition: all 0.3s;
+            text-transform: none;
+            letter-spacing: 0.5px;
+            box-shadow: 0 4px 6px rgba(50, 50, 93, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08);
+        }
+        
+        .btn-modern:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 7px 14px rgba(50, 50, 93, 0.1), 0 3px 6px rgba(0, 0, 0, 0.08);
+        }
+        
+        .btn-modern-primary {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            border: none;
+            color: white;
+        }
+        
+        .btn-modern-info {
+            background: linear-gradient(135deg, #20c997, #28a745);
+            border: none;
+            color: white;
+        }
+        
+        .btn-modern-danger {
+            background: linear-gradient(135deg, #dc3545, #fd7e14);
+            border: none;
+            color: white;
+        }
+        
+        .btn-icon {
+            border-radius: 50%;
+            width: 38px;
+            height: 38px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+        }
+        
+        .header-container {
+            background: linear-gradient(120deg, #28a745 0%, #20c997 100%);
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+        
+        .header-container::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M0 100 L100 0 L100 100 Z" fill="rgba(255,255,255,0.07)"/></svg>');
+            background-size: cover;
+            z-index: -1;
+        }
+        
+        .header-title {
+            font-weight: 700;
+            color: #fff;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 5px;
+            font-size: 28px;
+        }
+        
+        .header-subtitle {
+            color: rgba(255,255,255,0.9);
+            font-weight: 400;
+            margin-bottom: 25px;
+        }
+        
+        .badge-modern {
+            padding: 7px 12px;
+            border-radius: 50px;
+            font-weight: 500;
+            font-size: 12px;
+        }
+        
+        .badge-success-soft {
+            background-color: rgba(40, 167, 69, 0.15);
+            color: #28a745;
+        }
+        
+        .badge-warning-soft {
+            background-color: rgba(255, 159, 67, 0.15);
+            color: #ff9f43;
+        }
+        
+        .badge-danger-soft {
+            background-color: rgba(234, 84, 85, 0.15);
+            color: #ea5455;
+        }
+        
+        .progress {
+            height: 8px;
+            border-radius: 50px;
+            background-color: #eaeaea;
+        }
+        
+        .progress-bar {
+            border-radius: 50px;
+        }
+        
+        .score-pill {
+            display: inline-flex;
+            align-items: center;
+            background: #f9f9f9;
+            border-radius: 50px;
+            padding: 3px 10px 3px 3px;
+            font-weight: 600;
+        }
+        
+        .score-circle {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+            margin-right: 8px;
+        }
+        
+        .search-container {
+            position: relative;
+            margin-bottom: 20px;
+        }
+        
+        .search-input {
+            padding: 12px 20px 12px 45px;
+            border-radius: 50px;
+            border: 1px solid rgba(0,0,0,0.08);
+            background-color: white;
+            width: 100%;
+            font-size: 14px;
+            transition: all 0.3s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+        
+        .search-input:focus {
+            outline: none;
+            border-color: #28a745;
+            box-shadow: 0 3px 10px rgba(40, 167, 69, 0.1);
+        }
+        
+        .search-icon {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #8392AB;
+        }
+        
+        .filters-container {
+            margin-bottom: 20px;
+        }
+        
+        .filter-button {
+            background-color: white;
+            border: 1px solid rgba(0,0,0,0.08);
+            border-radius: 50px;
+            padding: 8px 15px;
+            font-size: 13px;
+            color: #8392AB;
+            margin-right: 10px;
+            transition: all 0.2s;
+        }
+        
+        .filter-button:hover, .filter-button.active {
+            background-color: #28a745;
+            color: white;
+            border-color: #28a745;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+    <div class="header-container">
+        <div class="row align-items-center">
+            <div class="col-md-6">
+                <h1 class="header-title">Gestion des Camions</h1>
+                <p class="header-subtitle">Supervisez et gérez votre flotte de véhicules</p>
+        </div>
+            <div class="col-md-6 text-md-end">
+                <a href="{{ path('app_camion_new') }}" class="btn btn-success btn-lg" style="position: relative; z-index: 5;">
+                    <i class="fas fa-plus me-2"></i> Ajouter un camion
+            </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="card-title mb-0">
+                <i class="fas fa-truck me-2"></i>Liste des Camions
+            </h5>
+            <div>
+                <a href="#" class="btn btn-sm btn-modern btn-modern-info" onclick="window.location.reload()">
+                    <i class="fas fa-sync-alt me-1"></i> Actualiser
+                            </a>
+                        </div>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="search-container">
+                        <i class="fas fa-search search-icon"></i>
+                        <input type="text" id="searchInput" class="search-input" placeholder="Rechercher un camion par matricule, type moteur...">
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="filters-container d-flex justify-content-md-end">
+                        <button class="filter-button active" data-filter="all">Tous</button>
+                        <button class="filter-button" data-filter="en_service">En service</button>
+                        <button class="filter-button" data-filter="en_maintenance">En maintenance</button>
+                        <button class="filter-button" data-filter="hors_service">Hors service</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="table-container">
+                <table class="table data-table" id="camionsTable">
+                            <thead>
+                                <tr>
+                                    <th>Matricule</th>
+                            <th class="sortable" data-sort="capacite">Capacité <i class="fas fa-sort"></i></th>
+                                    <th>État</th>
+                                    <th>Type Moteur</th>
+                            <th>Score Éco</th>
+                            <th class="text-end">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            {% for camion in camions %}
+                        <tr data-matricule="{{ camion.matricule }}" data-type="{{ camion.typeMoteur }}" data-etat="{{ camion.etat }}" data-capacite="{{ camion.capacite }}">
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="avatar-sm bg-light p-2 rounded-circle me-3">
+                                        <i class="fas fa-truck text-primary"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="mb-0">{{ camion.matricule }}</h6>
+                                        <small class="text-muted">#{{ camion.id }}</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="fw-medium">{{ camion.capacite }}</span>
+                                <small class="text-muted">tonnes</small>
+                            </td>
+                                    <td>
+                                        {% if camion.etat == 'en_service' %}
+                                    <span class="badge badge-modern badge-success-soft">En service</span>
+                                        {% elseif camion.etat == 'en_maintenance' %}
+                                    <span class="badge badge-modern badge-warning-soft">En maintenance</span>
+                                        {% else %}
+                                    <span class="badge badge-modern badge-danger-soft">Hors service</span>
+                                        {% endif %}
+                                    </td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    {% if camion.typeMoteur == 'electrique' %}
+                                        <i class="fas fa-bolt text-info me-2"></i>
+                                    {% elseif camion.typeMoteur == 'hybride' %}
+                                        <i class="fas fa-leaf text-success me-2"></i>
+                                    {% elseif camion.typeMoteur == 'gaz' %}
+                                        <i class="fas fa-fire-alt text-warning me-2"></i>
+                                    {% elseif camion.typeMoteur == 'biodiesel' %}
+                                        <i class="fas fa-seedling text-success me-2"></i>
+                                    {% else %}
+                                        <i class="fas fa-gas-pump text-secondary me-2"></i>
+                                    {% endif %}
+                                    {{ camion.typeMoteur|capitalize }}
+                                </div>
+                            </td>
+                                    <td>
+                                        {% if camion.getScoreEnvironnemental is defined %}
+                                    {% set score = camion.scoreEnvironnemental %}
+                                    <div class="d-flex align-items-center">
+                                        <div class="score-pill">
+                                            <div class="score-circle 
+                                                {% if score >= 80 %}
+                                                        bg-success
+                                                {% elseif score >= 60 %}
+                                                        bg-info
+                                                {% elseif score >= 40 %}
+                                                        bg-warning
+                                                    {% else %}
+                                                        bg-danger
+                                                {% endif %}">
+                                                {{ score }}
+                                            </div>
+                                            <span>/ 100</span>
+                                                </div>
+                                            </div>
+                                        {% else %}
+                                    <span class="text-muted">N/A</span>
+                                        {% endif %}
+                                    </td>
+                            <td class="text-end">
+                                <div class="d-flex justify-content-end gap-2">
+                                    <a href="{{ path('app_camion_show', {'id': camion.id}) }}" class="btn btn-icon btn-modern btn-modern-info" data-bs-toggle="tooltip" title="Voir les détails">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                    <a href="{{ path('app_camion_edit', {'id': camion.id}) }}" class="btn btn-icon btn-modern btn-modern-primary" data-bs-toggle="tooltip" title="Modifier">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <form method="post" action="{{ path('app_camion_delete', {'id': camion.id}) }}" class="d-inline" id="deleteForm{{ camion.id }}">
+                                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ camion.id) }}">
+                                        <button type="button" class="btn btn-icon btn-modern btn-modern-danger" onclick="confirmDelete({{ camion.id }}, '{{ camion.matricule }}', '{{ camion.capacite }}', '{{ camion.etat }}')" data-bs-toggle="tooltip" title="Supprimer">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% else %}
+                        <tr id="noResults">
+                            <td colspan="6" class="text-center py-5">
+                                <div class="empty-state">
+                                    <div class="empty-state-icon mb-3">
+                                        <i class="fas fa-truck fa-3x text-muted"></i>
+                                    </div>
+                                    <h5>Aucun camion trouvé</h5>
+                                    <p class="text-muted">Ajoutez votre premier camion pour commencer à gérer votre flotte.</p>
+                                    <a href="{{ path('app_camion_new') }}" class="btn btn-modern btn-modern-primary">
+                                        <i class="fas fa-plus me-2"></i> Ajouter un camion
+                                    </a>
+                                </div>
+                            </td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                <div id="searchNoResults" class="text-center py-5" style="display: none;">
+                    <div class="empty-state">
+                        <div class="empty-state-icon mb-3">
+                            <i class="fas fa-search fa-3x text-muted"></i>
+                        </div>
+                        <h5>Aucun résultat trouvé</h5>
+                        <p class="text-muted">Essayez de modifier vos critères de recherche</p>
+                        <button class="btn btn-modern btn-modern-info" onclick="resetSearch()">
+                            <i class="fas fa-redo me-2"></i> Réinitialiser la recherche
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialiser les tooltips
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        });
+        
+        // Variables globales
+        const searchInput = document.getElementById('searchInput');
+        const table = document.getElementById('camionsTable');
+        const tbody = table.querySelector('tbody');
+        const noResultsMessage = document.getElementById('searchNoResults');
+        const filterButtons = document.querySelectorAll('.filter-button');
+        let currentFilter = 'all';
+        let debounceTimer;
+        
+        // Fonction pour effectuer la recherche AJAX
+        function performSearch() {
+            const searchTerm = searchInput.value.trim().toLowerCase();
+            
+            // Annuler le timer précédent
+            clearTimeout(debounceTimer);
+            
+            // Définir un délai de 300ms avant d'exécuter la recherche
+            debounceTimer = setTimeout(() => {
+                // Construction de l'URL avec les paramètres
+                const searchUrl = "/admin/camion/api/search";
+                const url = `${searchUrl}?term=${encodeURIComponent(searchTerm)}&etat=${encodeURIComponent(currentFilter)}`;
+                
+                // Afficher un indicateur de chargement
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="text-center py-4">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">Chargement...</span>
+                            </div>
+                            <p class="mt-2">Recherche en cours...</p>
+                        </td>
+                    </tr>
+                `;
+                
+                // Effectuer la requête AJAX
+                fetch(url)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Erreur HTTP: ' + response.status);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        // Vider le tableau
+                        tbody.innerHTML = '';
+                        
+                        // Vérifier si des résultats ont été trouvés
+                        if (data.length === 0) {
+                            noResultsMessage.style.display = 'block';
+                            return;
+                        }
+                        
+                        // Cacher le message "Aucun résultat"
+                        noResultsMessage.style.display = 'none';
+                        
+                        // Ajouter les résultats au tableau
+                        data.forEach(camion => {
+                            // Déterminer la classe et le texte du badge d'état
+                            let etatBadgeClass, etatText;
+                            switch(camion.etat) {
+                                case 'en_service':
+                                    etatBadgeClass = 'badge-success-soft';
+                                    etatText = 'En service';
+                                    break;
+                                case 'en_maintenance':
+                                    etatBadgeClass = 'badge-warning-soft';
+                                    etatText = 'En maintenance';
+                                    break;
+                                case 'hors_service':
+                                    etatBadgeClass = 'badge-danger-soft';
+                                    etatText = 'Hors service';
+                                    break;
+                            }
+                            
+                            // Déterminer l'icône et la classe pour le type de moteur
+                            let typeIcon, typeIconClass;
+                            switch(camion.type_moteur) {
+                                case 'electrique':
+                                    typeIcon = 'bolt';
+                                    typeIconClass = 'text-info';
+                                    break;
+                                case 'hybride':
+                                    typeIcon = 'leaf';
+                                    typeIconClass = 'text-success';
+                                    break;
+                                case 'gaz':
+                                    typeIcon = 'fire-alt';
+                                    typeIconClass = 'text-warning';
+                                    break;
+                                case 'biodiesel':
+                                    typeIcon = 'seedling';
+                                    typeIconClass = 'text-success';
+                                    break;
+                                default:
+                                    typeIcon = 'gas-pump';
+                                    typeIconClass = 'text-secondary';
+                            }
+                            
+                            // Déterminer la classe du score écologique
+                            let scoreClass;
+                            if (camion.score_environnemental >= 80) {
+                                scoreClass = 'bg-success';
+                            } else if (camion.score_environnemental >= 60) {
+                                scoreClass = 'bg-info';
+                            } else if (camion.score_environnemental >= 40) {
+                                scoreClass = 'bg-warning';
+                            } else {
+                                scoreClass = 'bg-danger';
+                            }
+                            
+                            // Échapper les caractères spéciaux pour éviter les problèmes d'insertion HTML
+                            const escapeHtml = (str) => {
+                                return str.toString()
+                                    .replace(/&/g, '&amp;')
+                                    .replace(/</g, '&lt;')
+                                    .replace(/>/g, '&gt;')
+                                    .replace(/"/g, '&quot;')
+                                    .replace(/'/g, '&#039;');
+                            };
+                            
+                            // Créer la ligne du tableau
+                            const tr = document.createElement('tr');
+                            tr.setAttribute('data-matricule', camion.matricule);
+                            tr.setAttribute('data-type', camion.type_moteur);
+                            tr.setAttribute('data-etat', camion.etat);
+                            tr.setAttribute('data-capacite', camion.capacite);
+                            
+                            tr.innerHTML = `
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="avatar-sm bg-light p-2 rounded-circle me-3">
+                                            <i class="fas fa-truck text-primary"></i>
+                                        </div>
+                                        <div>
+                                            <h6 class="mb-0">${escapeHtml(camion.matricule)}</h6>
+                                            <small class="text-muted">#${camion.id}</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="fw-medium">${camion.capacite}</span>
+                                    <small class="text-muted">tonnes</small>
+                                </td>
+                                <td>
+                                    <span class="badge badge-modern ${etatBadgeClass}">${etatText}</span>
+                                </td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-${typeIcon} ${typeIconClass} me-2"></i>
+                                        ${camion.type_moteur.charAt(0).toUpperCase() + camion.type_moteur.slice(1)}
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="score-pill">
+                                            <div class="score-circle ${scoreClass}">
+                                                ${camion.score_environnemental}
+                                            </div>
+                                            <span>/ 100</span>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td class="text-end">
+                                    <div class="d-flex justify-content-end gap-2">
+                                        <a href="${camion.show_url}" class="btn btn-icon btn-modern btn-modern-info" data-bs-toggle="tooltip" title="Voir les détails">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a href="${camion.edit_url}" class="btn btn-icon btn-modern btn-modern-primary" data-bs-toggle="tooltip" title="Modifier">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <form method="post" action="${camion.delete_url}" class="d-inline" id="deleteForm${camion.id}">
+                                            <input type="hidden" name="_token" value="${escapeHtml(camion.csrf_token)}">
+                                            <button type="button" class="btn btn-icon btn-modern btn-modern-danger" onclick="confirmDelete(${camion.id}, '${escapeHtml(camion.matricule)}', '${camion.capacite}', '${escapeHtml(camion.etat)}')" data-bs-toggle="tooltip" title="Supprimer">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            `;
+                            
+                            tbody.appendChild(tr);
+                        });
+                        
+                        // Réinitialiser les tooltips pour les nouveaux éléments
+                        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+                        tooltipTriggerList.forEach(function (tooltipTriggerEl) {
+                            new bootstrap.Tooltip(tooltipTriggerEl)
+                        });
+                    })
+                    .catch(error => {
+                        console.error('Erreur lors de la recherche:', error);
+                        tbody.innerHTML = `
+                            <tr>
+                                <td colspan="6" class="text-center py-4">
+                                    <div class="alert alert-danger">
+                                        <i class="fas fa-exclamation-triangle me-2"></i>
+                                        Une erreur est survenue lors de la recherche: ${error.message}
+                                    </div>
+                                </td>
+                            </tr>
+                        `;
+                    });
+            }, 300);
+        }
+        
+        // Écouteur d'événement pour le champ de recherche
+        searchInput.addEventListener('input', performSearch);
+        
+        // Écouteur d'événement pour les boutons de filtre
+        filterButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                // Retirer la classe active de tous les boutons
+                filterButtons.forEach(btn => btn.classList.remove('active'));
+                // Ajouter la classe active au bouton cliqué
+                this.classList.add('active');
+                
+                // Mettre à jour le filtre actuel
+                currentFilter = this.getAttribute('data-filter');
+                
+                // Effectuer la recherche avec le nouveau filtre
+                performSearch();
+            });
+        });
+        
+        // Tri par capacité
+        const sortableHeaders = document.querySelectorAll('th.sortable');
+        sortableHeaders.forEach(header => {
+            header.addEventListener('click', function() {
+                const sortKey = this.getAttribute('data-sort');
+                const icon = this.querySelector('i');
+                const isAscending = icon.classList.contains('fa-sort-up');
+                
+                // Mettre à jour l'icône
+                icon.classList.remove('fa-sort', 'fa-sort-up', 'fa-sort-down');
+                icon.classList.add(isAscending ? 'fa-sort-down' : 'fa-sort-up');
+                
+                // Récupérer toutes les lignes
+                const rows = Array.from(tbody.querySelectorAll('tr'));
+                
+                // Trier les lignes
+                rows.sort((a, b) => {
+                    const aValue = parseFloat(a.getAttribute(`data-${sortKey}`));
+                    const bValue = parseFloat(b.getAttribute(`data-${sortKey}`));
+                    
+                    return isAscending ? bValue - aValue : aValue - bValue;
+                });
+                
+                // Réorganiser les lignes
+                rows.forEach(row => tbody.appendChild(row));
+            });
+        });
+    });
+    
+    function resetSearch() {
+        document.getElementById('searchInput').value = '';
+        document.getElementById('searchNoResults').style.display = 'none';
+        
+        // Simuler un événement d'entrée pour déclencher la recherche
+        const event = new Event('input', {
+            bubbles: true,
+            cancelable: true,
+        });
+        document.getElementById('searchInput').dispatchEvent(event);
+        
+        // Réinitialiser les filtres
+        document.querySelectorAll('.filter-button').forEach(btn => {
+            btn.classList.remove('active');
+            if (btn.getAttribute('data-filter') === 'all') {
+                btn.classList.add('active');
+            }
+        });
+    }
+    
+    function confirmDelete(id, matricule, capacite, etat) {
+        Swal.fire({
+            title: 'Supprimer ce camion ?',
+            html: `
+                <div class="text-start">
+                    <p>Vous êtes sur le point de supprimer le camion suivant :</p>
+                    <div class="alert alert-light border mb-3">
+                        <div class="d-flex align-items-center mb-2">
+                            <i class="fas fa-id-card me-2 text-primary"></i>
+                            <strong>Matricule :</strong>&nbsp;${matricule}
+                        </div>
+                        <div class="d-flex align-items-center mb-2">
+                            <i class="fas fa-weight me-2 text-primary"></i>
+                            <strong>Capacité :</strong>&nbsp;${capacite} tonnes
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-info-circle me-2 text-primary"></i>
+                            <strong>État :</strong>&nbsp;${etat}
+                        </div>
+                    </div>
+                    <div class="alert alert-warning d-flex align-items-center">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <div>Cette action est irréversible !</div>
+                    </div>
+                </div>
+            `,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#28a745',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Oui, supprimer',
+            cancelButtonText: 'Annuler',
+            buttonsStyling: true,
+            customClass: {
+                confirmButton: 'btn btn-danger',
+                cancelButton: 'btn btn-secondary'
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                document.getElementById('deleteForm' + id).submit();
+            }
+        });
+    }
+    </script>
+{% endblock %} 

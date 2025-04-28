@@ -1,0 +1,272 @@
+{% extends 'FrontBase.html.twig' %}
+
+{% block title %}Carte des Collectes - SmartWaste System{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <!-- Chargement de Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <style>
+        #map {
+            height: 600px !important;
+            width: 100% !important;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            z-index: 1; /* Assurer que la carte est au-dessus des autres éléments */
+            position: relative;
+            display: block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+        }
+        
+        /* Style pour masquer la carte pendant le chargement */
+        #map-loading {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255,255,255,0.8);
+            z-index: 1000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 10px;
+        }
+        
+        .map-legend {
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .legend-item {
+            margin: 8px 0;
+            display: flex;
+            align-items: center;
+        }
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+        .camion-marker { background-color: #28a745; }
+        
+        /* Style pour la page */
+        .page-header {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            border-radius: 10px;
+            padding: 30px;
+            color: white;
+            margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .page-header::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M0 100 L100 0 L100 100 Z" fill="rgba(255,255,255,0.07)"/></svg>');
+            background-size: cover;
+            z-index: 0;
+        }
+        
+        .page-header h1 {
+            position: relative;
+            z-index: 1;
+            font-weight: 700;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .page-header p {
+            position: relative;
+            z-index: 1;
+            opacity: 0.9;
+            margin-bottom: 0;
+            font-size: 1.1rem;
+        }
+        
+        /* Animation pour les points de collecte */
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.2); opacity: 0.8; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        
+        .animate-pulse {
+            animation: pulse 2s infinite;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+    <!-- Données JSON cachées pour le débogage et l'initialisation -->
+    <script id="camions-data" type="application/json">{{ camions_json|raw }}</script>
+    
+    <!-- Map Header Section -->
+    <section class="section pt-5 mt-5">
+        <div class="container" data-aos="fade-up">
+            <div class="page-header">
+                <h1>Carte des Camions</h1>
+                <p>Suivez en temps réel notre flotte de camions de collecte des déchets équipés de GPS pour une gestion optimisée.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Map Section -->
+    <section class="section">
+        <div class="container" data-aos="fade-up">
+            <!-- Map Row -->
+            <div class="row mb-5">
+                <div class="col-lg-9">
+                    <div id="map-container" style="position: relative;">
+                        <div id="map" style="height: 600px; width: 100%;"></div>
+                        <div id="map-loading">
+                            <div class="d-flex flex-column align-items-center">
+                                <div class="spinner-border text-primary mb-3" role="status">
+                                    <span class="visually-hidden">Chargement...</span>
+                                </div>
+                                <p>Chargement de la carte...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3">
+                    <div class="map-legend">
+                        <h4>Légende</h4>
+                        <div class="legend-item">
+                            <div class="legend-color camion-marker"></div>
+                            <span>Camion</span>
+                        </div>
+                    </div>
+
+                    <div class="card mt-4">
+                        <div class="card-header">
+                            <h5>Statistiques</h5>
+                        </div>
+                        <div class="card-body">
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    Total des camions
+                                    <span class="badge bg-primary rounded-pill" id="total-camions">{{ camions|length }}</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Boutons de débogage -->
+                    <div class="card mt-4">
+                        <div class="card-header">
+                            <h5>Outils</h5>
+                        </div>
+                        <div class="card-body">
+                            <button id="debug-map" class="btn btn-primary btn-sm w-100 mb-2">
+                                <i class="bi bi-bug"></i> Déboguer la carte
+                            </button>
+                            <button id="reset-map" class="btn btn-secondary btn-sm w-100">
+                                <i class="bi bi-arrow-clockwise"></i> Réinitialiser
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Table Row -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5>Liste des Camions</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Matricule</th>
+                                            <th>Modèle</th>
+                                            <th>Type de carburant</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="camions-table">
+                                        {% for camion in camions %}
+                                        <tr>
+                                            <td>{{ camion.id }}</td>
+                                            <td>{{ camion.matricule }}</td>
+                                            <td>{{ camion.modele }}</td>
+                                            <td>{{ camion.typeCarburant }}</td>
+                                            <td>
+                                                <button class="btn btn-sm btn-primary btn-locate" data-id="{{ camion.id }}">
+                                                    <i class="bi bi-geo-alt"></i> Localiser
+                                                </button>
+                                            </td>
+                                        </tr>
+                                        {% else %}
+                                        <tr>
+                                            <td colspan="5" class="text-center">Aucun camion disponible</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    
+    <!-- Chargement de Leaflet -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    
+    <!-- Chargement du script de débogage de la carte -->
+    <script src="{{ asset('assets/js/map-debug.js') }}"></script>
+    
+    <!-- Chargement du script d'initialisation de la carte -->
+    <script src="{{ asset('assets/js/map-init.js') }}"></script>
+    
+    <script>
+    // Script pour s'assurer que la carte est initialisée correctement
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log("Initialisation de la carte depuis le template...");
+        
+        // Forcer l'initialisation après un court délai
+        setTimeout(function() {
+            const mapElement = document.getElementById('map');
+            
+            if (mapElement) {
+                console.log("Dimensions de l'élément carte:", mapElement.clientWidth, "x", mapElement.clientHeight);
+                
+                // Forcer la hauteur si nécessaire
+                if (mapElement.clientHeight < 10) {
+                    console.log("Correction de la hauteur...");
+                    mapElement.style.height = '600px';
+                }
+            }
+            
+            // Initialiser la carte si la fonction est définie
+            if (typeof initializeMap === 'function') {
+                console.log("Appel de initializeMap()...");
+                initializeMap();
+            } else {
+                console.error("La fonction initializeMap n'est pas définie, tentative de débogage...");
+                if (typeof showTestMap === 'function') {
+                    showTestMap();
+                }
+            }
+        }, 500);
+    });
+    </script>
+{% endblock %} 

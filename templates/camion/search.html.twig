@@ -1,0 +1,174 @@
+{% extends 'BackBase.html.twig' %}
+
+{% block title %}Recherche de Camions{% endblock %}
+
+{% block body %}
+    <div class="d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-4">
+        <div>
+            <h3 class="fw-bold mb-3">Recherche avancée de Camions</h3>
+            <h6 class="op-7 mb-2">Filtrer les camions selon plusieurs critères</h6>
+        </div>
+        <div class="ms-md-auto py-2 py-md-0">
+            <a href="{{ path('app_camion_index') }}" class="btn btn-secondary btn-round mr-2">
+                <i class="bi bi-arrow-left"></i> Retour à la liste
+            </a>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title">Critères de recherche</h4>
+                </div>
+                <div class="card-body">
+                    <form method="get" action="{{ path('app_camion_search_page') }}" class="row g-3">
+                        <!-- Critères de base -->
+                        <div class="col-md-3">
+                            <label for="matricule" class="form-label">Matricule</label>
+                            <input type="text" class="form-control" id="matricule" name="matricule" 
+                                   value="{{ criteria.matricule }}">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="etat" class="form-label">État</label>
+                            <select class="form-select" id="etat" name="etat">
+                                <option value="all" {{ criteria.etat == 'all' ? 'selected' : '' }}>Tous</option>
+                                <option value="en_service" {{ criteria.etat == 'en_service' ? 'selected' : '' }}>En service</option>
+                                <option value="en_maintenance" {{ criteria.etat == 'en_maintenance' ? 'selected' : '' }}>En maintenance</option>
+                                <option value="hors_service" {{ criteria.etat == 'hors_service' ? 'selected' : '' }}>Hors service</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="capacite_min" class="form-label">Capacité minimale (tonnes)</label>
+                            <input type="number" class="form-control" id="capacite_min" name="capacite_min" 
+                                   min="0" step="0.1" value="{{ criteria.capacite_min }}">
+                        </div>
+                        <div class="col-md-3">
+                            <label for="capacite_max" class="form-label">Capacité maximale (tonnes)</label>
+                            <input type="number" class="form-control" id="capacite_max" name="capacite_max" 
+                                   min="0" step="0.1" value="{{ criteria.capacite_max }}">
+                        </div>
+                        
+                        <!-- Critères environnementaux -->
+                        <div class="col-md-4">
+                            <label for="type_moteur" class="form-label">Type de moteur</label>
+                            <select class="form-select" id="type_moteur" name="type_moteur">
+                                <option value="all" {{ criteria.type_moteur == 'all' ? 'selected' : '' }}>Tous</option>
+                                <option value="diesel" {{ criteria.type_moteur == 'diesel' ? 'selected' : '' }}>Diesel</option>
+                                <option value="electrique" {{ criteria.type_moteur == 'electrique' ? 'selected' : '' }}>Électrique</option>
+                                <option value="hybride" {{ criteria.type_moteur == 'hybride' ? 'selected' : '' }}>Hybride</option>
+                                <option value="gaz" {{ criteria.type_moteur == 'gaz' ? 'selected' : '' }}>Gaz</option>
+                                <option value="biodiesel" {{ criteria.type_moteur == 'biodiesel' ? 'selected' : '' }}>Biodiesel</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="emission_min" class="form-label">Émission CO2 min (g/km)</label>
+                            <input type="number" class="form-control" id="emission_min" name="emission_min" 
+                                   min="0" step="1" value="{{ criteria.emission_min }}">
+                        </div>
+                        <div class="col-md-4">
+                            <label for="emission_max" class="form-label">Émission CO2 max (g/km)</label>
+                            <input type="number" class="form-control" id="emission_max" name="emission_max" 
+                                   min="0" step="1" value="{{ criteria.emission_max }}">
+                        </div>
+                        <div class="col-md-4">
+                            <label for="annee_min" class="form-label">Année de fabrication min</label>
+                            <input type="number" class="form-control" id="annee_min" name="annee_min" 
+                                   min="1990" max="{{ 'now'|date('Y') }}" value="{{ criteria.annee_min }}">
+                        </div>
+                        <div class="col-md-4">
+                            <label for="annee_max" class="form-label">Année de fabrication max</label>
+                            <input type="number" class="form-control" id="annee_max" name="annee_max" 
+                                   min="1990" max="{{ 'now'|date('Y') }}" value="{{ criteria.annee_max }}">
+                        </div>
+                        
+                        <!-- Boutons d'action -->
+                        <div class="col-12 mt-4 text-end">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-search"></i> Rechercher
+                            </button>
+                            <a href="{{ path('app_camion_search_page') }}" class="btn btn-secondary">
+                                <i class="bi bi-x-circle"></i> Réinitialiser
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between">
+                        <h4 class="card-title">Résultats de la recherche</h4>
+                        <span class="badge bg-primary">{{ camions|length }} résultat(s)</span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% if camions|length > 0 %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Matricule</th>
+                                        <th>État</th>
+                                        <th>Capacité (t)</th>
+                                        <th>Type moteur</th>
+                                        <th>Émission CO2</th>
+                                        <th>Année</th>
+                                        <th>Déchets collectés</th>
+                                        <th class="text-end">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for camion in camions %}
+                                        <tr>
+                                            <td>{{ camion.id }}</td>
+                                            <td>{{ camion.matricule }}</td>
+                                            <td>
+                                                {% if camion.etat == 'en_service' %}
+                                                    <span class="badge bg-success">En service</span>
+                                                {% elseif camion.etat == 'en_maintenance' %}
+                                                    <span class="badge bg-warning">En maintenance</span>
+                                                {% else %}
+                                                    <span class="badge bg-danger">Hors service</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>{{ camion.capacite }}</td>
+                                            <td>{{ camion.typeMoteur|capitalize }}</td>
+                                            <td>{{ camion.emissionCo2 }} g/km</td>
+                                            <td>{{ camion.anneeFabrication }}</td>
+                                            <td>{{ camion.dechets|length }}</td>
+                                            <td class="text-end">
+                                                <a href="{{ path('app_camion_show', {'id': camion.id}) }}" class="btn btn-sm btn-info">
+                                                    <i class="bi bi-eye"></i>
+                                                </a>
+                                                <a href="{{ path('app_camion_edit', {'id': camion.id}) }}" class="btn btn-sm btn-primary">
+                                                    <i class="bi bi-pencil"></i>
+                                                </a>
+                                                <form method="post" action="{{ path('app_camion_delete', {'id': camion.id}) }}" 
+                                                      class="d-inline" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce camion?');">
+                                                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ camion.id) }}">
+                                                    <button class="btn btn-sm btn-danger">
+                                                        <i class="bi bi-trash"></i>
+                                                    </button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="alert alert-info">
+                            Aucun camion ne correspond à vos critères de recherche.
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %} 
