@@ -27,15 +27,25 @@
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group mb-3">
+<<<<<<< HEAD
                                 {{ form_label(form.matricule) }}
                                 {{ form_widget(form.matricule) }}
+=======
+                                {{ form_label(form.matricule, 'Matricule') }}
+                                {{ form_widget(form.matricule, {'attr': {'class': 'form-control', 'placeholder': 'ex: TN-0000'}}) }}
+>>>>>>> master
                                 {{ form_errors(form.matricule) }}
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="form-group mb-3">
+<<<<<<< HEAD
                                 {{ form_label(form.capacite) }}
                                 {{ form_widget(form.capacite) }}
+=======
+                                {{ form_label(form.capacite, 'Capacité') }}
+                                {{ form_widget(form.capacite, {'attr': {'class': 'form-control', 'placeholder': 'en tonnes'}}) }}
+>>>>>>> master
                                 {{ form_errors(form.capacite) }}
                             </div>
                         </div>
@@ -44,15 +54,25 @@
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group mb-3">
+<<<<<<< HEAD
                                 {{ form_label(form.etat) }}
                                 {{ form_widget(form.etat) }}
+=======
+                                {{ form_label(form.etat, 'État') }}
+                                {{ form_widget(form.etat, {'attr': {'class': 'form-select'}}) }}
+>>>>>>> master
                                 {{ form_errors(form.etat) }}
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="form-group mb-3">
+<<<<<<< HEAD
                                 {{ form_label(form.type_moteur) }}
                                 {{ form_widget(form.type_moteur) }}
+=======
+                                {{ form_label(form.type_moteur, 'Type moteur') }}
+                                {{ form_widget(form.type_moteur, {'attr': {'class': 'form-select'}}) }}
+>>>>>>> master
                                 {{ form_errors(form.type_moteur) }}
                             </div>
                         </div>
@@ -63,15 +83,25 @@
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group mb-3">
+<<<<<<< HEAD
                                 {{ form_label(form.emission_co2) }}
                                 {{ form_widget(form.emission_co2) }}
+=======
+                                {{ form_label(form.emission_co2, 'Émission CO2') }}
+                                {{ form_widget(form.emission_co2, {'attr': {'class': 'form-control', 'placeholder': 'g/km'}}) }}
+>>>>>>> master
                                 {{ form_errors(form.emission_co2) }}
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="form-group mb-3">
+<<<<<<< HEAD
                                 {{ form_label(form.consommation) }}
                                 {{ form_widget(form.consommation) }}
+=======
+                                {{ form_label(form.consommation, 'Consommation') }}
+                                {{ form_widget(form.consommation, {'attr': {'class': 'form-control', 'placeholder': 'L/100km'}}) }}
+>>>>>>> master
                                 {{ form_errors(form.consommation) }}
                             </div>
                         </div>
@@ -80,24 +110,56 @@
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group mb-3">
+<<<<<<< HEAD
                                 {{ form_label(form.annee_fabrication) }}
                                 {{ form_widget(form.annee_fabrication) }}
+=======
+                                {{ form_label(form.annee_fabrication, 'Année fabrication') }}
+                                {{ form_widget(form.annee_fabrication, {'attr': {'class': 'form-control', 'placeholder': 'ex: 2000'}}) }}
+>>>>>>> master
                                 {{ form_errors(form.annee_fabrication) }}
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="form-group mb-3">
+<<<<<<< HEAD
                                 {{ form_label(form.kilometrage) }}
                                 {{ form_widget(form.kilometrage) }}
+=======
+                                {{ form_label(form.kilometrage, 'Kilométrage') }}
+                                {{ form_widget(form.kilometrage, {'attr': {'class': 'form-control', 'placeholder': 'km'}}) }}
+>>>>>>> master
                                 {{ form_errors(form.kilometrage) }}
                             </div>
                         </div>
                     </div>
 
+<<<<<<< HEAD
                     <div class="form-group mt-4">
                         <button type="submit" class="btn btn-primary btn-round">
                             <i class="fas fa-save"></i> Mettre à jour Camion
                         </button>
+=======
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group mb-3">
+                                {{ form_label(form.modele, 'Modèle') }}
+                                {{ form_widget(form.modele, {'attr': {'class': 'form-control', 'placeholder': 'ex: BMW 1995'}}) }}
+                                {{ form_errors(form.modele) }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card-footer d-flex justify-content-between">
+                        <a href="{{ path('app_camion_index') }}" class="btn btn-outline-success">
+                            <i class="fas fa-arrow-left me-1"></i> Retour à la liste
+                        </a>
+                        <div>
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-save me-1"></i> Enregistrer
+                            </button>
+                        </div>
+>>>>>>> master
                     </div>
                     
                     {{ form_end(form) }}

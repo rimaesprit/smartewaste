@@ -133,9 +133,15 @@
                 </div>
                 <div class="card-body">
                     <div class="progress" style="height: 30px;">
+<<<<<<< HEAD
                         {% set en_service_percent = (stats.en_service / stats.total * 100)|round %}
                         {% set en_maintenance_percent = (stats.en_maintenance / stats.total * 100)|round %}
                         {% set hors_service_percent = (stats.hors_service / stats.total * 100)|round %}
+=======
+                        {% set en_service_percent = stats.total > 0 ? (stats.en_service / stats.total * 100)|round : 0 %}
+                        {% set en_maintenance_percent = stats.total > 0 ? (stats.en_maintenance / stats.total * 100)|round : 0 %}
+                        {% set hors_service_percent = stats.total > 0 ? (stats.hors_service / stats.total * 100)|round : 0 %}
+>>>>>>> master
                         
                         <div class="progress-bar bg-success" role="progressbar" style="width: {{ en_service_percent }}%" 
                             aria-valuenow="{{ en_service_percent }}" aria-valuemin="0" aria-valuemax="100">

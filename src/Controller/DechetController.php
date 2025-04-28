@@ -5,6 +5,10 @@ namespace App\Controller;
 use App\Entity\Dechet;
 use App\Form\DechetType;
 use App\Repository\DechetRepository;
+<<<<<<< HEAD
+=======
+use App\Repository\CamionRepository;
+>>>>>>> master
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -34,7 +38,31 @@ class DechetController extends AbstractController
             $entityManager->persist($dechet);
             $entityManager->flush();
 
+<<<<<<< HEAD
             return $this->redirectToRoute('app_dechet_index', [], Response::HTTP_SEE_OTHER);
+=======
+            // Ajouter une notification pour le camion concerné
+            $camion = $dechet->getCamion();
+            $this->addFlash(
+                'notification', 
+                [
+                    'title' => 'Nouveau déchet ajouté',
+                    'message' => sprintf(
+                        'Un déchet de type "%s" de %s kg a été ajouté au camion %s', 
+                        $dechet->getTypeDechet(), 
+                        $dechet->getPoids(), 
+                        $camion->getMatricule()
+                    ),
+                    'icon' => 'info',
+                    'camion_id' => $camion->getId(),
+                    'dechet_id' => $dechet->getId(),
+                    'timestamp' => (new \DateTime())->format('Y-m-d H:i:s')
+                ]
+            );
+
+            // Rediriger vers la page des notifications du camion
+            return $this->redirectToRoute('app_dechet_notification', ['id' => $camion->getId()]);
+>>>>>>> master
         }
 
         return $this->render('dechet/new.html.twig', [
@@ -80,6 +108,22 @@ class DechetController extends AbstractController
         return $this->redirectToRoute('app_dechet_index', [], Response::HTTP_SEE_OTHER);
     }
     
+<<<<<<< HEAD
+=======
+    // Nouvelle méthode pour afficher la notification concernant un camion
+    #[Route('/notification/{id}', name: 'app_dechet_notification', methods: ['GET'])]
+    public function notification(int $id, DechetRepository $dechetRepository): Response
+    {
+        // Récupérer les derniers déchets ajoutés à ce camion (limités à 10)
+        $dechets = $dechetRepository->findBy(['camion' => $id], ['date_depot' => 'DESC'], 10);
+        
+        return $this->render('dechet/notification.html.twig', [
+            'dechets' => $dechets,
+            'camion_id' => $id
+        ]);
+    }
+    
+>>>>>>> master
     // MÉTIER 1: API Calendar - Liste des dépôts par date
     #[Route('/calendar/{id}', name: 'app_dechet_calendar', methods: ['GET'])]
     public function calendarData(string $id, DechetRepository $dechetRepository): Response
@@ -529,4 +573,32 @@ class DechetController extends AbstractController
             'analyseParMois' => $analyseParMois
         ]);
     }
+<<<<<<< HEAD
+=======
+    
+    // Méthode pour afficher toutes les notifications
+    #[Route('/notifications', name: 'app_dechet_notifications', methods: ['GET'])]
+    public function notifications(DechetRepository $dechetRepository, CamionRepository $camionRepository): Response
+    {
+        // Récupérer les derniers déchets ajoutés (limités à 20)
+        $dechets = $dechetRepository->findBy([], ['date_depot' => 'DESC'], 20);
+        
+        // Regrouper les déchets par camion
+        $dechetsByCamion = [];
+        foreach ($dechets as $dechet) {
+            $camionId = $dechet->getCamion()->getId();
+            if (!isset($dechetsByCamion[$camionId])) {
+                $dechetsByCamion[$camionId] = [
+                    'camion' => $dechet->getCamion(),
+                    'dechets' => []
+                ];
+            }
+            $dechetsByCamion[$camionId]['dechets'][] = $dechet;
+        }
+        
+        return $this->render('dechet/notifications.html.twig', [
+            'dechetsByCamion' => $dechetsByCamion
+        ]);
+    }
+>>>>>>> master
 } 

@@ -11,8 +11,21 @@ class HomeController extends AbstractController
     #[Route('/', name: 'app_home')]
     public function index(): Response
     {
+<<<<<<< HEAD
         // Rediriger vers la page de login
         return $this->redirectToRoute('app_camion_index');
     }
     
+=======
+        // Rediriger vers la liste des camions
+        return $this->redirectToRoute('app_camion_index');
+    }
+    
+    #[Route('/home', name: 'app_home_page')]
+    public function home(): Response
+    {
+        // Rediriger vers la liste des camions également
+        return $this->redirectToRoute('app_camion_index');
+    }
+>>>>>>> master
 } 

@@ -1,6 +1,11 @@
 <form method="post" action="{{ path('app_dechet_delete', {'id': dechet.id}) }}" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer ce déchet?');" class="d-inline">
     <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ dechet.id) }}">
+<<<<<<< HEAD
     <button class="btn btn-danger btn-round">
         <i class="fas fa-trash"></i> Supprimer Déchet
+=======
+    <button class="btn btn-outline-danger">
+        <i class="fas fa-trash me-1"></i> Supprimer
+>>>>>>> master
     </button>
 </form> 

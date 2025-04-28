@@ -4,6 +4,7 @@
 
 {% block stylesheets %}
     {{ parent() }}
+<<<<<<< HEAD
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
     <style>
         #map {
@@ -19,6 +20,47 @@
         }
         .legend-item {
             margin: 5px 0;
+=======
+    <!-- Chargement de Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <style>
+        #map {
+            height: 600px !important;
+            width: 100% !important;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            z-index: 1; /* Assurer que la carte est au-dessus des autres éléments */
+            position: relative;
+            display: block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+        }
+        
+        /* Style pour masquer la carte pendant le chargement */
+        #map-loading {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255,255,255,0.8);
+            z-index: 1000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 10px;
+        }
+        
+        .map-legend {
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .legend-item {
+            margin: 8px 0;
+>>>>>>> master
             display: flex;
             align-items: center;
         }
@@ -29,10 +71,63 @@
             margin-right: 10px;
         }
         .camion-marker { background-color: #28a745; }
+<<<<<<< HEAD
+=======
+        
+        /* Style pour la page */
+        .page-header {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            border-radius: 10px;
+            padding: 30px;
+            color: white;
+            margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .page-header::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M0 100 L100 0 L100 100 Z" fill="rgba(255,255,255,0.07)"/></svg>');
+            background-size: cover;
+            z-index: 0;
+        }
+        
+        .page-header h1 {
+            position: relative;
+            z-index: 1;
+            font-weight: 700;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .page-header p {
+            position: relative;
+            z-index: 1;
+            opacity: 0.9;
+            margin-bottom: 0;
+            font-size: 1.1rem;
+        }
+        
+        /* Animation pour les points de collecte */
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.2); opacity: 0.8; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        
+        .animate-pulse {
+            animation: pulse 2s infinite;
+        }
+>>>>>>> master
     </style>
 {% endblock %}
 
 {% block body %}
+<<<<<<< HEAD
     <!-- Map Header Section -->
     <section class="section pt-5 mt-5">
         <div class="container" data-aos="fade-up">
@@ -40,6 +135,17 @@
                 <h2>Carte des Collectes</h2>
                 <div><span>Suivez nos</span> <span class="description-title">Camions en temps réel</span></div>
                 <p class="mt-3">Notre flotte de camions est équipée de GPS pour vous permettre de suivre en temps réel les opérations de collecte de déchets dans votre région.</p>
+=======
+    <!-- Données JSON cachées pour le débogage et l'initialisation -->
+    <script id="camions-data" type="application/json">{{ camions_json|raw }}</script>
+    
+    <!-- Map Header Section -->
+    <section class="section pt-5 mt-5">
+        <div class="container" data-aos="fade-up">
+            <div class="page-header">
+                <h1>Carte des Camions</h1>
+                <p>Suivez en temps réel notre flotte de camions de collecte des déchets équipés de GPS pour une gestion optimisée.</p>
+>>>>>>> master
             </div>
         </div>
     </section>
@@ -47,9 +153,26 @@
     <!-- Map Section -->
     <section class="section">
         <div class="container" data-aos="fade-up">
+<<<<<<< HEAD
             <div class="row">
                 <div class="col-lg-9">
                     <div id="map" class="shadow"></div>
+=======
+            <!-- Map Row -->
+            <div class="row mb-5">
+                <div class="col-lg-9">
+                    <div id="map-container" style="position: relative;">
+                        <div id="map" style="height: 600px; width: 100%;"></div>
+                        <div id="map-loading">
+                            <div class="d-flex flex-column align-items-center">
+                                <div class="spinner-border text-primary mb-3" role="status">
+                                    <span class="visually-hidden">Chargement...</span>
+                                </div>
+                                <p>Chargement de la carte...</p>
+                            </div>
+                        </div>
+                    </div>
+>>>>>>> master
                 </div>
                 <div class="col-lg-3">
                     <div class="map-legend">
@@ -73,10 +196,33 @@
                             </ul>
                         </div>
                     </div>
+<<<<<<< HEAD
                 </div>
             </div>
 
             <div class="row mt-5">
+=======
+
+                    <!-- Boutons de débogage -->
+                    <div class="card mt-4">
+                        <div class="card-header">
+                            <h5>Outils</h5>
+                        </div>
+                        <div class="card-body">
+                            <button id="debug-map" class="btn btn-primary btn-sm w-100 mb-2">
+                                <i class="bi bi-bug"></i> Déboguer la carte
+                            </button>
+                            <button id="reset-map" class="btn btn-secondary btn-sm w-100">
+                                <i class="bi bi-arrow-clockwise"></i> Réinitialiser
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Table Row -->
+            <div class="row">
+>>>>>>> master
                 <div class="col-12">
                     <div class="card">
                         <div class="card-header">
@@ -125,6 +271,7 @@
 
 {% block javascripts %}
     {{ parent() }}
+<<<<<<< HEAD
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -180,5 +327,48 @@
                 });
             });
         });
+=======
+    
+    <!-- Chargement de Leaflet -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    
+    <!-- Chargement du script de débogage de la carte -->
+    <script src="{{ asset('assets/js/map-debug.js') }}"></script>
+    
+    <!-- Chargement du script d'initialisation de la carte -->
+    <script src="{{ asset('assets/js/map-init.js') }}"></script>
+    
+    <script>
+    // Script pour s'assurer que la carte est initialisée correctement
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log("Initialisation de la carte depuis le template...");
+        
+        // Forcer l'initialisation après un court délai
+        setTimeout(function() {
+            const mapElement = document.getElementById('map');
+            
+            if (mapElement) {
+                console.log("Dimensions de l'élément carte:", mapElement.clientWidth, "x", mapElement.clientHeight);
+                
+                // Forcer la hauteur si nécessaire
+                if (mapElement.clientHeight < 10) {
+                    console.log("Correction de la hauteur...");
+                    mapElement.style.height = '600px';
+                }
+            }
+            
+            // Initialiser la carte si la fonction est définie
+            if (typeof initializeMap === 'function') {
+                console.log("Appel de initializeMap()...");
+                initializeMap();
+            } else {
+                console.error("La fonction initializeMap n'est pas définie, tentative de débogage...");
+                if (typeof showTestMap === 'function') {
+                    showTestMap();
+                }
+            }
+        }, 500);
+    });
+>>>>>>> master
     </script>
 {% endblock %} 

@@ -60,6 +60,7 @@
                     </div>
                 </div>
 
+<<<<<<< HEAD
                 <div class="mt-4">
                     <a href="{{ path('app_dechet_index') }}" class="btn btn-secondary">
                         <i class="fas fa-arrow-left"></i> Retour à la liste
@@ -75,6 +76,26 @@
                             <i class="fas fa-trash"></i> Supprimer
                         </button>
                     </form>
+=======
+                <div class="d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-4">
+                    <div>
+                        <h3 class="fw-bold mb-3">Gestion des Déchets</h3>
+                        <h6 class="op-7 mb-2">Détails du déchet</h6>
+                    </div>
+                    <div class="ms-md-auto py-2 py-md-0">
+                        <div class="card-footer d-flex justify-content-between">
+                            <a href="{{ path('app_dechet_index') }}" class="btn btn-outline-success">
+                                <i class="fas fa-arrow-left me-1"></i> Retour à la liste
+                            </a>
+                            <div class="d-flex gap-2">
+                                <a href="{{ path('app_dechet_edit', {'id': dechet.id}) }}" class="btn btn-success">
+                                    <i class="fas fa-edit me-1"></i> Modifier
+                                </a>
+                                {{ include('dechet/_delete_form.html.twig') }}
+                            </div>
+                        </div>
+                    </div>
+>>>>>>> master
                 </div>
             </div>
         </div>

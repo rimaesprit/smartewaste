@@ -55,9 +55,26 @@ class FrontController extends AbstractController
             ];
         }
         
+<<<<<<< HEAD
         return $this->render('front/map.html.twig', [
             'camions' => $camions,
             'camions_json' => json_encode($camionsJson)
+=======
+        // Log des données pour le débogage
+        error_log('Nombre de camions: ' . count($camionsJson));
+        
+        // S'assurer que le JSON est valide
+        $encodedJson = json_encode($camionsJson);
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            error_log('Erreur JSON: ' . json_last_error_msg());
+            // Fournir un tableau vide en cas d'erreur
+            $encodedJson = '[]';
+        }
+        
+        return $this->render('front/map.html.twig', [
+            'camions' => $camions,
+            'camions_json' => $encodedJson
+>>>>>>> master
         ]);
     }
     

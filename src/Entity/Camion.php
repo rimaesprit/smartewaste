@@ -90,6 +90,21 @@ class Camion
     #[ORM\OneToMany(mappedBy: 'camion', targetEntity: Dechet::class)]
     private Collection $dechets;
 
+<<<<<<< HEAD
+=======
+    #[ORM\Column(type: 'boolean')]
+    private bool $en_tournee = false;
+
+    #[ORM\Column(type: 'datetime', nullable: true)]
+    private ?\DateTimeInterface $debut_tournee = null;
+
+    #[ORM\Column(type: 'datetime', nullable: true)]
+    private ?\DateTimeInterface $fin_tournee = null;
+
+    #[ORM\Column(type: 'string', length: 255, nullable: true)]
+    private ?string $destination = null;
+
+>>>>>>> master
     public function __construct()
     {
         $this->dechets = new ArrayCollection();
@@ -351,4 +366,126 @@ class Camion
             return 'Mauvais';
         }
     }
+<<<<<<< HEAD
 }
+=======
+
+    public function isEnTournee(): bool
+    {
+        return $this->en_tournee;
+    }
+
+    public function setEnTournee(bool $en_tournee): static
+    {
+        $this->en_tournee = $en_tournee;
+
+        return $this;
+    }
+
+    public function getDebutTournee(): ?\DateTimeInterface
+    {
+        return $this->debut_tournee;
+    }
+
+    public function setDebutTournee(?\DateTimeInterface $debut_tournee): static
+    {
+        $this->debut_tournee = $debut_tournee;
+
+        return $this;
+    }
+
+    public function getFinTournee(): ?\DateTimeInterface
+    {
+        return $this->fin_tournee;
+    }
+
+    public function setFinTournee(?\DateTimeInterface $fin_tournee): static
+    {
+        $this->fin_tournee = $fin_tournee;
+
+        return $this;
+    }
+
+    public function getDestination(): ?string
+    {
+        return $this->destination;
+    }
+
+    public function setDestination(?string $destination): static
+    {
+        $this->destination = $destination;
+
+        return $this;
+    }
+
+    /**
+     * Démarre une tournée pour ce camion
+     */
+    public function demarrerTournee(?string $destination = null): static
+    {
+        if ($this->etat !== 'en_service') {
+            throw new \LogicException('Le camion doit être en service pour démarrer une tournée');
+        }
+
+        if ($this->en_tournee) {
+            throw new \LogicException('Le camion est déjà en tournée');
+        }
+
+        $this->en_tournee = true;
+        $this->debut_tournee = new \DateTime();
+        $this->fin_tournee = null;
+        $this->destination = $destination;
+
+        return $this;
+    }
+
+    /**
+     * Termine la tournée de ce camion
+     */
+    public function terminerTournee(): static
+    {
+        if (!$this->en_tournee) {
+            throw new \LogicException('Le camion n\'est pas en tournée');
+        }
+
+        $this->en_tournee = false;
+        $this->fin_tournee = new \DateTime();
+
+        return $this;
+    }
+
+    /**
+     * Vérifie si le camion est actuellement disponible pour une tournée
+     */
+    public function isDisponible(): bool
+    {
+        return $this->etat === 'en_service' && !$this->en_tournee;
+    }
+
+    /**
+     * Retourne la durée de la tournée actuelle ou de la dernière tournée
+     */
+    public function getDureeTournee(): ?string
+    {
+        if ($this->debut_tournee === null) {
+            return null;
+        }
+
+        $debut = $this->debut_tournee;
+        $fin = $this->en_tournee ? new \DateTime() : $this->fin_tournee;
+
+        if ($fin === null) {
+            return null;
+        }
+
+        $interval = $debut->diff($fin);
+        
+        if ($interval->days > 0) {
+            return $interval->format('%a jours %h heures %i minutes');
+        }
+        
+        return $interval->format('%h heures %i minutes');
+    }
+}
+ 
+>>>>>>> master

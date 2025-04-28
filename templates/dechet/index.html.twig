@@ -2,6 +2,7 @@
 
 {% block title %}Gestion des Déchets{% endblock %}
 
+<<<<<<< HEAD
 {% block body %}
     <div class="d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-4">
         <div>
@@ -91,6 +92,411 @@
                             {% endfor %}
                             </tbody>
                         </table>
+=======
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .card {
+            border-radius: 15px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+            border: none;
+            margin-bottom: 30px;
+        }
+        
+        .card-header {
+            background-color: transparent;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+            padding: 20px 25px;
+        }
+        
+        .card-title {
+            font-weight: 600;
+            font-size: 18px;
+            color: #2c3e50;
+        }
+        
+        .table-container {
+            padding: 0 10px;
+        }
+        
+        .data-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0 8px;
+        }
+        
+        .data-table thead th {
+            border: none;
+            color: #8392AB;
+            font-size: 13px;
+            font-weight: 500;
+            text-transform: uppercase;
+            padding: 15px 15px;
+        }
+        
+        .data-table thead th.sortable {
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .data-table thead th.sortable:hover {
+            color: #28a745;
+        }
+        
+        .data-table thead th.sortable i {
+            margin-left: 5px;
+            font-size: 10px;
+        }
+        
+        .data-table tbody tr {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.03);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .data-table tbody tr:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .data-table tbody td {
+            padding: 18px 15px;
+            vertical-align: middle;
+            border-top: none;
+            font-size: 14px;
+        }
+        
+        .data-table tbody tr td:first-child {
+            border-top-left-radius: 10px;
+            border-bottom-left-radius: 10px;
+        }
+        
+        .data-table tbody tr td:last-child {
+            border-top-right-radius: 10px;
+            border-bottom-right-radius: 10px;
+        }
+        
+        .btn-modern {
+            border-radius: 50px;
+            padding: 8px 20px;
+            font-weight: 500;
+            font-size: 14px;
+            transition: all 0.3s;
+            text-transform: none;
+            letter-spacing: 0.5px;
+            box-shadow: 0 4px 6px rgba(50, 50, 93, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08);
+        }
+        
+        .btn-modern:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 7px 14px rgba(50, 50, 93, 0.1), 0 3px 6px rgba(0, 0, 0, 0.08);
+        }
+        
+        .btn-modern-primary {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            border: none;
+            color: white;
+        }
+        
+        .btn-modern-info {
+            background: linear-gradient(135deg, #20c997, #28a745);
+            border: none;
+            color: white;
+        }
+        
+        .btn-modern-danger {
+            background: linear-gradient(135deg, #dc3545, #fd7e14);
+            border: none;
+            color: white;
+        }
+        
+        .btn-icon {
+            border-radius: 50%;
+            width: 38px;
+            height: 38px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+        }
+        
+        .header-container {
+            background: linear-gradient(120deg, #28a745 0%, #20c997 100%);
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+        
+        .header-container::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M0 100 L100 0 L100 100 Z" fill="rgba(255,255,255,0.07)"/></svg>');
+            background-size: cover;
+            z-index: -1;
+        }
+        
+        .header-title {
+            font-weight: 700;
+            color: #fff;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 5px;
+            font-size: 28px;
+        }
+        
+        .header-subtitle {
+            color: rgba(255,255,255,0.9);
+            font-weight: 400;
+            margin-bottom: 25px;
+        }
+        
+        .badge-modern {
+            padding: 7px 12px;
+            border-radius: 50px;
+            font-weight: 500;
+            font-size: 12px;
+        }
+        
+        .badge-success-soft {
+            background-color: rgba(40, 167, 69, 0.15);
+            color: #28a745;
+        }
+        
+        .badge-warning-soft {
+            background-color: rgba(255, 159, 67, 0.15);
+            color: #ff9f43;
+        }
+        
+        .badge-danger-soft {
+            background-color: rgba(234, 84, 85, 0.15);
+            color: #ea5455;
+        }
+        
+        .badge-primary-soft {
+            background-color: rgba(63, 135, 245, 0.15);
+            color: #3f87f5;
+        }
+        
+        .search-container {
+            position: relative;
+            margin-bottom: 20px;
+        }
+        
+        .search-input {
+            padding: 12px 20px 12px 45px;
+            border-radius: 50px;
+            border: 1px solid rgba(0,0,0,0.08);
+            background-color: white;
+            width: 100%;
+            font-size: 14px;
+            transition: all 0.3s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+        
+        .search-input:focus {
+            outline: none;
+            border-color: #28a745;
+            box-shadow: 0 3px 10px rgba(40, 167, 69, 0.1);
+        }
+        
+        .search-icon {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #8392AB;
+        }
+        
+        .filters-container {
+            margin-bottom: 20px;
+        }
+        
+        .filter-button {
+            background-color: white;
+            border: 1px solid rgba(0,0,0,0.08);
+            border-radius: 50px;
+            padding: 8px 15px;
+            font-size: 13px;
+            color: #8392AB;
+            margin-right: 10px;
+            transition: all 0.2s;
+        }
+        
+        .filter-button:hover, .filter-button.active {
+            background-color: #28a745;
+            color: white;
+            border-color: #28a745;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+    <div class="header-container">
+        <div class="row align-items-center">
+            <div class="col-md-6">
+                <h1 class="header-title">Gestion des Déchets</h1>
+                <p class="header-subtitle">Supervisez et gérez les déchets collectés</p>
+            </div>
+            <div class="col-md-6 text-md-end">
+                <a href="{{ path('app_dechet_new') }}" class="btn btn-success btn-lg" style="position: relative; z-index: 5;">
+                    <i class="fas fa-plus me-2"></i> Ajouter un déchet
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="card-title mb-0">
+                <i class="fas fa-recycle me-2"></i>Liste des Déchets
+            </h5>
+            <div>
+                <a href="#" class="btn btn-sm btn-modern btn-modern-info" onclick="window.location.reload()">
+                    <i class="fas fa-sync-alt me-1"></i> Actualiser
+                </a>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="search-container">
+                        <i class="fas fa-search search-icon"></i>
+                        <input type="text" id="searchInput" class="search-input" placeholder="Rechercher par type, poids, camion...">
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="filters-container d-flex justify-content-md-end">
+                        <button class="filter-button active" data-filter="all">Tous</button>
+                        <button class="filter-button" data-filter="plastique">Plastique</button>
+                        <button class="filter-button" data-filter="verre">Verre</button>
+                        <button class="filter-button" data-filter="papier">Papier</button>
+                        <button class="filter-button" data-filter="organique">Organique</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="table-container">
+                <table class="table data-table" id="dechetsTable">
+                    <thead>
+                        <tr>
+                            <th>Type</th>
+                            <th class="sortable" data-sort="poids">Poids (kg) <i class="fas fa-sort"></i></th>
+                            <th>Date de Dépôt</th>
+                            <th>Camion</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for dechet in dechets %}
+                        <tr data-type="{{ dechet.typeDechet }}" data-poids="{{ dechet.poids }}">
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="avatar-sm 
+                                        {% if dechet.typeDechet == 'plastique' %}
+                                            bg-primary-soft
+                                        {% elseif dechet.typeDechet == 'verre' %}
+                                            bg-info-soft
+                                        {% elseif dechet.typeDechet == 'papier' %}
+                                            bg-warning-soft
+                                        {% elseif dechet.typeDechet == 'metal' %}
+                                            bg-secondary
+                                        {% elseif dechet.typeDechet == 'organique' %}
+                                            bg-success-soft
+                                        {% elseif dechet.typeDechet == 'electronique' %}
+                                            bg-danger-soft
+                                        {% else %}
+                                            bg-light
+                                        {% endif %} 
+                                        p-2 rounded-circle me-3 text-center">
+                                        {% if dechet.typeDechet == 'plastique' %}
+                                            <i class="fas fa-wine-bottle text-primary"></i>
+                                        {% elseif dechet.typeDechet == 'verre' %}
+                                            <i class="fas fa-glass-martini text-info"></i>
+                                        {% elseif dechet.typeDechet == 'papier' %}
+                                            <i class="fas fa-newspaper text-warning"></i>
+                                        {% elseif dechet.typeDechet == 'metal' %}
+                                            <i class="fas fa-cog text-secondary"></i>
+                                        {% elseif dechet.typeDechet == 'organique' %}
+                                            <i class="fas fa-apple-alt text-success"></i>
+                                        {% elseif dechet.typeDechet == 'electronique' %}
+                                            <i class="fas fa-laptop text-danger"></i>
+                                        {% else %}
+                                            <i class="fas fa-trash text-dark"></i>
+                                        {% endif %}
+                                    </div>
+                                    <div>
+                                        <h6 class="mb-0">{{ dechet.typeDechet|capitalize }}</h6>
+                                        <small class="text-muted">#{{ dechet.id }}</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="fw-medium">{{ dechet.poids }}</span>
+                                <small class="text-muted">kg</small>
+                            </td>
+                            <td>{{ dechet.dateDepot ? dechet.dateDepot|date('d/m/Y H:i') : '' }}</td>
+                            <td>
+                                {% if dechet.camion %}
+                                    <a href="{{ path('app_camion_show', {'id': dechet.camion.id}) }}" class="badge badge-modern badge-primary-soft">
+                                        <i class="fas fa-truck me-1"></i> {{ dechet.camion.matricule }}
+                                    </a>
+                                {% else %}
+                                    <span class="badge badge-modern badge-warning-soft">Non assigné</span>
+                                {% endif %}
+                            </td>
+                            <td class="text-end">
+                                <div class="d-flex justify-content-end gap-2">
+                                    <a href="{{ path('app_dechet_show', {'id': dechet.id}) }}" class="btn btn-icon btn-modern btn-modern-info" data-bs-toggle="tooltip" title="Voir les détails">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="{{ path('app_dechet_edit', {'id': dechet.id}) }}" class="btn btn-icon btn-modern btn-modern-primary" data-bs-toggle="tooltip" title="Modifier">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <form method="post" action="{{ path('app_dechet_delete', {'id': dechet.id}) }}" class="d-inline" id="deleteForm{{ dechet.id }}">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ dechet.id) }}">
+                                        <button type="button" class="btn btn-icon btn-modern btn-modern-danger" onclick="confirmDelete({{ dechet.id }}, '{{ dechet.typeDechet }}', '{{ dechet.poids }}', '{{ dechet.dateDepot ? dechet.dateDepot|date('Y-m-d H:i') : '' }}')" data-bs-toggle="tooltip" title="Supprimer">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr id="noResults">
+                            <td colspan="5" class="text-center py-5">
+                                <div class="empty-state">
+                                    <div class="empty-state-icon mb-3">
+                                        <i class="fas fa-recycle fa-3x text-muted"></i>
+                                    </div>
+                                    <h5>Aucun déchet trouvé</h5>
+                                    <p class="text-muted">Ajoutez votre premier déchet pour commencer à gérer la collecte.</p>
+                                    <a href="{{ path('app_dechet_new') }}" class="btn btn-modern btn-modern-primary">
+                                        <i class="fas fa-plus me-2"></i> Ajouter un déchet
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+                <div id="searchNoResults" class="text-center py-5" style="display: none;">
+                    <div class="empty-state">
+                        <div class="empty-state-icon mb-3">
+                            <i class="fas fa-search fa-3x text-muted"></i>
+                        </div>
+                        <h5>Aucun résultat trouvé</h5>
+                        <p class="text-muted">Essayez de modifier vos critères de recherche</p>
+                        <button class="btn btn-modern btn-modern-info" onclick="resetSearch()">
+                            <i class="fas fa-redo me-2"></i> Réinitialiser la recherche
+                        </button>
+>>>>>>> master
                     </div>
                 </div>
             </div>
@@ -98,6 +504,7 @@
     </div>
 
     <script>
+<<<<<<< HEAD
     function confirmDelete(id, type, poids, dateDepot) {
         Swal.fire({
             title: 'Êtes-vous sûr ?',
@@ -111,10 +518,153 @@
                         - Date de dépôt : ${dateDepot}
                     </div>
                     <p class="text-danger"><i class="fas fa-exclamation-triangle"></i> Cette action est irréversible !</p>
+=======
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialiser les tooltips
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        });
+        
+        // Recherche
+        const searchInput = document.getElementById('searchInput');
+        const table = document.getElementById('dechetsTable');
+        const rows = table.querySelectorAll('tbody tr:not(#noResults)');
+        const noResultsMessage = document.getElementById('searchNoResults');
+        
+        searchInput.addEventListener('keyup', function() {
+            const searchTerm = this.value.toLowerCase();
+            let resultsFound = false;
+            
+            rows.forEach(row => {
+                const typeDechet = row.getAttribute('data-type').toLowerCase();
+                const poids = row.getAttribute('data-poids').toLowerCase();
+                const rowText = row.textContent.toLowerCase();
+                
+                if (typeDechet.includes(searchTerm) || 
+                    poids.includes(searchTerm) || 
+                    rowText.includes(searchTerm)) {
+                    row.style.display = '';
+                    resultsFound = true;
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+            
+            if (resultsFound) {
+                noResultsMessage.style.display = 'none';
+            } else {
+                noResultsMessage.style.display = 'block';
+            }
+        });
+        
+        // Filtrage par type de déchet
+        const filterButtons = document.querySelectorAll('.filter-button');
+        filterButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                // Retirer la classe active de tous les boutons
+                filterButtons.forEach(btn => btn.classList.remove('active'));
+                // Ajouter la classe active au bouton cliqué
+                this.classList.add('active');
+                
+                const filter = this.getAttribute('data-filter');
+                let resultsFound = false;
+                
+                rows.forEach(row => {
+                    if (filter === 'all' || row.getAttribute('data-type') === filter) {
+                        row.style.display = '';
+                        resultsFound = true;
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+                
+                if (resultsFound) {
+                    noResultsMessage.style.display = 'none';
+                } else {
+                    noResultsMessage.style.display = 'block';
+                }
+                
+                // Réinitialiser la recherche
+                searchInput.value = '';
+            });
+        });
+        
+        // Tri par poids
+        const sortableHeaders = document.querySelectorAll('th.sortable');
+        sortableHeaders.forEach(header => {
+            header.addEventListener('click', function() {
+                const sortKey = this.getAttribute('data-sort');
+                const icon = this.querySelector('i');
+                const isAscending = icon.classList.contains('fa-sort-up');
+                
+                // Mettre à jour l'icône
+                icon.classList.remove('fa-sort', 'fa-sort-up', 'fa-sort-down');
+                icon.classList.add(isAscending ? 'fa-sort-down' : 'fa-sort-up');
+                
+                // Trier les lignes
+                const rowsArray = Array.from(rows);
+                rowsArray.sort((a, b) => {
+                    const aValue = parseFloat(a.getAttribute(`data-${sortKey}`));
+                    const bValue = parseFloat(b.getAttribute(`data-${sortKey}`));
+                    
+                    return isAscending ? bValue - aValue : aValue - bValue;
+                });
+                
+                // Réorganiser les lignes
+                const tbody = table.querySelector('tbody');
+                rowsArray.forEach(row => {
+                    tbody.appendChild(row);
+                });
+            });
+        });
+    });
+    
+    function resetSearch() {
+        document.getElementById('searchInput').value = '';
+        const rows = document.querySelectorAll('#dechetsTable tbody tr:not(#noResults)');
+        rows.forEach(row => row.style.display = '');
+        document.getElementById('searchNoResults').style.display = 'none';
+        
+        // Réinitialiser les filtres
+        document.querySelectorAll('.filter-button').forEach(btn => {
+            btn.classList.remove('active');
+            if (btn.getAttribute('data-filter') === 'all') {
+                btn.classList.add('active');
+            }
+        });
+    }
+    
+    function confirmDelete(id, type, poids, dateDepot) {
+        Swal.fire({
+            title: 'Supprimer ce déchet ?',
+            html: `
+                <div class="text-start">
+                    <p>Vous êtes sur le point de supprimer le déchet suivant :</p>
+                    <div class="alert alert-light border mb-3">
+                        <div class="d-flex align-items-center mb-2">
+                            <i class="fas fa-recycle me-2 text-primary"></i>
+                            <strong>Type :</strong>&nbsp;${type}
+                        </div>
+                        <div class="d-flex align-items-center mb-2">
+                            <i class="fas fa-weight me-2 text-primary"></i>
+                            <strong>Poids :</strong>&nbsp;${poids} kg
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-calendar me-2 text-primary"></i>
+                            <strong>Date :</strong>&nbsp;${dateDepot}
+                        </div>
+                    </div>
+                    <div class="alert alert-warning d-flex align-items-center">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <div>Cette action est irréversible !</div>
+                    </div>
+>>>>>>> master
                 </div>
             `,
             icon: 'warning',
             showCancelButton: true,
+<<<<<<< HEAD
             confirmButtonColor: '#d33',
             cancelButtonColor: '#3085d6',
             confirmButtonText: 'Oui, supprimer !',
@@ -126,6 +676,16 @@
                 if (value.toUpperCase() !== 'SUPPRIMER') {
                     return 'Vous devez taper "SUPPRIMER" pour confirmer';
                 }
+=======
+            confirmButtonColor: '#28a745',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Oui, supprimer',
+            cancelButtonText: 'Annuler',
+            buttonsStyling: true,
+            customClass: {
+                confirmButton: 'btn btn-success',
+                cancelButton: 'btn btn-secondary'
+>>>>>>> master
             }
         }).then((result) => {
             if (result.isConfirmed) {

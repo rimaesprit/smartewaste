@@ -438,4 +438,216 @@ class CamionController extends AbstractController
         // S'assurer que le score reste entre 0 et 100
         return max(0, min(100, $score));
     }
+<<<<<<< HEAD
+=======
+
+    #[Route('/api/search', name: 'app_camion_search', methods: ['GET'])]
+    public function search(Request $request, CamionRepository $camionRepository): JsonResponse
+    {
+        $searchTerm = $request->query->get('term', '');
+        $etatFilter = $request->query->get('etat', '');
+        
+        $filters = ['searchTerm' => $searchTerm];
+        
+        if (!empty($etatFilter) && $etatFilter !== 'all') {
+            $filters['etat'] = $etatFilter;
+        }
+        
+        $camions = $camionRepository->findByFilters($filters);
+        
+        $result = [];
+        foreach ($camions as $camion) {
+            $result[] = [
+                'id' => $camion->getId(),
+                'matricule' => $camion->getMatricule(),
+                'modele' => $camion->getModele() ?? '',
+                'capacite' => $camion->getCapacite(),
+                'etat' => $camion->getEtat(),
+                'type_moteur' => $camion->getTypeMoteur(),
+                'score_environnemental' => $camion->getScoreEnvironnemental(),
+                'show_url' => $this->generateUrl('app_camion_show', ['id' => $camion->getId()]),
+                'edit_url' => $this->generateUrl('app_camion_edit', ['id' => $camion->getId()]),
+                'delete_url' => $this->generateUrl('app_camion_delete', ['id' => $camion->getId()]),
+                'csrf_token' => $this->container->get('security.csrf.token_manager')->getToken('delete' . $camion->getId())->getValue()
+            ];
+        }
+        
+        return new JsonResponse($result);
+    }
+
+    #[Route('/recherche', name: 'app_camion_search_page', methods: ['GET'])]
+    public function searchPage(Request $request, CamionRepository $camionRepository): Response
+    {
+        // Récupérer les critères de recherche
+        $criteria = [
+            'matricule' => $request->query->get('matricule', ''),
+            'etat' => $request->query->get('etat', 'all'),
+            'capacite_min' => $request->query->get('capacite_min', ''),
+            'capacite_max' => $request->query->get('capacite_max', ''),
+            'type_moteur' => $request->query->get('type_moteur', 'all'),
+            'emission_min' => $request->query->get('emission_min', ''),
+            'emission_max' => $request->query->get('emission_max', ''),
+            'annee_min' => $request->query->get('annee_min', ''),
+            'annee_max' => $request->query->get('annee_max', ''),
+        ];
+        
+        // Construire les filtres pour la recherche
+        $filters = [];
+        
+        if (!empty($criteria['matricule'])) {
+            $filters['matricule'] = $criteria['matricule'];
+        }
+        
+        if ($criteria['etat'] !== 'all') {
+            $filters['etat'] = $criteria['etat'];
+        }
+        
+        if (!empty($criteria['capacite_min'])) {
+            $filters['capacite_min'] = (float) $criteria['capacite_min'];
+        }
+        
+        if (!empty($criteria['capacite_max'])) {
+            $filters['capacite_max'] = (float) $criteria['capacite_max'];
+        }
+        
+        if ($criteria['type_moteur'] !== 'all') {
+            $filters['type_moteur'] = $criteria['type_moteur'];
+        }
+        
+        // Effectuer la recherche avec les filtres
+        $camions = $camionRepository->findByFilters($filters);
+        
+        return $this->render('camion/search.html.twig', [
+            'camions' => $camions,
+            'criteria' => $criteria,
+        ]);
+    }
+
+    #[Route('/{id}/demarrer-tournee', name: 'app_camion_demarrer_tournee', methods: ['POST'])]
+    public function demarrerTournee(Request $request, Camion $camion, EntityManagerInterface $entityManager): Response
+    {
+        if ($this->isCsrfTokenValid('demarrer-tournee'.$camion->getId(), $request->request->get('_token'))) {
+            try {
+                $destination = $request->request->get('destination');
+                $camion->demarrerTournee($destination);
+                $entityManager->flush();
+                
+                $this->addFlash('success', sprintf('Le camion %s est parti en tournée.', $camion->getMatricule()));
+                
+                // Si la requête est en AJAX, retourner une réponse JSON
+                if ($request->isXmlHttpRequest()) {
+                    return new JsonResponse([
+                        'success' => true,
+                        'message' => sprintf('Le camion %s est parti en tournée.', $camion->getMatricule()),
+                        'camion' => [
+                            'id' => $camion->getId(),
+                            'matricule' => $camion->getMatricule(),
+                            'enTournee' => $camion->isEnTournee(),
+                            'debutTournee' => $camion->getDebutTournee() ? $camion->getDebutTournee()->format('d/m/Y H:i') : null,
+                            'destination' => $camion->getDestination()
+                        ]
+                    ]);
+                }
+            } catch (\LogicException $e) {
+                $this->addFlash('error', $e->getMessage());
+                
+                if ($request->isXmlHttpRequest()) {
+                    return new JsonResponse([
+                        'success' => false,
+                        'message' => $e->getMessage()
+                    ]);
+                }
+            }
+        } else {
+            $this->addFlash('error', 'Le token CSRF est invalide');
+            
+            if ($request->isXmlHttpRequest()) {
+                return new JsonResponse([
+                    'success' => false,
+                    'message' => 'Le token CSRF est invalide'
+                ]);
+            }
+        }
+
+        return $this->redirectToRoute('app_camion_show', ['id' => $camion->getId()]);
+    }
+    
+    #[Route('/{id}/terminer-tournee', name: 'app_camion_terminer_tournee', methods: ['POST'])]
+    public function terminerTournee(Request $request, Camion $camion, EntityManagerInterface $entityManager): Response
+    {
+        if ($this->isCsrfTokenValid('terminer-tournee'.$camion->getId(), $request->request->get('_token'))) {
+            try {
+                $camion->terminerTournee();
+                $entityManager->flush();
+                
+                $this->addFlash('success', sprintf('Le camion %s est revenu de tournée.', $camion->getMatricule()));
+                
+                // Si la requête est en AJAX, retourner une réponse JSON
+                if ($request->isXmlHttpRequest()) {
+                    return new JsonResponse([
+                        'success' => true,
+                        'message' => sprintf('Le camion %s est revenu de tournée.', $camion->getMatricule()),
+                        'camion' => [
+                            'id' => $camion->getId(),
+                            'matricule' => $camion->getMatricule(),
+                            'enTournee' => $camion->isEnTournee(),
+                            'finTournee' => $camion->getFinTournee() ? $camion->getFinTournee()->format('d/m/Y H:i') : null,
+                            'dureeTournee' => $camion->getDureeTournee()
+                        ]
+                    ]);
+                }
+            } catch (\LogicException $e) {
+                $this->addFlash('error', $e->getMessage());
+                
+                if ($request->isXmlHttpRequest()) {
+                    return new JsonResponse([
+                        'success' => false,
+                        'message' => $e->getMessage()
+                    ]);
+                }
+            }
+        } else {
+            $this->addFlash('error', 'Le token CSRF est invalide');
+            
+            if ($request->isXmlHttpRequest()) {
+                return new JsonResponse([
+                    'success' => false,
+                    'message' => 'Le token CSRF est invalide'
+                ]);
+            }
+        }
+
+        return $this->redirectToRoute('app_camion_show', ['id' => $camion->getId()]);
+    }
+    
+    #[Route('/notifications', name: 'app_camion_notifications', methods: ['GET'])]
+    public function notifications(CamionRepository $camionRepository): Response
+    {
+        $camionsEnTournee = $camionRepository->findBy(['en_tournee' => true]);
+        
+        return $this->render('camion/notifications.html.twig', [
+            'camions' => $camionsEnTournee
+        ]);
+    }
+    
+    #[Route('/api/notifications', name: 'app_camion_api_notifications', methods: ['GET'])]
+    public function apiNotifications(CamionRepository $camionRepository): JsonResponse
+    {
+        $camionsEnTournee = $camionRepository->findBy(['en_tournee' => true]);
+        
+        $result = [];
+        foreach ($camionsEnTournee as $camion) {
+            $result[] = [
+                'id' => $camion->getId(),
+                'matricule' => $camion->getMatricule(),
+                'debutTournee' => $camion->getDebutTournee() ? $camion->getDebutTournee()->format('d/m/Y H:i') : null,
+                'destination' => $camion->getDestination(),
+                'dureeTournee' => $camion->getDureeTournee(),
+                'showUrl' => $this->generateUrl('app_camion_show', ['id' => $camion->getId()])
+            ];
+        }
+        
+        return new JsonResponse($result);
+    }
+>>>>>>> master
 }

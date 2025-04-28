@@ -31,11 +31,14 @@ class CamionType extends AbstractType
                 'attr' => [
                     'maxlength' => 255,
                     'placeholder' => 'Ex: Mercedes Actros 1845'
+<<<<<<< HEAD
                 ],
                 'constraints' => [
                     new NotBlank([
                         'message' => 'Le modèle ne peut pas être vide',
                     ]),
+=======
+>>>>>>> master
                 ]
             ])
             ->add('capacite', NumberType::class, [
