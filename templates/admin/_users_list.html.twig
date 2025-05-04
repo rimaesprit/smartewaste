@@ -1,0 +1,117 @@
+<div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+    {% for user in users %}
+        <div class="col">
+            <div class="card h-100 shadow-sm border-0">
+                <div class="card-header bg-white border-0 d-flex justify-content-between align-items-center">
+                    <span class="fw-bold text-muted">#{{ user.id }}</span>
+                    {% if 'ROLE_ADMIN' in user.roles %}
+                        <span class="badge rounded-pill bg-primary bg-opacity-10 text-primary">Administrateur</span>
+                    {% else %}
+                        <span class="badge rounded-pill bg-info bg-opacity-10 text-info">Utilisateur</span>
+                    {% endif %}
+                </div>
+
+                <div class="card-body text-center">
+                    <div class="avatar mx-auto mb-3">
+                        <div class="avatar-initials rounded-circle bg-light text-dark d-flex align-items-center justify-content-center"
+                             style="width: 80px; height: 80px; font-size: 2rem; background-color: {{ random(['#e3f2fd', '#fff8e1', '#f3e5f5', '#e8f5e9', '#ffebee']) }}!important;">
+                            {{ user.firstName|first|upper }}{{ user.lastName|first|upper }}
+                        </div>
+                    </div>
+
+                    <h5 class="card-title mb-1">{{ user.firstName }} {{ user.lastName }}</h5>
+                    <p class="text-muted small mb-3">{{ user.email }}</p>
+
+                    <div class="d-flex justify-content-center mb-3">
+                    <span class="d-flex align-items-center me-3">
+                        {% if user.isVerified %}
+                            <i class="fas fa-check-circle text-success me-1"></i>
+                            <span class="small">Vérifié</span>
+                        {% else %}
+                            <i class="fas fa-times-circle text-danger me-1"></i>
+                            <span class="small">Non vérifié</span>
+                        {% endif %}
+                    </span>
+                    </div>
+                </div>
+
+                <div class="card-footer bg-white border-0 d-flex justify-content-center">
+                    <div class="btn-group btn-group-sm" role="group">
+                        <a href="{{ path('app_admin_user_view', {'id': user.id}) }}" class="btn btn-outline-info" data-bs-toggle="tooltip" title="Voir">
+                            <i class="fas fa-eye"></i>
+                        </a>
+                        <a href="{{ path('app_admin_user_edit', {'id': user.id}) }}" class="btn btn-outline-warning" data-bs-toggle="tooltip" title="Modifier">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteModal{{ user.id }}" data-bs-toggle="tooltip" title="Supprimer">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal de confirmation de suppression -->
+        <div class="modal fade" id="deleteModal{{ user.id }}" tabindex="-1" aria-labelledby="deleteModalLabel{{ user.id }}" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header border-0">
+                        <h5 class="modal-title" id="deleteModalLabel{{ user.id }}">Confirmer la suppression</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body py-4">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="flex-shrink-0 me-3">
+                                <div class="avatar-initials rounded-circle bg-light text-dark d-flex align-items-center justify-content-center"
+                                     style="width: 50px; height: 50px; background-color: {{ random(['#e3f2fd', '#fff8e1', '#f3e5f5', '#e8f5e9', '#ffebee']) }}!important;">
+                                    {{ user.firstName|first|upper }}{{ user.lastName|first|upper }}
+                                </div>
+                            </div>
+                            <div class="flex-grow-1">
+                                <h6 class="mb-0">{{ user.firstName }} {{ user.lastName }}</h6>
+                                <small class="text-muted">{{ user.email }}</small>
+                            </div>
+                        </div>
+                        <p class="mb-0">Êtes-vous sûr de vouloir supprimer cet utilisateur ? Cette action est irréversible.</p>
+                    </div>
+                    <div class="modal-footer border-0">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Annuler</button>
+                        <form method="post" action="{{ path('app_admin_user_delete', {'id': user.id}) }}">
+                            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ user.id) }}">
+                            <button type="submit" class="btn btn-danger">Supprimer définitivement</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <div class="col-12">
+            <div class="card shadow-sm border-0">
+                <div class="card-body text-center py-5">
+                    <i class="fas fa-user-slash fa-3x text-muted mb-3"></i>
+                    <h5 class="card-title">Aucun utilisateur trouvé</h5>
+                    <p class="text-muted">Aucun utilisateur ne correspond aux critères de recherche</p>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+</div>
+
+<style>
+    .card {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        border-radius: 12px;
+        overflow: hidden;
+    }
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1)!important;
+    }
+    .avatar-initials {
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+    .btn-group .btn {
+        transition: all 0.2s ease;
+    }
+</style>
