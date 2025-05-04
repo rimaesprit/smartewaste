@@ -1,0 +1,147 @@
+{% extends 'FrontBase.html.twig' %}
+
+{% block title %}Carte des poubelles{% endblock %}
+
+{% block stylesheets %}
+{{ parent() }}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<style>
+    #map {
+        height: 500px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .poubelle-card {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        margin-bottom: 15px;
+        padding: 15px;
+    }
+    
+    .poubelle-header {
+        border-bottom: 1px solid #eee;
+        margin-bottom: 10px;
+        padding-bottom: 10px;
+    }
+    
+    .poubelle-header h5 {
+        margin: 0;
+        color: #333;
+    }
+    
+    .poubelle-body {
+        margin-bottom: 15px;
+    }
+    
+    .poubelle-footer {
+        display: flex;
+        gap: 10px;
+    }
+    
+    .niveau-critique {
+        color: #dc3545;
+        font-weight: bold;
+    }
+    
+    .niveau-attention {
+        color: #ffc107;
+        font-weight: bold;
+    }
+    
+    .niveau-normal {
+        color: #28a745;
+        font-weight: bold;
+    }
+    
+    .progress {
+        height: 10px;
+        margin: 10px 0;
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Carte interactive des poubelles</h5>
+                    <div id="map"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        {% for poubelle in poubelles %}
+            <div class="col-md-4">
+                <div class="poubelle-card">
+                    <div class="poubelle-header">
+                        <h5>{{ poubelle.localisation }}</h5>
+                    </div>
+                    <div class="poubelle-body">
+                        {% set niveauClass = poubelle.niveauRemplissage > 80 ? 'niveau-critique' : (poubelle.niveauRemplissage > 50 ? 'niveau-attention' : 'niveau-normal') %}
+                        <p class="mb-2">Type: {{ poubelle.type }}</p>
+                        <p class="mb-2">Niveau de remplissage: <span class="{{ niveauClass }}">{{ poubelle.niveauRemplissage }}%</span></p>
+                        <div class="progress mb-3" style="height: 10px;">
+                            <div class="progress-bar {{ niveauClass == 'niveau-critique' ? 'bg-danger' : (niveauClass == 'niveau-attention' ? 'bg-warning' : 'bg-success') }}" role="progressbar" style="width: {{ poubelle.niveauRemplissage }}%" aria-valuenow="{{ poubelle.niveauRemplissage }}" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                        <p class="mb-0">Statut: {{ poubelle.statut }}</p>
+                    </div>
+                    <div class="poubelle-footer">
+                        <a href="{{ path('app_front_bienetre_by_poubelle', {'id': poubelle.id}) }}" class="btn btn-primary btn-sm">
+                            <i class="fas fa-comment mr-1"></i> Voir les avis
+                        </a>
+                        <a href="{{ path('app_front_bienetre_new', {'poubelle_id': poubelle.id}) }}" class="btn btn-success btn-sm">
+                            <i class="fas fa-star mr-1"></i> Donner un avis
+                        </a>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var map = L.map('map').setView([36.8065, 10.1815], 13);
+    
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(map);
+    
+    var poubelles = {{ poubelles|json_encode()|raw }};
+    
+    poubelles.forEach(function(poubelle) {
+        var icon = L.divIcon({
+            className: 'custom-div-icon',
+            html: `<div class="marker-pin" style="background-color: ${getMarkerColor(poubelle.niveauRemplissage)}"></div>`,
+            iconSize: [30, 42],
+            iconAnchor: [15, 42]
+        });
+        
+        var marker = L.marker([poubelle.latitude, poubelle.longitude], {icon: icon})
+            .addTo(map)
+            .bindPopup(`
+                <strong>${poubelle.localisation}</strong><br>
+                Type: ${poubelle.type}<br>
+                Niveau: ${poubelle.niveauRemplissage}%<br>
+                Statut: ${poubelle.statut}
+            `);
+    });
+    
+    function getMarkerColor(niveau) {
+        if (niveau > 80) return '#dc3545';
+        if (niveau > 50) return '#ffc107';
+        return '#28a745';
+    }
+});
+</script>
+{% endblock %} 

@@ -1,0 +1,71 @@
+{% extends 'BackBase.html.twig' %}
+
+{% block title %}Administration - SmartWaste{% endblock %}
+
+{% block body %}
+<div class="d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-4">
+    <div>
+        <h3 class="fw-bold mb-3">Tableau de bord administrateur</h3>
+        <h6 class="op-7 mb-2">Bienvenue dans l'espace d'administration</h6>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <div class="card-head-row">
+                    <div class="card-title">Liste des utilisateurs</div>
+                    <div class="card-tools">
+                        <a href="{{ path('app_admin_users') }}" class="btn btn-primary btn-round btn-sm">
+                            <i class="fa fa-users"></i> Voir tous les utilisateurs
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Nom complet</th>
+                                <th>Email</th>
+                                <th>Rôle</th>
+                                <th>Vérifié</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for user in users|slice(0, 5) %}
+                                <tr>
+                                    <td>{{ user.id }}</td>
+                                    <td>{{ user.fullName }}</td>
+                                    <td>{{ user.email }}</td>
+                                    <td>
+                                        {% if 'ROLE_ADMIN' in user.roles %}
+                                            <span class="badge bg-primary">Admin</span>
+                                        {% else %}
+                                            <span class="badge bg-info">Utilisateur</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if user.isVerified %}
+                                            <span class="text-success"><i class="fa fa-check-circle"></i> Oui</span>
+                                        {% else %}
+                                            <span class="text-danger"><i class="fa fa-times-circle"></i> Non</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% else %}
+                                <tr>
+                                    <td colspan="5" class="text-center">Aucun utilisateur enregistré</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

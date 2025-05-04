@@ -1,0 +1,201 @@
+{% extends 'BackBase.html.twig' %}
+
+{% block title %}Statistiques des Avis{% endblock %}
+
+{% block stylesheets %}
+<style>
+    .sentiment-badge {
+        padding: 5px 10px;
+        border-radius: 20px;
+        color: white;
+        font-weight: bold;
+    }
+    .sentiment-Positif {
+        background-color: #28a745;
+    }
+    .sentiment-Neutre {
+        background-color: #6c757d;
+    }
+    .sentiment-Négatif {
+        background-color: #dc3545;
+    }
+    .sentiment-Indéterminé {
+        background-color: #17a2b8;
+    }
+    .stat-card {
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 20px;
+        color: white;
+    }
+    .stat-card-positif {
+        background-color: #28a745;
+    }
+    .stat-card-neutre {
+        background-color: #6c757d;
+    }
+    .stat-card-negatif {
+        background-color: #dc3545;
+    }
+    .stat-card-indetermine {
+        background-color: #17a2b8;
+    }
+    .stat-value {
+        font-size: 3rem;
+        font-weight: bold;
+    }
+    .stat-percent {
+        font-size: 1.2rem;
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="page-inner">
+    <div class="page-header">
+        <h4 class="page-title">Gestion des Avis de Bien-être</h4>
+        <ul class="breadcrumbs">
+            <li class="nav-home">
+                <a href="{{ path('app_home') }}">
+                    <i class="fas fa-home"></i>
+                </a>
+            </li>
+            <li class="separator">
+                <i class="fas fa-angle-right"></i>
+            </li>
+            <li class="nav-item">
+                <a href="{{ path('app_bienetre_index') }}">Avis</a>
+            </li>
+            <li class="separator">
+                <i class="fas fa-angle-right"></i>
+            </li>
+            <li class="nav-item">
+                <a href="#">Statistiques</a>
+            </li>
+        </ul>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Répartition des sentiments</div>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        {% set total = total > 0 ? total : 1 %}
+                        
+                        <div class="col-md-3">
+                            <div class="stat-card stat-card-positif">
+                                <h5><i class="fas fa-smile-beam mr-2"></i> Positifs</h5>
+                                <div class="stat-value">{{ sentiments.Positif }}</div>
+                                <div class="stat-percent">{{ ((sentiments.Positif / total) * 100)|round(1) }}%</div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-3">
+                            <div class="stat-card stat-card-neutre">
+                                <h5><i class="fas fa-meh mr-2"></i> Neutres</h5>
+                                <div class="stat-value">{{ sentiments.Neutre }}</div>
+                                <div class="stat-percent">{{ ((sentiments.Neutre / total) * 100)|round(1) }}%</div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-3">
+                            <div class="stat-card stat-card-negatif">
+                                <h5><i class="fas fa-frown mr-2"></i> Négatifs</h5>
+                                <div class="stat-value">{{ sentiments.Négatif }}</div>
+                                <div class="stat-percent">{{ ((sentiments.Négatif / total) * 100)|round(1) }}%</div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-3">
+                            <div class="stat-card stat-card-indetermine">
+                                <h5><i class="fas fa-question-circle mr-2"></i> Indéterminés</h5>
+                                <div class="stat-value">{{ sentiments.Indéterminé }}</div>
+                                <div class="stat-percent">{{ ((sentiments.Indéterminé / total) * 100)|round(1) }}%</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row mt-4">
+                        <div class="col-md-12">
+                            <div class="chart-container">
+                                <canvas id="sentimentChart" style="width: 100%; height: 400px;"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-action">
+                    <a href="{{ path('app_bienetre_index') }}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left mr-2"></i> Retour à la liste
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var ctx = document.getElementById('sentimentChart').getContext('2d');
+    
+    var sentiments = {
+        'Positif': {{ sentiments.Positif }},
+        'Neutre': {{ sentiments.Neutre }},
+        'Négatif': {{ sentiments.Négatif }},
+        'Indéterminé': {{ sentiments.Indéterminé }}
+    };
+    
+    var labels = Object.keys(sentiments);
+    var data = Object.values(sentiments);
+    
+    var backgroundColors = [
+        'rgba(40, 167, 69, 0.7)',    // Positif - vert
+        'rgba(108, 117, 125, 0.7)',  // Neutre - gris
+        'rgba(220, 53, 69, 0.7)',    // Négatif - rouge
+        'rgba(23, 162, 184, 0.7)'    // Indéterminé - bleu
+    ];
+    
+    var chart = new Chart(ctx, {
+        type: 'pie',
+        data: {
+            labels: labels,
+            datasets: [{
+                data: data,
+                backgroundColor: backgroundColors,
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Répartition des sentiments dans les avis',
+                    font: {
+                        size: 16
+                    }
+                },
+                legend: {
+                    position: 'right'
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            var value = context.raw;
+                            var total = context.dataset.data.reduce((a, b) => a + b, 0);
+                            var percentage = ((value / total) * 100).toFixed(1);
+                            return context.label + ': ' + value + ' (' + percentage + '%)';
+                        }
+                    }
+                }
+            }
+        }
+    });
+});
+</script>
+{% endblock %} 

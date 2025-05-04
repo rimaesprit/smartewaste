@@ -1,0 +1,179 @@
+{% extends 'BackBase.html.twig' %}
+
+{% block title %}Liste des Avis de Bien-être{% endblock %}
+
+{% block stylesheets %}
+<style>
+    .rate-stars {
+        color: #ffc107;
+    }
+    .sentiment-badge {
+        padding: 5px 10px;
+        border-radius: 20px;
+        color: white;
+        font-weight: bold;
+    }
+    .sentiment-Positif {
+        background-color: #28a745;
+    }
+    .sentiment-Neutre {
+        background-color: #6c757d;
+    }
+    .sentiment-Négatif {
+        background-color: #dc3545;
+    }
+    .sentiment-Indéterminé {
+        background-color: #17a2b8;
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="page-inner">
+    <div class="page-header">
+        <h4 class="page-title">Gestion des Avis de Bien-être</h4>
+        <ul class="breadcrumbs">
+            <li class="nav-home">
+                <a href="{{ path('app_home') }}">
+                    <i class="fas fa-home"></i>
+                </a>
+            </li>
+            <li class="separator">
+                <i class="fas fa-angle-right"></i>
+            </li>
+            <li class="nav-item">
+                <a href="#">Avis</a>
+            </li>
+            <li class="separator">
+                <i class="fas fa-angle-right"></i>
+            </li>
+            <li class="nav-item">
+                <a href="#">Liste</a>
+            </li>
+        </ul>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <div class="d-flex align-items-center">
+                        <h4 class="card-title">Liste des avis</h4>
+                        <a href="{{ path('app_bienetre_new') }}" class="btn btn-primary btn-round ml-auto">
+                            <i class="fa fa-plus"></i>
+                            Ajouter un avis
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% for label, messages in app.flashes %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ label }}" role="alert">
+                                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    {% endfor %}
+                    
+                    <div class="table-responsive">
+                        <table id="datatable-bienetres" class="display table table-striped table-hover">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Nom</th>
+                                    <th>Poubelle</th>
+                                    <th>Note</th>
+                                    <th>Sentiment</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for bienetre in bienetres %}
+                                <tr>
+                                    <td>{{ bienetre.id }}</td>
+                                    <td>{{ bienetre.nom }}</td>
+                                    <td>
+                                        {% if bienetre.poubelle %}
+                                            <a href="{{ path('app_poubelle_show', {'id': bienetre.poubelle.id}) }}">
+                                                {{ bienetre.poubelle }}
+                                            </a>
+                                        {% else %}
+                                            <span class="text-muted">Non spécifié</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="rate-stars">
+                                            {% for i in 1..5 %}
+                                                {% if i <= bienetre.rate %}
+                                                    <i class="fas fa-star"></i>
+                                                {% else %}
+                                                    <i class="far fa-star"></i>
+                                                {% endif %}
+                                            {% endfor %}
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="sentiment-badge sentiment-{{ bienetre.sentiment }}">{{ bienetre.sentiment }}</span>
+                                    </td>
+                                    <td>
+                                        <div class="form-button-action">
+                                            <a href="{{ path('app_bienetre_show', {'id': bienetre.id}) }}" class="btn btn-link btn-primary btn-lg" data-original-title="Voir">
+                                                <i class="fa fa-eye"></i>
+                                            </a>
+                                            <a href="{{ path('app_bienetre_edit', {'id': bienetre.id}) }}" class="btn btn-link btn-primary" data-original-title="Modifier">
+                                                <i class="fa fa-edit"></i>
+                                            </a>
+                                            <form method="post" action="{{ path('app_bienetre_delete', {'id': bienetre.id}) }}" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cet avis?');" style="display: inline-block;">
+                                                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ bienetre.id) }}">
+                                                <button class="btn btn-link btn-danger" data-original-title="Supprimer">
+                                                    <i class="fa fa-times"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <div class="d-flex align-items-center">
+                        <h4 class="card-title">Statistiques et rapports</h4>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-12">
+                            <a href="{{ path('app_bienetre_stats_avis') }}" class="btn btn-primary btn-lg btn-block">
+                                <i class="fas fa-chart-pie mr-2"></i> Statistiques des sentiments
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+<script>
+    $(document).ready(function() {
+        $('#datatable-bienetres').DataTable({
+            "language": {
+                "url": "//cdn.datatables.net/plug-ins/1.10.24/i18n/French.json"
+            }
+        });
+    });
+</script>
+{% endblock %} 

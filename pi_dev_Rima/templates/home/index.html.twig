@@ -1,0 +1,379 @@
+{% extends 'BackBase.html.twig' %}
+{% import _self as macros %}
+
+{% block title %}SmartWaste - Tableau de bord{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .mini-stat-card {
+            transition: transform 0.3s;
+        }
+        .mini-stat-card:hover {
+            transform: translateY(-5px);
+        }
+        .stat-icon {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+        }
+        .chart-container {
+            height: 300px;
+        }
+    </style>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
+
+{% block body %}
+<div class="page-inner mt-4">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title">Bienvenue dans SmartWaste</h4>
+                    <p class="card-category">Système de gestion intelligente des déchets</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistiques des camions -->
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <h4 class="page-title">État de la flotte de camions</h4>
+        </div>
+        <div class="col-sm-6 col-md-3">
+            <div class="card card-stats card-round bg-primary text-white mini-stat-card">
+                <div class="card-body">
+                    <div class="text-center">
+                        <div class="stat-icon">
+                            <i class="fas fa-truck"></i>
+                        </div>
+                        <div class="stat-value">{{ stats_camions.total }}</div>
+                        <div class="stat-title">Camions au total</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-md-3">
+            <div class="card card-stats card-round bg-success text-white mini-stat-card">
+                <div class="card-body">
+                    <div class="text-center">
+                        <div class="stat-icon">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div class="stat-value">{{ stats_camions.en_service }}</div>
+                        <div class="stat-title">En service</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-md-3">
+            <div class="card card-stats card-round bg-warning text-white mini-stat-card">
+                <div class="card-body">
+                    <div class="text-center">
+                        <div class="stat-icon">
+                            <i class="fas fa-tools"></i>
+                        </div>
+                        <div class="stat-value">{{ stats_camions.en_maintenance }}</div>
+                        <div class="stat-title">En maintenance</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-md-3">
+            <div class="card card-stats card-round bg-danger text-white mini-stat-card">
+                <div class="card-body">
+                    <div class="text-center">
+                        <div class="stat-icon">
+                            <i class="fas fa-ban"></i>
+                        </div>
+                        <div class="stat-value">{{ stats_camions.hors_service }}</div>
+                        <div class="stat-title">Hors service</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistiques des déchets -->
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <h4 class="page-title">Statistiques des déchets</h4>
+        </div>
+        <div class="col-sm-6 col-md-3">
+            <div class="card card-stats card-round bg-info text-white mini-stat-card">
+                <div class="card-body">
+                    <div class="text-center">
+                        <div class="stat-icon">
+                            <i class="fas fa-trash-alt"></i>
+                        </div>
+                        <div class="stat-value">{{ stats_dechets.total }}</div>
+                        <div class="stat-title">Déchets enregistrés</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-md-3">
+            <div class="card card-stats card-round bg-secondary text-white mini-stat-card">
+                <div class="card-body">
+                    <div class="text-center">
+                        <div class="stat-icon">
+                            <i class="fas fa-weight"></i>
+                        </div>
+                        <div class="stat-value">{{ stats_dechets.poids|number_format(1) }}</div>
+                        <div class="stat-title">Kilogrammes</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-md-3">
+            <div class="card card-stats card-round bg-success text-white mini-stat-card">
+                <div class="card-body">
+                    <div class="text-center">
+                        <div class="stat-icon">
+                            <i class="fas fa-recycle"></i>
+                        </div>
+                        <div class="stat-value">{{ stats_dechets.traites }}</div>
+                        <div class="stat-title">Déchets traités</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-md-3">
+            <div class="card card-stats card-round bg-warning text-white mini-stat-card">
+                <div class="card-body">
+                    <div class="text-center">
+                        <div class="stat-icon">
+                            <i class="fas fa-star"></i>
+                        </div>
+                        <div class="stat-value">{{ stats_dechets.favoris }}</div>
+                        <div class="stat-title">Favoris</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Graphiques et tableaux -->
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Répartition par type de déchet</div>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="dechetsTypesChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">État de la flotte</div>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="camionsEtatChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Derniers déchets enregistrés -->
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Derniers déchets enregistrés</div>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Type</th>
+                                    <th>Poids (kg)</th>
+                                    <th>Date de dépôt</th>
+                                    <th>Camion assigné</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for dechet in derniers_dechets %}
+                                <tr>
+                                    <td>{{ dechet.id }}</td>
+                                    <td>
+                                        <span class="badge bg-{{ macros.getBadgeColor(dechet.typeDechet) }}">
+                                            {{ dechet.typeDechet|capitalize }}
+                                        </span>
+                                    </td>
+                                    <td>{{ dechet.poids }}</td>
+                                    <td>{{ dechet.dateDepot|date('d/m/Y') }}</td>
+                                    <td>
+                                        {% if dechet.camion %}
+                                            <a href="{{ path('app_camion_show', {'id': dechet.camion.id}) }}">
+                                                {{ dechet.camion.matricule }}
+                                            </a>
+                                        {% else %}
+                                            <span class="text-muted">Non assigné</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if dechet.traite %}
+                                            <span class="badge bg-success">Traité</span>
+                                        {% else %}
+                                            <span class="badge bg-warning">En attente</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <a href="{{ path('app_dechet_show', {'id': dechet.id}) }}" class="btn btn-sm btn-primary">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Liens rapides -->
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Accès rapide</div>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3 mb-3">
+                            <a href="{{ path('app_camion_statistics') }}" class="btn btn-primary btn-block">
+                                <i class="fas fa-chart-bar mr-2"></i> Statistiques Camions
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <a href="{{ path('app_camion_optimisation') }}" class="btn btn-success btn-block">
+                                <i class="fas fa-route mr-2"></i> Optimisation des trajets
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <a href="{{ path('app_dechet_prediction') }}" class="btn btn-info btn-block">
+                                <i class="fas fa-brain mr-2"></i> Prédictions IA
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <a href="{{ path('app_camion_eco_compare') }}" class="btn btn-secondary btn-block">
+                                <i class="fas fa-leaf mr-2"></i> Comparaison écologique
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Graphique des types de déchets
+        const typesDechetsCtx = document.getElementById('dechetsTypesChart').getContext('2d');
+        new Chart(typesDechetsCtx, {
+            type: 'pie',
+            data: {
+                labels: [
+                    {% for type, poids in stats_dechets.types %}
+                        '{{ type|capitalize }}',
+                    {% endfor %}
+                ],
+                datasets: [{
+                    data: [
+                        {% for type, poids in stats_dechets.types %}
+                            {{ poids }},
+                        {% endfor %}
+                    ],
+                    backgroundColor: [
+                        '#3498db', // plastique
+                        '#f1c40f', // papier
+                        '#2ecc71', // verre
+                        '#95a5a6', // metal
+                        '#27ae60', // organique
+                        '#e74c3c', // electronique
+                        '#c0392b'  // dangereux
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'right'
+                    }
+                }
+            }
+        });
+        
+        // Graphique des états des camions
+        const camionsEtatCtx = document.getElementById('camionsEtatChart').getContext('2d');
+        new Chart(camionsEtatCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['En service', 'En maintenance', 'Hors service'],
+                datasets: [{
+                    data: [
+                        {{ stats_camions.en_service }},
+                        {{ stats_camions.en_maintenance }},
+                        {{ stats_camions.hors_service }}
+                    ],
+                    backgroundColor: [
+                        '#2ecc71', // en service
+                        '#f1c40f', // en maintenance
+                        '#e74c3c'  // hors service
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'right'
+                    }
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}
+
+{% macro getBadgeColor(type) %}
+    {% set colors = {
+        'plastique': 'primary',
+        'papier': 'warning',
+        'verre': 'success',
+        'metal': 'secondary',
+        'organique': 'info',
+        'electronique': 'danger',
+        'dangereux': 'dark'
+    } %}
+    
+    {{ colors[type] ?? 'secondary' }}
+{% endmacro %} 

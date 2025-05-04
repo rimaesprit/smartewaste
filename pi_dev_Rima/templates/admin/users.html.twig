@@ -1,0 +1,180 @@
+{% extends 'BackBase.html.twig' %}
+
+{% block title %}Gestion des utilisateurs - SmartWaste{% endblock %}
+
+{% block body %}
+<div class="d-flex align-items-left align-items-md-center flex-column flex-md-row pt-2 pb-4">
+    <div>
+        <h3 class="fw-bold mb-3">Gestion des utilisateurs</h3>
+        <h6 class="op-7 mb-2">Liste complète des utilisateurs enregistrés sur la plateforme</h6>
+    </div>
+    <div class="ms-md-auto py-2 py-md-0">
+        <a href="{{ path('app_admin_dashboard') }}" class="btn btn-secondary btn-round btn-sm">
+            <i class="fas fa-arrow-left"></i> Retour au tableau de bord
+        </a>
+    </div>
+</div>
+
+{% for label, messages in app.flashes %}
+    {% for message in messages %}
+        <div class="alert alert-{{ label }}">
+            {{ message }}
+        </div>
+    {% endfor %}
+{% endfor %}
+
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">Recherche</div>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-5">
+                        <div class="form-group">
+                            <label for="searchQuery" class="form-label">Rechercher par nom, prénom ou email</label>
+                            <input type="text" class="form-control" id="searchQuery" placeholder="Rechercher...">
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label for="searchRole" class="form-label">Rôle</label>
+                            <select class="form-select" id="searchRole">
+                                <option value="">Tous</option>
+                                <option value="ROLE_ADMIN">Administrateur</option>
+                                <option value="ROLE_USER">Utilisateur</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label for="searchVerified" class="form-label">Vérifié</label>
+                            <select class="form-select" id="searchVerified">
+                                <option value="">Tous</option>
+                                <option value="true">Oui</option>
+                                <option value="false">Non</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-2 d-flex align-items-end">
+                        <button type="button" id="searchButton" class="btn btn-primary w-100">
+                            <i class="fas fa-search me-1"></i> Rechercher
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">Utilisateurs</div>
+            </div>
+            <div class="card-body">
+                <div id="loader" class="text-center py-3" style="display: none;">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Chargement...</span>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Nom</th>
+                                <th>Prénom</th>
+                                <th>Email</th>
+                                <th>Rôle</th>
+                                <th>Vérifié</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="usersTableBody">
+                            {% include 'admin/_users_list.html.twig' with {'users': users} %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchQuery = document.getElementById('searchQuery');
+        const searchRole = document.getElementById('searchRole');
+        const searchVerified = document.getElementById('searchVerified');
+        const searchButton = document.getElementById('searchButton');
+        const usersTableBody = document.getElementById('usersTableBody');
+        const loader = document.getElementById('loader');
+        
+        // Fonction pour effectuer la recherche
+        function performSearch() {
+            // Afficher le loader
+            loader.style.display = 'block';
+            
+            // Récupérer les valeurs des filtres
+            const query = searchQuery.value;
+            const role = searchRole.value;
+            const verified = searchVerified.value;
+            
+            // Construire l'URL avec les paramètres
+            let url = "{{ path('app_admin_users_search') }}?";
+            const params = new URLSearchParams();
+            
+            if (query) params.append('query', query);
+            if (role) params.append('role', role);
+            if (verified !== '') params.append('verified', verified);
+            
+            url += params.toString();
+            
+            // Effectuer la requête AJAX
+            fetch(url, {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.text())
+            .then(html => {
+                // Cacher le loader
+                loader.style.display = 'none';
+                
+                // Mettre à jour le tableau des résultats
+                usersTableBody.innerHTML = html;
+                
+                // Réinitialiser les modals Bootstrap
+                if (typeof bootstrap !== 'undefined') {
+                    document.querySelectorAll('[data-bs-toggle="modal"]').forEach(function(element) {
+                        new bootstrap.Modal(element);
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Erreur lors de la recherche:', error);
+                loader.style.display = 'none';
+            });
+        }
+        
+        // Déclencher la recherche au clic sur le bouton
+        searchButton.addEventListener('click', performSearch);
+        
+        // Déclencher la recherche lorsqu'on appuie sur Entrée dans le champ de recherche
+        searchQuery.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                performSearch();
+            }
+        });
+        
+        // Déclencher la recherche lorsqu'on change les filtres déroulants
+        searchRole.addEventListener('change', performSearch);
+        searchVerified.addEventListener('change', performSearch);
+    });
+</script>
+{% endblock %} 

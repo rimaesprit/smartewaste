@@ -1,0 +1,183 @@
+{% extends 'FrontBase.html.twig' %}
+
+{% block title %}Connexion - SmartWaste{% endblock %}
+
+{% block stylesheets %}
+{{ parent() }}
+<style>
+    .social-login-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 10px;
+        border-radius: 4px;
+        margin-bottom: 10px;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        font-weight: 500;
+    }
+    .social-login-btn i {
+        margin-right: 10px;
+        font-size: 20px;
+    }
+    .google-btn {
+        background-color: #fff;
+        color: #757575;
+        border: 1px solid #ddd;
+    }
+    .google-btn:hover {
+        background-color: #f1f1f1;
+        color: #555;
+    }
+    .microsoft-btn {
+        background-color: #2f2f2f;
+        color: #fff;
+        border: 1px solid #2f2f2f;
+    }
+    .microsoft-btn:hover {
+        background-color: #000;
+        color: #fff;
+    }
+    .or-divider {
+        display: flex;
+        align-items: center;
+        text-align: center;
+        margin: 20px 0;
+    }
+    .or-divider::before,
+    .or-divider::after {
+        content: '';
+        flex: 1;
+        border-bottom: 1px solid #ddd;
+    }
+    .or-divider span {
+        padding: 0 10px;
+        color: #777;
+        font-size: 14px;
+    }
+    .alert {
+        border-radius: 4px;
+        margin-bottom: 20px;
+    }
+    .alert-danger {
+        background-color: #f8d7da;
+        border-color: #f5c6cb;
+        color: #721c24;
+    }
+    .alert-success {
+        background-color: #d4edda;
+        border-color: #c3e6cb;
+        color: #155724;
+    }
+    .btn-link-custom {
+        color: var(--primary-color);
+        text-decoration: none;
+    }
+    .btn-link-custom:hover {
+        text-decoration: underline;
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="container">
+    <div class="row mt-5 justify-content-center">
+        <div class="col-lg-5 col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-body p-4">
+                    <div class="text-center mb-4">
+                        <h2 class="font-weight-bold text-primary">Connexion</h2>
+                        <p class="text-muted">Connectez-vous à votre compte</p>
+                    </div>
+
+                    {% if error %}
+                        <div class="alert alert-danger">
+                            {% if error.messageKey == 'Invalid credentials.' %}
+                                Identifiants invalides. Veuillez vérifier votre email et mot de passe.
+                            {% else %}
+                                {{ error.messageKey|trans(error.messageData, 'security') }}
+                            {% endif %}
+                        </div>
+                    {% endif %}
+                    
+                    {% if app.request.get('error') == 'google_auth_error' %}
+                        <div class="alert alert-danger">
+                            {% if app.session.has('google_oauth_error') %}
+                                {{ app.session.get('google_oauth_error') }}
+                                {% do app.session.remove('google_oauth_error') %}
+                            {% else %}
+                                Une erreur est survenue lors de la connexion avec Google. Veuillez réessayer.
+                            {% endif %}
+                        </div>
+                    {% endif %}
+                    
+                    {% for message in app.flashes('error') %}
+                        <div class="alert alert-danger">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                    
+                    {% for message in app.flashes('success') %}
+                        <div class="alert alert-success">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+
+                    <form method="post" action="{{ path('app_login') }}" class="needs-validation">
+                        {% if app.user %}
+                            <div class="mb-3">
+                                Vous êtes connecté en tant que {{ app.user.userIdentifier }}, <a href="{{ path('app_logout') }}" class="btn-link-custom">Se déconnecter</a>
+                            </div>
+                        {% endif %}
+
+                        <div class="mb-3">
+                            <label for="inputEmail" class="form-label">Email</label>
+                            <input type="email" value="{{ last_username }}" name="email" id="inputEmail" class="form-control" autocomplete="email" placeholder="Votre adresse email" required autofocus>
+                        </div>
+                        <div class="mb-3">
+                            <label for="inputPassword" class="form-label">Mot de passe</label>
+                            <input type="password" name="password" id="inputPassword" class="form-control" autocomplete="current-password" placeholder="Votre mot de passe" required>
+                        </div>
+
+                        <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="remember_me" name="_remember_me">
+                                <label class="form-check-label" for="remember_me">
+                                    Se souvenir de moi
+                                </label>
+                            </div>
+                            <a href="{{ path('app_forgot_password_request') }}" class="btn-link-custom">Mot de passe oublié ?</a>
+                        </div>
+
+                        <div class="d-grid gap-2 mt-4">
+                            <button class="btn btn-primary btn-lg" type="submit">
+                                Se connecter
+                            </button>
+                        </div>
+
+                        <div class="text-center mt-3">
+                            <span class="text-muted">Pas encore de compte ?</span>
+                            <a href="{{ path('app_register') }}" class="btn-link-custom">S'inscrire</a>
+                        </div>
+                    </form>
+                    
+                    <div class="or-divider">
+                        <span>OU</span>
+                    </div>
+                    
+                    <div class="social-login-container">
+                        <a href="{{ path('connect_google_start') }}" class="social-login-btn google-btn d-block">
+                            <i class="bi bi-google"></i> Continuer avec Google
+                        </a>
+                        <a href="{{ path('connect_microsoft_start') }}" class="social-login-btn microsoft-btn d-block">
+                            <i class="bi bi-microsoft"></i> Continuer avec Microsoft
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

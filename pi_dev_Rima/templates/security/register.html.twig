@@ -1,0 +1,348 @@
+{% extends 'FrontBase.html.twig' %}
+
+{% block title %}Inscription - SmartWaste{% endblock %}
+
+{% block stylesheets %}
+{{ parent() }}
+<!-- Animate.css pour les animations -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+<style>
+    .invalid-feedback {
+        display: none;
+    }
+    
+    .form-control.is-invalid {
+        border-color: #dc3545;
+        background-image: none;
+    }
+    
+    /* Personnalisation de SweetAlert2 */
+    .my-swal .swal2-title {
+        color: #1a1e2c;
+        font-weight: 600;
+    }
+    
+    .my-swal .swal2-html-container {
+        text-align: left;
+    }
+    
+    .my-swal .swal2-html-container ul {
+        padding-left: 20px;
+        margin-bottom: 0;
+    }
+    
+    .my-swal .swal2-html-container li {
+        margin-bottom: 5px;
+        color: #dc3545;
+    }
+    
+    .my-swal .swal2-confirm {
+        background-color: #0ea2bd !important;
+    }
+    
+    .my-swal .swal2-icon.swal2-error {
+        border-color: #dc3545;
+    }
+    
+    .my-swal .swal2-icon.swal2-error [class^=swal2-x-mark-line] {
+        background-color: #dc3545;
+    }
+    
+    /* Styles pour les boutons de connexion sociale */
+    .social-login-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 10px;
+        border-radius: 4px;
+        margin-bottom: 10px;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        font-weight: 500;
+    }
+    .social-login-btn i {
+        margin-right: 10px;
+        font-size: 20px;
+    }
+    .google-btn {
+        background-color: #fff;
+        color: #757575;
+        border: 1px solid #ddd;
+    }
+    .google-btn:hover {
+        background-color: #f1f1f1;
+        color: #555;
+    }
+    .microsoft-btn {
+        background-color: #2f2f2f;
+        color: #fff;
+        border: 1px solid #2f2f2f;
+    }
+    .microsoft-btn:hover {
+        background-color: #000;
+        color: #fff;
+    }
+    .or-divider {
+        display: flex;
+        align-items: center;
+        text-align: center;
+        margin: 20px 0;
+    }
+    .or-divider::before,
+    .or-divider::after {
+        content: '';
+        flex: 1;
+        border-bottom: 1px solid #ddd;
+    }
+    .or-divider span {
+        padding: 0 10px;
+        color: #777;
+        font-size: 14px;
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="container">
+    <div class="row mt-5 justify-content-center">
+        <div class="col-lg-6 col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-body p-4">
+                    <div class="text-center mb-4">
+                        <h2 class="font-weight-bold text-primary">Créer un compte</h2>
+                        <p class="text-muted">Inscrivez-vous pour accéder au système</p>
+                    </div>
+
+                    {% if app.flashes('error') is defined and app.flashes('error')|length > 0 %}
+                        {% for flash_error in app.flashes('error') %}
+                            <div class="alert alert-danger">
+                                {{ flash_error }}
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                    
+                    {% if app.flashes('success') is defined and app.flashes('success')|length > 0 %}
+                        {% for flash_success in app.flashes('success') %}
+                            <div class="alert alert-success">
+                                {{ flash_success }}
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    {{ form_start(registrationForm, {'attr': {'class': 'needs-validation', 'novalidate': 'novalidate', 'id': 'registration-form'}}) }}
+                    
+                        {# Stockage des erreurs pour les afficher plus tard dans un popup #}
+                        <div id="validation-errors" style="display: none;">
+                            {{ form_errors(registrationForm) }}
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                {{ form_label(registrationForm.firstName) }}
+                                {{ form_widget(registrationForm.firstName, {'attr': {'class': 'form-control', 'required': 'required', 'data-field-name': 'Prénom'}}) }}
+                                <div class="invalid-feedback">
+                                    {{ form_errors(registrationForm.firstName) }}
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                {{ form_label(registrationForm.lastName) }}
+                                {{ form_widget(registrationForm.lastName, {'attr': {'class': 'form-control', 'required': 'required', 'data-field-name': 'Nom'}}) }}
+                                <div class="invalid-feedback">
+                                    {{ form_errors(registrationForm.lastName) }}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form_label(registrationForm.email) }}
+                            {{ form_widget(registrationForm.email, {'attr': {'class': 'form-control', 'required': 'required', 'data-field-name': 'Email'}}) }}
+                            <div class="invalid-feedback">
+                                {{ form_errors(registrationForm.email) }}
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form_label(registrationForm.plainPassword) }}
+                            {{ form_widget(registrationForm.plainPassword, {'attr': {'class': 'form-control', 'required': 'required', 'data-field-name': 'Mot de passe'}}) }}
+                            <small class="form-text text-muted">
+                                Le mot de passe doit contenir au moins 8 caractères
+                            </small>
+                            <div class="invalid-feedback">
+                                {{ form_errors(registrationForm.plainPassword) }}
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            {{ form_label(registrationForm.confirmPassword) }}
+                            {{ form_widget(registrationForm.confirmPassword, {'attr': {'class': 'form-control', 'required': 'required', 'data-field-name': 'Confirmation du mot de passe'}}) }}
+                            <div class="invalid-feedback">
+                                {{ form_errors(registrationForm.confirmPassword) }}
+                            </div>
+                        </div>
+
+                        <div class="mb-3 form-check">
+                            {{ form_widget(registrationForm.agreeTerms, {'attr': {'class': 'form-check-input', 'required': 'required', 'data-field-name': 'Conditions d\'utilisation'}}) }}
+                            {{ form_label(registrationForm.agreeTerms) }}
+                            <div class="invalid-feedback">
+                                {{ form_errors(registrationForm.agreeTerms) }}
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2 mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg">S'inscrire</button>
+                        </div>
+
+                        <div class="text-center mt-3">
+                            <span class="text-muted">Vous avez déjà un compte ?</span>
+                            <a href="{{ path('app_login') }}" class="text-primary">Se connecter</a>
+                        </div>
+                    {{ form_end(registrationForm) }}
+                    
+                    <div class="or-divider">
+                        <span>OU</span>
+                    </div>
+                    
+                    <div class="social-login-container">
+                        <a href="{{ path('connect_google_start') }}" class="social-login-btn google-btn d-block">
+                            <i class="bi bi-google"></i> S'inscrire avec Google
+                        </a>
+                        <a href="{{ path('connect_microsoft_start') }}" class="social-login-btn microsoft-btn d-block">
+                            <i class="bi bi-microsoft"></i> S'inscrire avec Microsoft
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+
+{# Ajout de SweetAlert2 #}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('registration-form');
+    
+    form.addEventListener('submit', function(event) {
+        // Empêcher la soumission du formulaire par défaut
+        event.preventDefault();
+        
+        // Récupérer tous les champs obligatoires
+        const requiredFields = form.querySelectorAll('[required]');
+        
+        // Vérifier chaque champ
+        let isValid = true;
+        let errors = [];
+        let firstInvalidField = null;
+        
+        requiredFields.forEach(function(field) {
+            // Réinitialiser les classes d'erreur
+            field.classList.remove('is-invalid');
+            
+            // Vérifier si le champ est vide
+            if (!field.value.trim()) {
+                isValid = false;
+                field.classList.add('is-invalid');
+                
+                // Ajouter le message d'erreur
+                const fieldName = field.getAttribute('data-field-name');
+                errors.push(`Le champ "${fieldName}" est obligatoire.`);
+                
+                // Enregistrer le premier champ invalide
+                if (!firstInvalidField) {
+                    firstInvalidField = field;
+                }
+            }
+            
+            // Vérification spécifique pour l'email
+            if (field.type === 'email' && field.value.trim() !== '') {
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailRegex.test(field.value.trim())) {
+                    isValid = false;
+                    field.classList.add('is-invalid');
+                    errors.push('L\'adresse email n\'est pas valide.');
+                    
+                    if (!firstInvalidField) {
+                        firstInvalidField = field;
+                    }
+                }
+            }
+            
+            // Vérification spécifique pour le mot de passe
+            if (field.name.includes('plainPassword') && field.value.trim() !== '') {
+                if (field.value.length < 8) {
+                    isValid = false;
+                    field.classList.add('is-invalid');
+                    errors.push('Le mot de passe doit contenir au moins 8 caractères.');
+                    
+                    if (!firstInvalidField) {
+                        firstInvalidField = field;
+                    }
+                }
+            }
+        });
+        
+        // Vérification que les mots de passe correspondent
+        const password = form.querySelector('[name*="plainPassword"]');
+        const confirmPassword = form.querySelector('[name*="confirmPassword"]');
+        
+        if (password.value !== confirmPassword.value) {
+            isValid = false;
+            confirmPassword.classList.add('is-invalid');
+            errors.push('Les mots de passe ne correspondent pas.');
+            
+            if (!firstInvalidField) {
+                firstInvalidField = confirmPassword;
+            }
+        }
+        
+        // Si le formulaire est invalide, afficher les erreurs dans un popup
+        if (!isValid) {
+            // Faire défiler jusqu'au premier champ invalide
+            if (firstInvalidField) {
+                firstInvalidField.focus();
+            }
+            
+            // Afficher les erreurs dans SweetAlert2
+            Swal.fire({
+                title: 'Formulaire incomplet',
+                html: '<div class="text-left"><ul><li>' + errors.join('</li><li>') + '</li></ul></div>',
+                icon: 'error',
+                confirmButtonText: 'Corriger',
+                confirmButtonColor: '#0ea2bd',
+                customClass: {
+                    container: 'my-swal',
+                    title: 'my-swal-title',
+                    htmlContainer: 'my-swal-html',
+                    confirmButton: 'my-swal-confirm-button',
+                    icon: 'my-swal-icon'
+                },
+                showClass: {
+                    popup: 'animate__animated animate__fadeInDown animate__faster'
+                },
+                hideClass: {
+                    popup: 'animate__animated animate__fadeOutUp animate__faster'
+                }
+            });
+        } else {
+            // Afficher un message de chargement pendant la soumission
+            Swal.fire({
+                title: 'Inscription en cours...',
+                html: 'Veuillez patienter pendant le traitement de votre demande.',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+            
+            // Si tout est valide, soumettre le formulaire
+            form.submit();
+        }
+    });
+});
+</script>
+{% endblock %} 

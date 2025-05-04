@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}SmartWaste - Gestion des déchets intelligente{% endblock %}</title>
+  <meta name="description" content="Gestion des déchets intelligente et écologique">
+  <meta name="keywords" content="déchets, recyclage, gestion, écologie">
+
+  <!-- Favicons -->
+  <link rel="icon" href="data:,">
+
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    /* Styles de base */
+    :root {
+      --primary-color: #0ea2bd;
+      --secondary-color: #0b8a7a;
+      --dark-color: #1a1e2c;
+      --light-color: #f8f9fa;
+      --success-color: #28a745;
+      --warning-color: #ffc107;
+      --danger-color: #dc3545;
+    }
+    
+    body {
+      font-family: 'Poppins', sans-serif;
+      color: #333;
+      line-height: 1.6;
+      background-color: #f5f5f5;
+      overflow-x: hidden;
+    }
+    
+    .dark-background {
+      background-color: var(--dark-color);
+      color: #fff;
+    }
+    
+    .light-background {
+      background-color: #f8f9fa;
+    }
+    
+    /* Header */
+    #header {
+      background-color: rgba(26, 30, 44, 0.98);
+      padding: 15px 0;
+      transition: all 0.5s;
+      box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+    }
+    
+    #header.scrolled {
+      background-color: rgba(26, 30, 44, 1);
+      padding: 10px 0;
+    }
+    
+    #header a {
+      color: #fff;
+      text-decoration: none;
+    }
+    
+    .logo span {
+      letter-spacing: 0.5px;
+    }
+    
+    /* Navigation */
+    .navbar {
+      padding: 0;
+    }
+    
+    .navbar ul {
+      display: flex;
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      align-items: center;
+    }
+    
+    .navbar li {
+      margin: 0 5px;
+      position: relative;
+    }
+    
+    .navbar a,
+    .navbar .nav-link {
+      color: rgba(255, 255, 255, 0.8);
+      font-weight: 500;
+      font-size: 0.95rem;
+      padding: 10px 15px;
+      border-radius: 50px;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      text-decoration: none;
+    }
+    
+    .navbar a:hover, 
+    .navbar a.active,
+    .navbar .nav-link:hover,
+    .navbar .nav-link.active {
+      color: #fff;
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .navbar a.active,
+    .navbar .nav-link.active {
+      color: var(--primary-color);
+      font-weight: 600;
+    }
+    
+    /* Menu déroulant */
+    .navbar .dropdown {
+      position: relative;
+    }
+    
+    .navbar .dropdown > a,
+    .navbar .dropdown > .nav-link {
+      white-space: nowrap;
+    }
+    
+    .navbar .dropdown-toggle {
+      display: flex;
+      align-items: center;
+    }
+    
+    .navbar .dropdown-toggle .bi-chevron-down {
+      margin-left: 5px;
+      font-size: 12px;
+      transition: transform 0.3s;
+    }
+    
+    .navbar .dropdown:hover .bi-chevron-down {
+      transform: rotate(180deg);
+    }
+    
+    .navbar .dropdown ul {
+      display: block;
+      position: absolute;
+      left: 0;
+      top: 100%;
+      margin: 0;
+      padding: 10px 0;
+      z-index: 99;
+      opacity: 0;
+      visibility: hidden;
+      background: #fff;
+      box-shadow: 0px 0px 30px rgba(127, 137, 161, 0.25);
+      border-radius: 8px;
+      transition: all 0.3s ease;
+      min-width: 200px;
+      transform: translateY(10px);
+    }
+    
+    .navbar .dropdown:hover > ul {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+    
+    .navbar .dropdown ul li {
+      min-width: 200px;
+      margin: 0;
+    }
+    
+    .navbar .dropdown ul a,
+    .navbar .dropdown ul .nav-link {
+      padding: 10px 20px;
+      font-size: 14px;
+      color: #333;
+      border-radius: 0;
+      display: block;
+    }
+    
+    .navbar .dropdown ul a:hover, 
+    .navbar .dropdown ul a.active,
+    .navbar .dropdown ul .nav-link:hover,
+    .navbar .dropdown ul .nav-link.active {
+      color: var(--primary-color);
+      background-color: #f6f9ff;
+    }
+    
+    .auth-buttons {
+      display: flex;
+      gap: 10px;
+    }
+    
+    .auth-buttons .btn-secondary, 
+    .auth-buttons .btn-login {
+      padding: 8px 20px;
+      border-radius: 50px;
+      font-weight: 500;
+      font-size: 0.9rem;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+    }
+    
+    .auth-buttons .btn-secondary {
+      background-color: transparent;
+      border: 1px solid var(--primary-color);
+      color: #fff;
+    }
+    
+    .auth-buttons .btn-secondary:hover {
+      background-color: rgba(14, 162, 189, 0.1);
+    }
+    
+    .auth-buttons .btn-login {
+      background-color: var(--primary-color);
+      border: 1px solid var(--primary-color);
+      color: #fff;
+    }
+    
+    .auth-buttons .btn-login:hover {
+      background-color: var(--secondary-color);
+      border-color: var(--secondary-color);
+    }
+    
+    .mobile-nav-toggle {
+      display: none;
+      color: #fff;
+      font-size: 28px;
+      cursor: pointer;
+      line-height: 0;
+      transition: 0.5s;
+    }
+    
+    /* Responsive navigation */
+    @media (max-width: 992px) {
+      .mobile-nav-toggle {
+        display: block;
+      }
+      
+      .navbar ul {
+        display: none;
+        position: fixed;
+        top: 70px;
+        right: -100%;
+        width: 250px;
+        height: 100vh;
+        background: var(--dark-color);
+        overflow-y: auto;
+        transition: 0.3s;
+        z-index: 9999;
+        padding: 20px 0;
+        box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
+        flex-direction: column;
+      }
+      
+      .navbar ul.active {
+        right: 0;
+      }
+      
+      .navbar li {
+        margin: 0;
+        width: 100%;
+      }
+      
+      .navbar a {
+        padding: 12px 20px;
+        border-radius: 0;
+        display: flex;
+        justify-content: space-between;
+      }
+      
+      .navbar .dropdown ul {
+        position: static;
+        opacity: 1;
+        visibility: visible;
+        background: rgba(0, 0, 0, 0.1);
+        box-shadow: none;
+        border-radius: 0;
+        padding: 0;
+        margin: 0;
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.3s ease;
+      }
+      
+      .navbar .dropdown ul.show {
+        max-height: 300px;
+      }
+      
+      .navbar .dropdown > a:after {
+        content: '\f107';
+        font-family: 'Bootstrap Icons';
+        margin-left: 10px;
+      }
+      
+      .auth-buttons {
+        margin-top: 20px;
+        flex-direction: column;
+        width: 100%;
+      }
+      
+      .auth-buttons .btn-secondary, 
+      .auth-buttons .btn-login {
+        width: 100%;
+        text-align: center;
+        margin: 5px 0;
+        justify-content: center;
+      }
+    }
+    
+    /* Hero Section */
+    .hero {
+      padding-top: 120px;
+      padding-bottom: 60px;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .hero h1 {
+      font-size: 2.8rem;
+      font-weight: 700;
+      margin-bottom: 20px;
+    }
+    
+    .hero h1 span {
+      color: var(--primary-color);
+    }
+    
+    .hero p {
+      font-size: 1.1rem;
+      margin-bottom: 30px;
+    }
+    
+    .btn-get-started {
+      background-color: var(--primary-color);
+      color: #fff;
+      border-radius: 50px;
+      padding: 10px 30px;
+      font-weight: 600;
+      display: inline-block;
+      text-decoration: none;
+      margin-right: 15px;
+      transition: 0.3s;
+    }
+    
+    .btn-get-started:hover {
+      background-color: var(--secondary-color);
+      color: #fff;
+    }
+    
+    .btn-watch-video {
+      color: #fff;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      text-decoration: none;
+      transition: 0.3s;
+    }
+    
+    .btn-watch-video i {
+      font-size: 32px;
+      margin-right: 8px;
+    }
+    
+    .hero-waves {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 100px;
+      z-index: 5;
+    }
+    
+    .wave1, .wave2, .wave3 {
+      opacity: 0.4;
+    }
+    
+    .wave2 {
+      opacity: 0.3;
+    }
+    
+    .wave3 {
+      opacity: 0.2;
+    }
+    
+    /* Sections */
+    .section {
+      padding: 80px 0;
+    }
+    
+    .section-title {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    
+    .section-title h2 {
+      font-size: 14px;
+      font-weight: 500;
+      padding: 0;
+      line-height: 1px;
+      margin: 0 0 5px 0;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: #aaa;
+    }
+    
+    .section-title div {
+      margin-top: 15px;
+      font-size: 32px;
+      font-weight: 700;
+    }
+    
+    .section-title div span:first-child {
+      color: #333;
+    }
+    
+    .section-title div .description-title {
+      color: var(--primary-color);
+    }
+    
+    /* About Section */
+    .about h3 {
+      font-weight: 600;
+      font-size: 16px;
+      color: var(--primary-color);
+    }
+    
+    .about h2 {
+      font-size: 2rem;
+      font-weight: 700;
+      margin: 10px 0 20px 0;
+    }
+    
+    .about p {
+      margin-bottom: 20px;
+    }
+    
+    .read-more {
+      display: inline-flex;
+      align-items: center;
+      color: var(--primary-color);
+      text-decoration: none;
+      font-weight: 600;
+    }
+    
+    .read-more i {
+      margin-left: 5px;
+      font-size: 18px;
+    }
+    
+    .icon-box {
+      text-align: center;
+      padding: 30px 20px;
+      border-radius: 8px;
+      background-color: #f8f9fa;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
+      transition: 0.3s;
+    }
+    
+    .icon-box:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 5px 25px rgba(0, 0, 0, 0.1);
+    }
+    
+    .icon-box i {
+      font-size: 40px;
+      color: var(--primary-color);
+      margin-bottom: 20px;
+    }
+    
+    .icon-box h3 {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+    
+    /* Statistics Section */
+    .stats-item {
+      text-align: center;
+    }
+    
+    .stats-item span {
+      font-size: 48px;
+      font-weight: 700;
+      color: var(--primary-color);
+    }
+    
+    .stats-item p {
+      margin-top: 10px;
+      font-size: 18px;
+    }
+    
+    /* Services Section */
+    .features-item {
+      text-align: center;
+      padding: 40px 30px;
+      border-radius: 8px;
+      background-color: #fff;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.05);
+      transition: 0.3s;
+      height: 100%;
+    }
+    
+    .features-item:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 5px 25px rgba(0, 0, 0, 0.1);
+    }
+    
+    .features-item i {
+      font-size: 48px;
+      margin-bottom: 20px;
+    }
+    
+    .features-item h3 {
+      font-size: 18px;
+      font-weight: 600;
+    }
+    
+    .features-item h3 a {
+      color: #333;
+      text-decoration: none;
+    }
+    
+    /* Call to Action */
+    .cta {
+      background: linear-gradient(rgba(26, 30, 44, 0.9), rgba(26, 30, 44, 0.9)), 
+                  url('https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80') center center;
+      background-size: cover;
+      padding: 80px 0;
+    }
+    
+    .cta h3 {
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 20px;
+    }
+    
+    .cta p {
+      margin-bottom: 30px;
+    }
+    
+    .cta-btn {
+      background-color: var(--primary-color);
+      color: #fff;
+      border-radius: 50px;
+      padding: 12px 30px;
+      font-weight: 600;
+      display: inline-block;
+      text-decoration: none;
+      transition: 0.3s;
+    }
+    
+    .cta-btn:hover {
+      background-color: var(--secondary-color);
+      color: #fff;
+    }
+    
+    /* Footer */
+    .footer {
+      background-color: var(--dark-color);
+      color: #fff;
+      padding: 60px 0 30px;
+    }
+    
+    .footer a {
+      color: #fff;
+      text-decoration: none;
+    }
+    
+    .footer-links h4, 
+    .footer-contact h4 {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 20px;
+      position: relative;
+      padding-bottom: 10px;
+    }
+    
+    .footer-links h4::after, 
+    .footer-contact h4::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      bottom: 0;
+      height: 2px;
+      width: 30px;
+      background-color: var(--primary-color);
+    }
+    
+    .footer-links ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    
+    .footer-links li {
+      margin-bottom: 10px;
+    }
+    
+    .footer-links a:hover {
+      color: var(--primary-color);
+    }
+    
+    .social-links a {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      background-color: rgba(255, 255, 255, 0.1);
+      border-radius: 50%;
+      margin-right: 10px;
+      transition: 0.3s;
+    }
+    
+    .social-links a:hover {
+      background-color: var(--primary-color);
+    }
+    
+    .copyright {
+      padding-top: 30px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+      .hero {
+        text-align: center;
+      }
+      
+      .hero-img {
+        margin-bottom: 30px;
+      }
+      
+      .about h2 {
+        font-size: 1.8rem;
+      }
+      
+      .cta h3 {
+        font-size: 24px;
+      }
+    }
+    
+    /* Fix for header spacing */
+    .main {
+      padding-top: 80px; /* Adjust based on header height */
+    }
+
+    /* Styles personnalisés pour le menu déroulant */
+    .dropdown-toggle.active + ul {
+      display: block !important;
+      opacity: 1 !important;
+      visibility: visible !important;
+      transform: translateY(0) !important;
+      background-color: #fff !important;
+    }
+    
+    /* Amélioration de l'apparence du menu déroulant Espace Citoyen */
+    .navbar .dropdown > .dropdown-toggle {
+      padding-right: 20px;
+    }
+    
+    .navbar .dropdown > .dropdown-toggle .bi-chevron-down {
+      font-size: 12px;
+      transition: transform 0.3s ease;
+    }
+    
+    .navbar .dropdown:hover > .dropdown-toggle .bi-chevron-down,
+    .navbar .dropdown > .dropdown-toggle.active .bi-chevron-down {
+      transform: rotate(-180deg);
+    }
+    
+    .navbar .dropdown ul {
+      background-color: #fff !important;
+    }
+    
+    .navbar .dropdown ul .nav-link {
+      border-radius: 0;
+      margin: 0;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+      color: #333 !important;
+    }
+    
+    .navbar .dropdown ul li:last-child .nav-link {
+      border-bottom: none;
+    }
+
+    /* Dropdown menu styles */
+    .dropdown-menu {
+      border-radius: 0.25rem;
+      margin-top: 0.5rem;
+      border: none;
+      box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+      background-color: #fff;
+    }
+
+    .dropdown-item {
+      padding: 0.5rem 1.5rem;
+      color: #212529;
+      font-weight: 500;
+      transition: all 0.2s ease-in-out;
+    }
+
+    .dropdown-item:hover, .dropdown-item:focus {
+      color: var(--bs-green);
+      background-color: rgba(92, 184, 92, 0.1);
+    }
+
+    /* Ensure dropdown works on hover for desktop */
+    @media (min-width: 992px) {
+      .navbar .nav-item.dropdown:hover .dropdown-menu {
+        display: block;
+      }
+    }
+  </style>
+
+  {% block stylesheets %}{% endblock %}
+
+</head>
+
+<body class="index-page">
+
+  <header id="header" class="fixed-top">
+    <div class="container d-flex align-items-center justify-content-between">
+
+      <a href="{{ path('app_front_home') }}" class="logo d-flex align-items-center me-auto me-lg-0">
+        <span class="fs-4 fw-bold text-white">SmartWaste<span class="text-primary">.</span></span>
+      </a>
+
+      <nav id="navbar" class="navbar">
+        <ul>
+          <li><a href="{{ path('app_front_home') }}" class="nav-link {{ app.request.get('_route') == 'app_front_home' ? 'active' : '' }}">Accueil</a></li>
+          <li><a href="{{ path('app_front_about') }}" class="nav-link {{ app.request.get('_route') == 'app_front_about' ? 'active' : '' }}">À propos</a></li>
+          <li><a href="{{ path('app_front_services') }}" class="nav-link {{ app.request.get('_route') == 'app_front_services' ? 'active' : '' }}">Services</a></li>
+          <li><a href="{{ path('app_front_map') }}" class="nav-link {% if app.request.get('_route') == 'app_front_map' %}active{% endif %}">Carte</a></li>
+          <li><a href="{{ path('app_front_poubelles_list') }}" class="nav-link {% if app.request.get('_route') == 'app_front_poubelles_list' %}active{% endif %}">Poubelles</a></li>
+          <li><a href="{{ path('app_front_parking') }}" class="nav-link {% if app.request.get('_route') == 'app_front_parking' %}active{% endif %}">Parkings</a></li>
+          
+          {% if app.user %}
+          <li class="dropdown">
+            <a href="#" class="nav-link dropdown-toggle {% if app.request.get('_route') starts with 'app_citoyen_' or app.request.get('_route') starts with 'app_reclamation_' or app.request.get('_route') starts with 'app_profile_' %}active{% endif %}">
+              <span>Espace Citoyen</span> <i class="bi bi-chevron-down"></i>
+            </a>
+            <ul>
+              <li><a href="{{ path('app_profile_index') }}" class="nav-link {{ app.request.get('_route') starts with 'app_profile_' ? 'active' : '' }}">Mon Profil</a></li>
+              <li><a href=# class="nav-link {{ app.request.get('_route') starts with 'app_reclamation_' ? 'active' : '' }}">Mes réclamations</a></li>
+            </ul>
+          </li>
+          {% endif %}
+          
+          <li><a href="{{ path('app_front_contact') }}" class="nav-link {{ app.request.get('_route') == 'app_front_contact' ? 'active' : '' }}">Contact</a></li>
+        </ul>
+        <i class="bi bi-list mobile-nav-toggle"></i>
+      </nav>
+
+      <div class="auth-buttons">
+        {% if app.user %}
+          <a class="btn-login" href="{{ path('app_logout') }}">Déconnexion</a>
+        {% else %}
+          <a class="btn-secondary me-2" href="{{ path('app_register') }}">S'inscrire</a>
+          <a class="btn-login" href="{{ path('app_login') }}">Se Connecter</a>
+        {% endif %}
+      </div>
+
+    </div>
+  </header>
+
+  <main class="main">
+    {% block body %}{% endblock %}
+  </main>
+
+  <footer id="footer" class="footer">
+    <div class="container">
+      <div class="row gy-4">
+        <div class="col-lg-5 col-md-12 footer-info">
+          <a href="{{ path('app_front_home') }}" class="logo d-flex align-items-center">
+            <span>SmartWaste</span>
+          </a>
+          <p>Solution innovante pour une gestion intelligente des déchets urbains. Ensemble, préservons notre environnement pour les générations futures.</p>
+          <div class="social-links d-flex mt-4">
+            <a href="#" class="twitter"><i class="bi bi-twitter"></i></a>
+            <a href="#" class="facebook"><i class="bi bi-facebook"></i></a>
+            <a href="#" class="instagram"><i class="bi bi-instagram"></i></a>
+            <a href="#" class="linkedin"><i class="bi bi-linkedin"></i></a>
+          </div>
+        </div>
+        
+        <div class="col-lg-2 col-6 footer-links">
+          <h4>Liens Utiles</h4>
+          <ul>
+            <li><a href="{{ path('app_front_home') }}">Accueil</a></li>
+            <li><a href="{{ path('app_front_about') }}">À propos</a></li>
+            <li><a href="{{ path('app_front_services') }}">Services</a></li>
+            <li><a href="#">Conditions d'utilisation</a></li>
+            <li><a href="#">Politique de confidentialité</a></li>
+          </ul>
+        </div>
+        
+        <div class="col-lg-2 col-6 footer-links">
+          <h4>Nos Services</h4>
+          <ul>
+            <li><a href="{{ path('app_front_services') }}">Collecte des déchets</a></li>
+            <li><a href="{{ path('app_front_services') }}">Recyclage</a></li>
+            <li><a href="{{ path('app_front_services') }}">Compostage</a></li>
+            <li><a href="{{ path('app_front_services') }}">Conseil environnemental</a></li>
+            <li><a href="{{ path('app_front_services') }}">Valorisation énergétique</a></li>
+          </ul>
+        </div>
+        
+        <div class="col-lg-3 col-md-12 footer-contact text-center text-md-start">
+          <h4>Contactez-nous</h4>
+          <p>
+            123 Avenue Écologique <br>
+            75001 Paris<br>
+            France <br><br>
+            <strong>Téléphone:</strong> +33 1 23 45 67 89<br>
+            <strong>Email:</strong> contact@smartwaste.com<br>
+          </p>
+        </div>
+      </div>
+    </div>
+    
+    <div class="container mt-4">
+      <div class="copyright text-center">
+        &copy; Copyright <strong><span>SmartWaste</span></strong>. Tous droits réservés
+      </div>
+    </div>
+  </footer>
+
+  <!-- Bootstrap Bundle with Popper -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Changement de l'apparence du header au défilement
+      const header = document.querySelector('#header');
+      const scrolled = () => {
+        if (window.scrollY > 100) {
+          header.classList.add('scrolled');
+        } else {
+          header.classList.remove('scrolled');
+        }
+      };
+      window.addEventListener('load', scrolled);
+      document.addEventListener('scroll', scrolled);
+      
+      // Menu mobile
+      const mobileNavToggle = document.querySelector('.mobile-nav-toggle');
+      const navbar = document.querySelector('.navbar ul');
+      
+      if (mobileNavToggle) {
+        mobileNavToggle.addEventListener('click', function(e) {
+          navbar.classList.toggle('active');
+          this.classList.toggle('bi-list');
+          this.classList.toggle('bi-x');
+        });
+      }
+      
+      // Navigation déroulante sur mobile
+      const navDropdowns = document.querySelectorAll('.navbar .dropdown > .dropdown-toggle');
+      navDropdowns.forEach(dropdown => {
+        dropdown.addEventListener('click', function(e) {
+          if (window.innerWidth < 992) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            // Fermer tous les autres menus déroulants
+            navDropdowns.forEach(otherDropdown => {
+              if (otherDropdown !== this) {
+                otherDropdown.classList.remove('active');
+                otherDropdown.nextElementSibling.classList.remove('show');
+              }
+            });
+            
+            this.classList.toggle('active');
+            this.nextElementSibling.classList.toggle('show');
+          }
+        });
+      });
+      
+      // Fermer le menu mobile lors du clic sur un lien
+      document.querySelectorAll('.navbar .nav-link:not(.dropdown-toggle)').forEach(navLink => {
+        navLink.addEventListener('click', () => {
+          if (navbar.classList.contains('active')) {
+            navbar.classList.remove('active');
+            mobileNavToggle.classList.add('bi-list');
+            mobileNavToggle.classList.remove('bi-x');
+          }
+        });
+      });
+      
+      // Cliquer à l'extérieur ferme le menu
+      document.addEventListener('click', function(e) {
+        const isDropdownButton = e.target.closest('.dropdown-toggle');
+        const isDropdownMenu = e.target.closest('.dropdown ul');
+        
+        if (!isDropdownButton && !isDropdownMenu) {
+          navDropdowns.forEach(dropdown => {
+            dropdown.classList.remove('active');
+            dropdown.nextElementSibling.classList.remove('show');
+          });
+        }
+      });
+
+      // Add this script to ensure the dropdown works properly
+      document.addEventListener('DOMContentLoaded', function() {
+        // For desktop: handle hover dropdown
+        if (window.innerWidth >= 992) {
+          document.querySelectorAll('.navbar .nav-item.dropdown').forEach(function(item) {
+            item.addEventListener('mouseenter', function() {
+              this.querySelector('.dropdown-menu').classList.add('show');
+            });
+            item.addEventListener('mouseleave', function() {
+              this.querySelector('.dropdown-menu').classList.remove('show');
+            });
+          });
+        }
+        
+        // For mobile: ensure the dropdown toggle works with click
+        document.querySelectorAll('.dropdown-toggle').forEach(function(dropdown) {
+          dropdown.addEventListener('click', function(e) {
+            if (window.innerWidth < 992) {
+              e.preventDefault();
+              e.stopPropagation();
+              const menu = this.nextElementSibling;
+              if (menu.classList.contains('show')) {
+                menu.classList.remove('show');
+              } else {
+                document.querySelectorAll('.dropdown-menu.show').forEach(function(openMenu) {
+                  openMenu.classList.remove('show');
+                });
+                menu.classList.add('show');
+              }
+            }
+          });
+        });
+      });
+    });
+  </script>
+
+  {% block javascripts %}{% endblock %}
+
+</body>
+
+</html> 

@@ -1,0 +1,135 @@
+{{ form_start(form, {'attr': {'novalidate': 'novalidate', 'class': 'needs-validation', 'id': 'poubelleForm'}}) }}
+
+<div class="form-section">
+    <h4 class="section-title"><i class="fas fa-info-circle"></i> Informations de base</h4>
+    <div class="row">
+        <div class="col-md-6">
+            <div class="form-group mb-3">
+                {{ form_label(form.localisation, 'Localisation', {'label_attr': {'class': 'form-label'}}) }}
+                {{ form_widget(form.localisation, {'attr': {'class': 'form-control' ~ (form.localisation.vars.valid ? '' : ' is-invalid'), 'placeholder': 'Entrez la localisation'}}) }}
+                {{ form_errors(form.localisation, {'attr': {'class': 'invalid-feedback'}}) }}
+                <div class="invalid-feedback">
+                    Veuillez entrer une localisation valide.
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="form-group mb-3">
+                {{ form_label(form.adresse, 'Adresse', {'label_attr': {'class': 'form-label'}}) }}
+                {{ form_widget(form.adresse, {'attr': {'class': 'form-control' ~ (form.adresse.vars.valid ? '' : ' is-invalid'), 'placeholder': 'Entrez l\'adresse'}}) }}
+                {{ form_errors(form.adresse, {'attr': {'class': 'invalid-feedback'}}) }}
+                <div class="invalid-feedback">
+                    Veuillez entrer une adresse valide.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="form-section">
+    <h4 class="section-title"><i class="fas fa-sliders-h"></i> Détails techniques</h4>
+    <div class="row">
+        <div class="col-md-6">
+            <div class="form-group mb-3">
+                {{ form_label(form.niveauRemplissage, 'Niveau de Remplissage', {'label_attr': {'class': 'form-label'}}) }}
+                {{ form_widget(form.niveauRemplissage, {'attr': {'class': 'form-control' ~ (form.niveauRemplissage.vars.valid ? '' : ' is-invalid'), 'min': '0', 'max': '100'}}) }}
+                {{ form_errors(form.niveauRemplissage, {'attr': {'class': 'invalid-feedback'}}) }}
+                <div class="invalid-feedback">
+                    Veuillez entrer un niveau de remplissage entre 0 et 100.
+                </div>
+                <div class="progress mt-2">
+                    <div id="preview-progress-bar" class="progress-bar" role="progressbar" style="width: {{ form.niveauRemplissage.vars.value|default(0) }}%" 
+                         aria-valuenow="{{ form.niveauRemplissage.vars.value|default(0) }}" aria-valuemin="0" aria-valuemax="100">
+                        {{ form.niveauRemplissage.vars.value|default(0) }}%
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="form-group mb-3">
+                {{ form_label(form.type, 'Type', {'label_attr': {'class': 'form-label'}}) }}
+                {{ form_widget(form.type, {'attr': {'class': 'form-select' ~ (form.type.vars.valid ? '' : ' is-invalid')}}) }}
+                {{ form_errors(form.type, {'attr': {'class': 'invalid-feedback'}}) }}
+                <div class="invalid-feedback">
+                    Veuillez sélectionner un type de poubelle.
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-6">
+            <div class="form-group mb-3">
+                {{ form_label(form.statut, 'Statut', {'label_attr': {'class': 'form-label'}}) }}
+                {{ form_widget(form.statut, {'attr': {'class': 'form-select' ~ (form.statut.vars.valid ? '' : ' is-invalid')}}) }}
+                {{ form_errors(form.statut, {'attr': {'class': 'invalid-feedback'}}) }}
+                <div class="invalid-feedback">
+                    Veuillez sélectionner un statut.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="form-section">
+    <h4 class="section-title"><i class="fas fa-map-marker-alt"></i> Emplacement</h4>
+    <div class="row">
+        <div class="col-md-12">
+            <button type="button" id="geolocate-btn" class="btn btn-primary btn-geolocation">
+                <i class="fas fa-location-arrow"></i> Utiliser ma position actuelle
+            </button>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="map-container">
+                <div id="map"></div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-6">
+            <div class="form-group mb-3">
+                {{ form_label(form.latitude, 'Latitude', {'label_attr': {'class': 'form-label'}}) }}
+                {{ form_widget(form.latitude, {'attr': {'class': 'form-control' ~ (form.latitude.vars.valid ? '' : ' is-invalid'), 'placeholder': 'Entrez la latitude'}}) }}
+                {{ form_errors(form.latitude, {'attr': {'class': 'invalid-feedback'}}) }}
+                <div class="invalid-feedback">
+                    Veuillez entrer une latitude valide.
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="form-group mb-3">
+                {{ form_label(form.longitude, 'Longitude', {'label_attr': {'class': 'form-label'}}) }}
+                {{ form_widget(form.longitude, {'attr': {'class': 'form-control' ~ (form.longitude.vars.valid ? '' : ' is-invalid'), 'placeholder': 'Entrez la longitude'}}) }}
+                {{ form_errors(form.longitude, {'attr': {'class': 'invalid-feedback'}}) }}
+                <div class="invalid-feedback">
+                    Veuillez entrer une longitude valide.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="text-center">
+    <button class="btn btn-primary">
+        <i class="fas fa-save"></i> {{ button_label|default('Enregistrer') }}
+    </button>
+</div>
+
+{{ form_end(form) }}
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Validation personnalisée du formulaire
+    var form = document.getElementById('poubelleForm');
+    
+    form.addEventListener('submit', function(event) {
+        if (!form.checkValidity()) {
+            event.preventDefault();
+            event.stopPropagation();
+        }
+        
+        form.classList.add('was-validated');
+    });
+});
+</script> 

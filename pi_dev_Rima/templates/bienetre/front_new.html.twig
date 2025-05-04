@@ -1,0 +1,250 @@
+{% extends 'FrontBase.html.twig' %}
+
+{% block title %}Donner un avis{% endblock %}
+
+{% block stylesheets %}
+{{ parent() }}
+<style>
+    .rate-stars {
+        color: #ffc107;
+        font-size: 1.5rem;
+    }
+    .form-card {
+        border-radius: 15px;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+        padding: 40px;
+        background-color: #fff;
+        margin-top: -50px;
+        position: relative;
+        z-index: 2;
+    }
+    .page-header {
+        background: linear-gradient(135deg, #1e4b57 0%, #2d7d90 100%);
+        padding: 80px 0 100px;
+        margin-bottom: 0;
+        color: white;
+        position: relative;
+    }
+    .page-header::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 50px;
+        background: linear-gradient(to right bottom, transparent 49%, #fff 50%);
+    }
+    .invalid-feedback {
+        display: block;
+        font-size: 0.85rem;
+        margin-top: 0.5rem;
+    }
+    .form-label {
+        font-weight: 600;
+        color: #2d3748;
+        margin-bottom: 0.75rem;
+    }
+    .form-control, .form-select {
+        border-radius: 10px;
+        padding: 12px 15px;
+        border: 2px solid #e2e8f0;
+        transition: all 0.3s ease;
+    }
+    .form-control:focus, .form-select:focus {
+        border-color: #2d7d90;
+        box-shadow: 0 0 0 0.2rem rgba(45, 125, 144, 0.25);
+    }
+    .btn-primary {
+        background: linear-gradient(135deg, #1e4b57 0%, #2d7d90 100%);
+        border: none;
+        padding: 15px 30px;
+        border-radius: 10px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        transition: all 0.3s ease;
+    }
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(45, 125, 144, 0.3);
+    }
+    .btn-outline-secondary {
+        border: 2px solid #e2e8f0;
+        padding: 15px 30px;
+        border-radius: 10px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+    .btn-outline-secondary:hover {
+        background-color: #f7fafc;
+        border-color: #cbd5e0;
+    }
+    .rating-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 10px;
+        margin: 20px 0;
+    }
+    .rating-star {
+        font-size: 2rem;
+        color: #e2e8f0;
+        cursor: pointer;
+        transition: color 0.3s ease;
+    }
+    .rating-star.active {
+        color: #ffc107;
+    }
+    .form-group {
+        margin-bottom: 25px;
+    }
+    .form-header {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+    .form-header h2 {
+        color: #2d3748;
+        font-weight: 700;
+        margin-bottom: 10px;
+    }
+    .form-header p {
+        color: #718096;
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="page-header">
+    <div class="container">
+        <div class="text-center">
+            <h1 class="display-4 fw-bold">Donner un avis</h1>
+            <p class="lead">
+                {% if form.poubelle.vars.data %}
+                    Pour la poubelle située à {{ form.poubelle.vars.data.localisation }}
+                {% else %}
+                    Pour une poubelle de notre système
+                {% endif %}
+            </p>
+        </div>
+    </div>
+</div>
+
+<div class="container mb-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="form-card">
+                <div class="form-header">
+                    <h2>Partagez votre expérience</h2>
+                    <p>Votre avis nous aide à améliorer nos services</p>
+                </div>
+
+                {{ form_start(form, {'attr': {'novalidate': 'novalidate', 'class': 'needs-validation'}}) }}
+                
+                {% if not form.vars.valid %}
+                    <div class="alert alert-danger">
+                        {{ form_errors(form) }}
+                    </div>
+                {% endif %}
+
+                <div class="form-group">
+                    {{ form_label(form.nom) }}
+                    {{ form_widget(form.nom, {'attr': {'class': 'form-control form-control-lg'}}) }}
+                    <div class="invalid-feedback">
+                        {{ form_errors(form.nom) }}
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    {{ form_label(form.rate) }}
+                    <div class="rating-container" id="star-rating">
+                        {% for i in 1..5 %}
+                            <i class="fas fa-star rating-star" data-value="{{ i }}"></i>
+                        {% endfor %}
+                    </div>
+                    {{ form_widget(form.rate, {'attr': {'class': 'form-control',  }}) }}
+                    <div class="invalid-feedback">
+                        {{ form_errors(form.rate) }}
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    {{ form_label(form.review) }}
+                    {{ form_widget(form.review, {'attr': {'class': 'form-control form-control-lg', 'rows': '5'}}) }}
+                    <div class="invalid-feedback">
+                        {{ form_errors(form.review) }}
+                    </div>
+                </div>
+
+                {% if not form.poubelle.vars.data %}
+                <div class="form-group">
+                    {{ form_label(form.poubelle) }}
+                    {{ form_widget(form.poubelle, {'attr': {'class': 'form-select form-select-lg'}}) }}
+                    <div class="invalid-feedback">
+                        {{ form_errors(form.poubelle) }}
+                    </div>
+                </div>
+                {% else %}
+                    {{ form_widget(form.poubelle) }}
+                {% endif %}
+
+                <div class="d-grid gap-3 mt-4">
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i class="fas fa-paper-plane me-2"></i> Envoyer mon avis
+                    </button>
+                    <a href="{{ path('app_front_poubelles') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-2"></i> Retour à la liste
+                    </a>
+                </div>
+                {{ form_end(form) }}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block javascripts %}
+{{ parent() }}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const ratingStars = document.querySelectorAll('.rating-star');
+    const rateInput = document.querySelector('#{{ form.rate.vars.id }}');
+
+    // Initialiser les étoiles si une note existe déjà
+    if (rateInput.value) {
+        updateStars(parseInt(rateInput.value));
+    }
+
+    ratingStars.forEach(star => {
+        star.addEventListener('click', function() {
+            const value = this.dataset.value;
+            rateInput.value = value;
+            updateStars(value);
+        });
+
+        star.addEventListener('mouseover', function() {
+            const value = this.dataset.value;
+            highlightStars(value);
+        });
+
+        star.addEventListener('mouseout', function() {
+            const currentRating = rateInput.value;
+            updateStars(currentRating);
+        });
+    });
+
+    function updateStars(value) {
+        ratingStars.forEach(star => {
+            const starValue = parseInt(star.dataset.value);
+            star.classList.toggle('active', starValue <= value);
+        });
+    }
+
+    function highlightStars(value) {
+        ratingStars.forEach(star => {
+            const starValue = parseInt(star.dataset.value);
+            star.classList.toggle('active', starValue <= value);
+        });
+    }
+});
+</script>
+{% endblock %}
+
+{% endblock %} 

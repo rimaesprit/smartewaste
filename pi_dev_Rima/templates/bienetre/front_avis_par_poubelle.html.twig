@@ -1,0 +1,184 @@
+{% extends 'FrontBase.html.twig' %}
+
+{% block title %}Avis pour la poubelle {{ poubelle.localisation }}{% endblock %}
+
+{% block stylesheets %}
+<style>
+    .rate-stars {
+        color: #ffc107;
+    }
+    .sentiment-badge {
+        padding: 5px 10px;
+        border-radius: 20px;
+        color: white;
+        font-weight: bold;
+    }
+    .sentiment-Positif {
+        background-color: #28a745;
+    }
+    .sentiment-Neutre {
+        background-color: #6c757d;
+    }
+    .sentiment-Négatif {
+        background-color: #dc3545;
+    }
+    .sentiment-Indéterminé {
+        background-color: #17a2b8;
+    }
+    .review-card {
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        margin-bottom: 30px;
+        overflow: hidden;
+        transition: transform 0.3s ease;
+    }
+    .review-card:hover {
+        transform: translateY(-5px);
+    }
+    .review-card-positive {
+        border-top: 5px solid #28a745;
+    }
+    .review-card-neutral {
+        border-top: 5px solid #6c757d;
+    }
+    .review-card-negative {
+        border-top: 5px solid #dc3545;
+    }
+    .review-card-indeterminate {
+        border-top: 5px solid #17a2b8;
+    }
+    .review-header {
+        padding: 20px;
+        border-bottom: 1px solid #eee;
+        background-color: #f8f9fa;
+    }
+    .review-body {
+        padding: 20px;
+        background-color: #fff;
+    }
+    .review-footer {
+        padding: 15px 20px;
+        background-color: #f8f9fa;
+        border-top: 1px solid #eee;
+    }
+    .page-header {
+        background-color: #f8f9fa;
+        padding: 30px 0;
+        margin-bottom: 40px;
+        border-bottom: 1px solid #e9ecef;
+    }
+    .niveau-critique {
+        color: #dc3545;
+        font-weight: bold;
+    }
+    .niveau-normal {
+        color: #28a745;
+    }
+    .niveau-attention {
+        color: #ffc107;
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="page-header">
+    <div class="container">
+        <h1 class="display-4">Avis pour la poubelle</h1>
+        <p class="lead">Située à {{ poubelle.localisation }}</p>
+    </div>
+</div>
+
+<div class="container mb-5">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <h5 class="card-title">Détails de la poubelle</h5>
+                            <p class="card-text">
+                                <strong>Localisation:</strong> {{ poubelle.localisation }}<br>
+                                <strong>Type:</strong> {{ poubelle.type }}<br>
+                                <strong>Statut:</strong> {{ poubelle.statut }}<br>
+                                {% set niveauClass = poubelle.niveauRemplissage > 80 ? 'niveau-critique' : (poubelle.niveauRemplissage > 50 ? 'niveau-attention' : 'niveau-normal') %}
+                                <strong>Niveau de remplissage:</strong> <span class="{{ niveauClass }}">{{ poubelle.niveauRemplissage }}%</span>
+                            </p>
+                            <div class="progress mt-2 mb-3" style="height: 10px;">
+                                <div class="progress-bar {{ niveauClass == 'niveau-critique' ? 'bg-danger' : (niveauClass == 'niveau-attention' ? 'bg-warning' : 'bg-success') }}" role="progressbar" style="width: {{ poubelle.niveauRemplissage }}%" aria-valuenow="{{ poubelle.niveauRemplissage }}" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            <a href="{{ path('app_front_bienetre_new', {'poubelle_id': poubelle.id}) }}" class="btn btn-success btn-lg">
+                                <i class="fas fa-star me-2"></i> Donner un avis
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h2>Les avis des utilisateurs</h2>
+            {% if avis|length > 0 %}
+                <p class="text-muted">{{ avis|length }} avis pour cette poubelle</p>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if avis|length > 0 %}
+        <div class="row">
+            {% for item in avis %}
+                {% set cardClass = 
+                    item.sentiment == 'Positif' ? 'review-card-positive' : 
+                    (item.sentiment == 'Neutre' ? 'review-card-neutral' : 
+                    (item.sentiment == 'Négatif' ? 'review-card-negative' : 'review-card-indeterminate')) 
+                %}
+                
+                <div class="col-md-6 mb-4">
+                    <div class="review-card {{ cardClass }}">
+                        <div class="review-header">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">{{ item.nom }}</h5>
+                                <span class="sentiment-badge sentiment-{{ item.sentiment }}">{{ item.sentiment }}</span>
+                            </div>
+                        </div>
+                        <div class="review-body">
+                            <p>{{ item.review|nl2br }}</p>
+                        </div>
+                        <div class="review-footer">
+                            <div class="rate-stars">
+                                {% for i in 1..5 %}
+                                    {% if i <= item.rate %}
+                                        <i class="fas fa-star"></i>
+                                    {% else %}
+                                        <i class="far fa-star"></i>
+                                    {% endif %}
+                                {% endfor %}
+                                <span class="ms-2 text-muted">({{ item.rate }}/5)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="row">
+            <div class="col-md-12">
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i> Aucun avis n'a encore été donné pour cette poubelle. Soyez le premier à partager votre expérience !
+                </div>
+            </div>
+        </div>
+    {% endif %}
+    
+    <div class="row mt-4">
+        <div class="col-md-12 text-center">
+            <a href="{{ path('app_front_poubelles_list') }}" class="btn btn-primary">
+                <i class="fas fa-map-marker-alt me-2"></i> Retour à la carte des poubelles
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %} 

@@ -1,0 +1,125 @@
+{% extends 'BackBase.html.twig' %}
+
+{% block title %}Alertes Poubelles Critiques{% endblock %}
+
+{% block stylesheets %}
+<style>
+    .status-badge {
+        padding: 5px 10px;
+        border-radius: 20px;
+        color: white;
+        font-weight: bold;
+    }
+    .status-Fonctionnelle {
+        background-color: #28a745;
+    }
+    .status-En-maintenance {
+        background-color: #ffc107;
+        color: #212529;
+    }
+    .status-Hors-service {
+        background-color: #dc3545;
+    }
+    .niveau-critique {
+        color: #dc3545;
+        font-weight: bold;
+    }
+    .alert-item {
+        border-left: 4px solid #dc3545;
+        margin-bottom: 15px;
+        padding: 15px;
+        background-color: #fff5f5;
+    }
+    .progress-bar {
+        height: 10px;
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="page-inner">
+    <div class="page-header">
+        <h4 class="page-title">Gestion des Poubelles</h4>
+        <ul class="breadcrumbs">
+            <li class="nav-home">
+                <a href="{{ path('app_home') }}">
+                    <i class="fas fa-home"></i>
+                </a>
+            </li>
+            <li class="separator">
+                <i class="fas fa-angle-right"></i>
+            </li>
+            <li class="nav-item">
+                <a href="{{ path('app_poubelle_index') }}">Poubelles</a>
+            </li>
+            <li class="separator">
+                <i class="fas fa-angle-right"></i>
+            </li>
+            <li class="nav-item">
+                <a href="#">Alertes</a>
+            </li>
+        </ul>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">
+                        <i class="fas fa-exclamation-triangle text-danger mr-2"></i>
+                        Alertes des poubelles avec un niveau de remplissage critique (>80%)
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% if poubelles|length > 0 %}
+                        {% for poubelle in poubelles %}
+                            <div class="alert-item">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <h5 class="mb-1">
+                                            <a href="{{ path('app_poubelle_show', {'id': poubelle.id}) }}">
+                                                <strong>{{ poubelle.localisation }}</strong>
+                                            </a>
+                                        </h5>
+                                        <p class="text-muted">ID: {{ poubelle.id }}</p>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <span class="niveau-critique">{{ poubelle.niveauRemplissage }}%</span>
+                                        <div class="progress mt-2">
+                                            <div class="progress-bar bg-danger" role="progressbar" style="width: {{ poubelle.niveauRemplissage }}%" aria-valuenow="{{ poubelle.niveauRemplissage }}" aria-valuemin="0" aria-valuemax="100"></div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <span class="status-badge status-{{ poubelle.statut|replace({' ': '-'}) }}">{{ poubelle.statut }}</span>
+                                    </div>
+                                </div>
+                                <div class="row mt-3">
+                                    <div class="col-md-12">
+                                        <div class="button-group">
+                                            <a href="{{ path('app_poubelle_edit', {'id': poubelle.id}) }}" class="btn btn-sm btn-primary">
+                                                <i class="fa fa-edit mr-1"></i> Modifier
+                                            </a>
+                                            <a href="{{ path('app_bienetre_by_poubelle', {'id': poubelle.id}) }}" class="btn btn-sm btn-info">
+                                                <i class="fa fa-comment mr-1"></i> Voir les avis
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="alert alert-success">
+                            <i class="fa fa-check-circle mr-2"></i> Aucune poubelle n'a atteint un niveau critique.
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="card-action">
+                    <a href="{{ path('app_poubelle_index') }}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left mr-2"></i> Retour à la liste
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

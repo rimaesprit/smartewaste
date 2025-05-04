@@ -1,0 +1,410 @@
+{% extends 'BackBase.html.twig' %}
+
+{% block title %}Liste des poubelles{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .statut-badge {
+            padding: 6px 10px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-size: 0.8rem;
+        }
+        .statut-Fonctionnelle {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .statut-En-maintenance {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        .statut-Hors-service {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .fill-level {
+            width: 100%;
+            height: 10px;
+            background-color: #eee;
+            border-radius: 5px;
+            margin-top: 5px;
+        }
+        .fill-bar {
+            height: 100%;
+            border-radius: 5px;
+        }
+        .fill-low {
+            background-color: #28a745;
+        }
+        .fill-medium {
+            background-color: #ffc107;
+        }
+        .fill-high {
+            background-color: #dc3545;
+        }
+        .action-buttons {
+            display: flex;
+            gap: 5px;
+        }
+        
+        /* Styles pour la recherche */
+        .search-box {
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        
+        .filter-badge {
+            display: inline-flex;
+            align-items: center;
+            background: #f1f5f9;
+            border-radius: 50px;
+            padding: 5px 12px;
+            margin-right: 8px;
+            margin-bottom: 8px;
+            font-size: 12px;
+            color: #2c3e50;
+        }
+        
+        .filter-badge i {
+            font-size: 10px;
+            margin-left: 8px;
+            cursor: pointer;
+            color: #8392AB;
+        }
+        
+        .filter-badge i:hover {
+            color: #dc3545;
+        }
+        
+        #loader {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .spinner-border {
+            width: 1.5rem;
+            height: 1.5rem;
+        }
+        
+        #active-filters {
+            display: flex;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+    <div class="container-fluid">
+        <!-- Messages flash -->
+        {% for label, messages in app.flashes %}
+            {% for message in messages %}
+                <div class="alert alert-{{ label }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+            {% endfor %}
+        {% endfor %}
+        
+        <!-- Section de recherche -->
+        <div class="card search-box mb-4">
+            <div class="card-header">
+                <h5 class="mb-0">Recherche avancée</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4 mb-3">
+                        <div class="form-group">
+                            <label for="searchQuery">Recherche</label>
+                            <input type="text" class="form-control" id="searchQuery" placeholder="Localisation, adresse...">
+                        </div>
+                    </div>
+                    <div class="col-md-2 mb-3">
+                        <div class="form-group">
+                            <label for="searchType">Type</label>
+                            <select class="form-control" id="searchType">
+                                <option value="">Tous</option>
+                                <option value="Plastique">Plastique</option>
+                                <option value="Verre">Verre</option>
+                                <option value="Papier">Papier</option>
+                                <option value="Métal">Métal</option>
+                                <option value="Organique">Organique</option>
+                                <option value="Mixte">Mixte</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-2 mb-3">
+                        <div class="form-group">
+                            <label for="searchStatut">Statut</label>
+                            <select class="form-control" id="searchStatut">
+                                <option value="">Tous</option>
+                                <option value="Fonctionnelle">Fonctionnelle</option>
+                                <option value="En maintenance">En maintenance</option>
+                                <option value="Hors service">Hors service</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-2 mb-3">
+                        <div class="form-group">
+                            <label for="searchNiveauMin">Niveau min (%)</label>
+                            <input type="number" class="form-control" id="searchNiveauMin" min="0" max="100" placeholder="0">
+                        </div>
+                    </div>
+                    <div class="col-md-2 mb-3">
+                        <div class="form-group">
+                            <label for="searchNiveauMax">Niveau max (%)</label>
+                            <input type="number" class="form-control" id="searchNiveauMax" min="0" max="100" placeholder="100">
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-md-12 text-right">
+                        <button type="button" id="searchButton" class="btn btn-primary">
+                            <i class="fas fa-search mr-1"></i> Rechercher
+                        </button>
+                        <button type="button" id="resetButton" class="btn btn-secondary">
+                            <i class="fas fa-redo mr-1"></i> Réinitialiser
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Filtres actifs -->
+                <div id="active-filters" class="mt-3" style="display: none;">
+                    <!-- Les filtres actifs seront affichés ici dynamiquement -->
+                </div>
+                
+                <!-- Indicateur de chargement -->
+                <div id="loader" class="mt-3">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Chargement...</span>
+                    </div>
+                    <span class="ms-2">Recherche en cours...</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Tableau des poubelles -->
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-trash"></i> Liste des poubelles
+                        </h3>
+                        <div class="card-tools">
+                            <a href="{{ path('app_poubelle_new') }}" class="btn btn-primary btn-sm">
+                                <i class="fas fa-plus"></i> Ajouter une poubelle
+                            </a>
+                            <a href="{{ path('app_poubelle_notifications') }}" class="btn btn-warning btn-sm">
+                                <i class="fas fa-bell"></i> Notifications
+                            </a>
+                        </div>
+                    </div>
+                    <div class="card-body table-responsive p-0">
+                        <table class="table table-hover text-nowrap">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Localisation</th>
+                                    <th>Type</th>
+                                    <th>Niveau de remplissage</th>
+                                    <th>Statut</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="poubelles-container">
+                                {% include 'poubelle/_poubelles_list.html.twig' with {'poubelles': poubelles} %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Éléments DOM
+            const searchButton = document.getElementById('searchButton');
+            const resetButton = document.getElementById('resetButton');
+            const searchQuery = document.getElementById('searchQuery');
+            const searchType = document.getElementById('searchType');
+            const searchStatut = document.getElementById('searchStatut');
+            const searchNiveauMin = document.getElementById('searchNiveauMin');
+            const searchNiveauMax = document.getElementById('searchNiveauMax');
+            const activeFilters = document.getElementById('active-filters');
+            const poubellesContainer = document.getElementById('poubelles-container');
+            const loader = document.getElementById('loader');
+            
+            // Fonction pour effectuer la recherche
+            function performSearch() {
+                // Afficher le loader
+                loader.style.display = 'block';
+                
+                // Récupérer les valeurs des filtres
+                const query = searchQuery.value.trim();
+                const type = searchType.value;
+                const statut = searchStatut.value;
+                const niveauMin = searchNiveauMin.value;
+                const niveauMax = searchNiveauMax.value;
+                
+                // Mettre à jour les filtres actifs
+                updateActiveFilters(query, type, statut, niveauMin, niveauMax);
+                
+                // Construire l'URL avec les paramètres
+                let url = "{{ path('app_poubelle_ajax_search') }}?";
+                const params = new URLSearchParams();
+                
+                if (query) params.append('query', query);
+                if (type) params.append('type', type);
+                if (statut) params.append('statut', statut);
+                if (niveauMin) params.append('niveau_min', niveauMin);
+                if (niveauMax) params.append('niveau_max', niveauMax);
+                
+                url += params.toString();
+                
+                // Effectuer la requête AJAX
+                fetch(url, {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => response.text())
+                .then(html => {
+                    // Cacher le loader
+                    loader.style.display = 'none';
+                    
+                    // Mettre à jour le tableau
+                    poubellesContainer.innerHTML = html;
+                })
+                .catch(error => {
+                    console.error('Erreur lors de la recherche:', error);
+                    loader.style.display = 'none';
+                    poubellesContainer.innerHTML = '<tr><td colspan="6" class="text-center text-danger">Une erreur est survenue lors de la recherche.</td></tr>';
+                });
+            }
+            
+            // Fonction pour mettre à jour les filtres actifs
+            function updateActiveFilters(query, type, statut, niveauMin, niveauMax) {
+                let hasFilters = false;
+                activeFilters.innerHTML = '';
+                
+                if (query) {
+                    addFilterBadge('Recherche: ' + query, 'query');
+                    hasFilters = true;
+                }
+                
+                if (type) {
+                    addFilterBadge('Type: ' + type, 'type');
+                    hasFilters = true;
+                }
+                
+                if (statut) {
+                    addFilterBadge('Statut: ' + statut, 'statut');
+                    hasFilters = true;
+                }
+                
+                if (niveauMin) {
+                    addFilterBadge('Niveau min: ' + niveauMin + '%', 'niveau_min');
+                    hasFilters = true;
+                }
+                
+                if (niveauMax) {
+                    addFilterBadge('Niveau max: ' + niveauMax + '%', 'niveau_max');
+                    hasFilters = true;
+                }
+                
+                if (hasFilters) {
+                    const clearAllButton = document.createElement('button');
+                    clearAllButton.className = 'btn btn-sm btn-outline-secondary ms-2';
+                    clearAllButton.innerHTML = '<i class="fas fa-times-circle"></i> Effacer tous';
+                    clearAllButton.addEventListener('click', clearAllFilters);
+                    activeFilters.appendChild(clearAllButton);
+                    
+                    activeFilters.style.display = 'flex';
+                } else {
+                    activeFilters.style.display = 'none';
+                }
+            }
+            
+            // Fonction pour ajouter un badge de filtre
+            function addFilterBadge(text, filterType) {
+                const badge = document.createElement('div');
+                badge.className = 'filter-badge';
+                badge.innerHTML = text + ' <i class="fas fa-times-circle" data-filter="' + filterType + '"></i>';
+                
+                // Ajouter un gestionnaire d'événements pour supprimer le filtre
+                const closeIcon = badge.querySelector('i');
+                closeIcon.addEventListener('click', function() {
+                    const filterType = this.getAttribute('data-filter');
+                    clearFilter(filterType);
+                });
+                
+                activeFilters.appendChild(badge);
+            }
+            
+            // Fonction pour effacer un filtre spécifique
+            function clearFilter(filterType) {
+                switch (filterType) {
+                    case 'query':
+                        searchQuery.value = '';
+                        break;
+                    case 'type':
+                        searchType.value = '';
+                        break;
+                    case 'statut':
+                        searchStatut.value = '';
+                        break;
+                    case 'niveau_min':
+                        searchNiveauMin.value = '';
+                        break;
+                    case 'niveau_max':
+                        searchNiveauMax.value = '';
+                        break;
+                }
+                
+                performSearch();
+            }
+            
+            // Fonction pour effacer tous les filtres
+            function clearAllFilters() {
+                searchQuery.value = '';
+                searchType.value = '';
+                searchStatut.value = '';
+                searchNiveauMin.value = '';
+                searchNiveauMax.value = '';
+                
+                performSearch();
+            }
+            
+            // Écouteurs d'événements
+            searchButton.addEventListener('click', performSearch);
+            
+            resetButton.addEventListener('click', clearAllFilters);
+            
+            // Déclencher la recherche lorsqu'on appuie sur Entrée dans le champ de recherche
+            searchQuery.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    performSearch();
+                }
+            });
+            
+            // Fonction de confirmation de suppression
+            window.confirmDelete = function(id, type, localisation) {
+                if (confirm(`Êtes-vous sûr de vouloir supprimer la poubelle #${id} de type ${type} située à ${localisation} ?`)) {
+                    document.getElementById('deleteForm' + id).submit();
+                }
+            };
+        });
+    </script>
+{% endblock %} 

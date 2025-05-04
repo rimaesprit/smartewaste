@@ -1,0 +1,347 @@
+{% extends 'BackBase.html.twig' %}
+
+{% block title %}Notifications des Poubelles{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .notification-section {
+            margin-bottom: 30px;
+        }
+        
+        .type-header {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-left: 5px solid #28a745;
+        }
+        
+        .type-info {
+            display: flex;
+            align-items: center;
+        }
+        
+        .type-icon {
+            font-size: 1.5rem;
+            margin-right: 15px;
+            color: #28a745;
+        }
+        
+        .notification-card {
+            border-left: 4px solid #28a745;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+        }
+        
+        .notification-card.remplie {
+            border-left-color: #ffc107;
+        }
+        
+        .notification-card.maintenance {
+            border-left-color: #17a2b8;
+        }
+        
+        .notification-card.hors-service {
+            border-left-color: #dc3545;
+        }
+        
+        .notification-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .notification-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+            padding-bottom: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .notification-badge {
+            color: white;
+            font-size: 0.8rem;
+            padding: 3px 8px;
+            border-radius: 20px;
+        }
+        
+        .notification-badge.badge-plastique { background-color: #3498db; }
+        .notification-badge.badge-verre { background-color: #2ecc71; }
+        .notification-badge.badge-papier { background-color: #f1c40f; }
+        .notification-badge.badge-metal { background-color: #95a5a6; }
+        .notification-badge.badge-organique { background-color: #27ae60; }
+        .notification-badge.badge-mixte { background-color: #9b59b6; }
+        
+        .notification-level {
+            font-size: 1.1rem;
+            color: #495057;
+            font-weight: bold;
+        }
+        
+        .notification-address {
+            font-size: 0.9rem;
+            color: #6c757d;
+            margin-bottom: 5px;
+        }
+        
+        .notification-location {
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
+        
+        .progress {
+            height: 8px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+        }
+        
+        .progress-bar.critical {
+            background-color: #dc3545;
+        }
+        
+        .progress-bar.warning {
+            background-color: #ffc107;
+        }
+        
+        .progress-bar.normal {
+            background-color: #28a745;
+        }
+        
+        .empty-container {
+            text-align: center;
+            padding: 50px 0;
+        }
+        
+        .empty-icon {
+            font-size: 3rem;
+            color: #6c757d;
+            margin-bottom: 20px;
+        }
+        
+        .statut-badge {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            color: white;
+        }
+        
+        .statut-fonctionnelle {
+            background-color: #28a745;
+        }
+        
+        .statut-maintenance {
+            background-color: #17a2b8;
+        }
+        
+        .statut-hors-service {
+            background-color: #dc3545;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+    <div class="container py-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="mb-0">
+                <i class="fas fa-bell text-success me-2"></i>
+                Centre de Notifications - Poubelles
+            </h2>
+            <div>
+                <a href="{{ path('app_poubelle_index') }}" class="btn btn-secondary">
+                    <i class="fas fa-list me-2"></i> Liste des poubelles
+                </a>
+            </div>
+        </div>
+        
+        <div class="alert alert-info">
+            <div class="d-flex">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-info-circle fa-2x me-3"></i>
+                </div>
+                <div>
+                    <h4 class="alert-heading">Centre de notifications</h4>
+                    <p>Cette page affiche les alertes concernant les poubelles nécessitant votre attention : poubelles presque pleines, en maintenance ou hors service.</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Poubelles Remplies -->
+        {% if poubellesRemplies|length > 0 %}
+            <div class="card mb-4">
+                <div class="card-header bg-warning text-white">
+                    <h4 class="mb-0"><i class="fas fa-exclamation-triangle me-2"></i> Poubelles presque pleines</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        {% for poubelle in poubellesRemplies %}
+                            <div class="col-md-6 col-lg-4">
+                                <div class="card notification-card remplie">
+                                    <div class="card-body">
+                                        <div class="notification-header">
+                                            <h5 class="mb-0">Poubelle #{{ poubelle.id }}</h5>
+                                            <span class="notification-badge badge-{{ poubelle.type|lower }}">
+                                                {{ poubelle.type }}
+                                            </span>
+                                        </div>
+                                        <div class="notification-location">
+                                            <i class="fas fa-map-marker-alt me-1"></i>
+                                            {{ poubelle.localisation }}
+                                        </div>
+                                        <div class="notification-address">
+                                            <i class="fas fa-road me-1"></i>
+                                            {{ poubelle.adresse }}
+                                        </div>
+                                        <div class="mt-2">
+                                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                                <small>Niveau de remplissage</small>
+                                                <small class="fw-bold">{{ poubelle.niveauRemplissage }}%</small>
+                                            </div>
+                                            <div class="progress">
+                                                <div class="progress-bar {% if poubelle.niveauRemplissage > 90 %}critical{% elseif poubelle.niveauRemplissage > 75 %}warning{% else %}normal{% endif %}" 
+                                                     role="progressbar" 
+                                                     style="width: {{ poubelle.niveauRemplissage }}%" 
+                                                     aria-valuenow="{{ poubelle.niveauRemplissage }}" 
+                                                     aria-valuemin="0" 
+                                                     aria-valuemax="100">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="mt-3 d-flex justify-content-between">
+                                            <a href="{{ path('app_poubelle_show', {'id': poubelle.id}) }}" class="btn btn-sm btn-info">
+                                                <i class="fas fa-eye me-1"></i> Détails
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+        
+        <!-- Poubelles en Maintenance -->
+        {% if poubellesEnMaintenance|length > 0 %}
+            <div class="card mb-4">
+                <div class="card-header bg-info text-white">
+                    <h4 class="mb-0"><i class="fas fa-tools me-2"></i> Poubelles en maintenance</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        {% for poubelle in poubellesEnMaintenance %}
+                            <div class="col-md-6 col-lg-4">
+                                <div class="card notification-card maintenance">
+                                    <div class="card-body">
+                                        <div class="notification-header">
+                                            <h5 class="mb-0">Poubelle #{{ poubelle.id }}</h5>
+                                            <span class="notification-badge badge-{{ poubelle.type|lower }}">
+                                                {{ poubelle.type }}
+                                            </span>
+                                        </div>
+                                        <div class="notification-location">
+                                            <i class="fas fa-map-marker-alt me-1"></i>
+                                            {{ poubelle.localisation }}
+                                        </div>
+                                        <div class="notification-address">
+                                            <i class="fas fa-road me-1"></i>
+                                            {{ poubelle.adresse }}
+                                        </div>
+                                        <div class="mt-2">
+                                            <span class="statut-badge statut-maintenance">
+                                                <i class="fas fa-tools me-1"></i> En maintenance
+                                            </span>
+                                        </div>
+                                        <div class="mt-3 d-flex justify-content-between">
+                                            <a href="{{ path('app_poubelle_show', {'id': poubelle.id}) }}" class="btn btn-sm btn-info">
+                                                <i class="fas fa-eye me-1"></i> Détails
+                                            </a>
+                                            <a href="{{ path('app_poubelle_edit', {'id': poubelle.id}) }}" class="btn btn-sm btn-primary">
+                                                <i class="fas fa-edit me-1"></i> Modifier
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+        
+        <!-- Poubelles Hors Service -->
+        {% if poubellesHorsService|length > 0 %}
+            <div class="card mb-4">
+                <div class="card-header bg-danger text-white">
+                    <h4 class="mb-0"><i class="fas fa-times-circle me-2"></i> Poubelles hors service</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        {% for poubelle in poubellesHorsService %}
+                            <div class="col-md-6 col-lg-4">
+                                <div class="card notification-card hors-service">
+                                    <div class="card-body">
+                                        <div class="notification-header">
+                                            <h5 class="mb-0">Poubelle #{{ poubelle.id }}</h5>
+                                            <span class="notification-badge badge-{{ poubelle.type|lower }}">
+                                                {{ poubelle.type }}
+                                            </span>
+                                        </div>
+                                        <div class="notification-location">
+                                            <i class="fas fa-map-marker-alt me-1"></i>
+                                            {{ poubelle.localisation }}
+                                        </div>
+                                        <div class="notification-address">
+                                            <i class="fas fa-road me-1"></i>
+                                            {{ poubelle.adresse }}
+                                        </div>
+                                        <div class="mt-2">
+                                            <span class="statut-badge statut-hors-service">
+                                                <i class="fas fa-times-circle me-1"></i> Hors service
+                                            </span>
+                                        </div>
+                                        <div class="mt-3 d-flex justify-content-between">
+                                            <a href="{{ path('app_poubelle_show', {'id': poubelle.id}) }}" class="btn btn-sm btn-info">
+                                                <i class="fas fa-eye me-1"></i> Détails
+                                            </a>
+                                            <a href="{{ path('app_poubelle_edit', {'id': poubelle.id}) }}" class="btn btn-sm btn-primary">
+                                                <i class="fas fa-edit me-1"></i> Modifier
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+        
+        {% if poubellesRemplies|length == 0 and poubellesEnMaintenance|length == 0 and poubellesHorsService|length == 0 %}
+            <div class="empty-container">
+                <div class="empty-icon">
+                    <i class="fas fa-check-circle text-success"></i>
+                </div>
+                <h4>Aucune notification</h4>
+                <p class="text-muted">Toutes les poubelles fonctionnent correctement et ne nécessitent pas d'attention particulière.</p>
+                <a href="{{ path('app_poubelle_index') }}" class="btn btn-primary mt-3">
+                    <i class="fas fa-list me-2"></i> Voir toutes les poubelles
+                </a>
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        // Rafraîchir la page toutes les 60 secondes pour mettre à jour les notifications
+        setTimeout(function() {
+            window.location.reload();
+        }, 60000);
+    </script>
+{% endblock %} 

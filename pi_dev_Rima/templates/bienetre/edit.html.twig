@@ -1,0 +1,106 @@
+{% extends 'BackBase.html.twig' %}
+
+{% block title %}Modifier l'Avis{% endblock %}
+
+{% block body %}
+<div class="page-inner">
+    <div class="page-header">
+        <h4 class="page-title">Gestion des Avis de Bien-être</h4>
+        <ul class="breadcrumbs">
+            <li class="nav-home">
+                <a href="{{ path('app_home') }}">
+                    <i class="fas fa-home"></i>
+                </a>
+            </li>
+            <li class="separator">
+                <i class="fas fa-angle-right"></i>
+            </li>
+            <li class="nav-item">
+                <a href="{{ path('app_bienetre_index') }}">Avis</a>
+            </li>
+            <li class="separator">
+                <i class="fas fa-angle-right"></i>
+            </li>
+            <li class="nav-item">
+                <a href="#">Modifier</a>
+            </li>
+        </ul>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-title">Modifier l'avis #{{ bienetre.id }}</div>
+                </div>
+                <div class="card-body">
+                    {{ form_start(form) }}
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                {{ form_label(form.nom) }}
+                                {{ form_widget(form.nom) }}
+                                <small class="form-text text-muted">{{ form_help(form.nom) }}</small>
+                                <div class="form-error">
+                                    {{ form_errors(form.nom) }}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                {{ form_label(form.rate) }}
+                                {{ form_widget(form.rate) }}
+                                <small class="form-text text-muted">{{ form_help(form.rate) }}</small>
+                                <div class="form-error">
+                                    {{ form_errors(form.rate) }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                {{ form_label(form.review) }}
+                                {{ form_widget(form.review) }}
+                                <small class="form-text text-muted">{{ form_help(form.review) }}</small>
+                                <div class="form-error">
+                                    {{ form_errors(form.review) }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                {{ form_label(form.poubelle) }}
+                                {{ form_widget(form.poubelle) }}
+                                <small class="form-text text-muted">{{ form_help(form.poubelle) }}</small>
+                                <div class="form-error">
+                                    {{ form_errors(form.poubelle) }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle mr-2"></i>
+                                Le sentiment sera automatiquement déterminé en fonction de la note.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-action">
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-save mr-2"></i> Enregistrer les modifications
+                    </button>
+                    <a href="{{ path('app_bienetre_index') }}" class="btn btn-danger">
+                        <i class="fas fa-times mr-2"></i> Annuler
+                    </a>
+                </div>
+                {{ form_end(form) }}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 
