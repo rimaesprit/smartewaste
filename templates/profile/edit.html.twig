@@ -1,0 +1,516 @@
+{% extends 'FrontBase.html.twig' %}
+
+{% block title %}Modifier mon profil - {{ parent() }}{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        :root {
+            --primary-color: #1e4b57;
+            --primary-light: #2d7d90;
+            --primary-gradient: linear-gradient(135deg, #1e4b57 0%, #2d7d90 100%);
+            --accent-color: #3ecf8e;
+            --dark-color: #1f2937;
+            --light-color: #f9fafb;
+            --text-color: #374151;
+            --text-light: #6b7280;
+            --box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            --border-radius: 1rem;
+        }
+        
+        .edit-header {
+            background: var(--primary-gradient);
+            color: white;
+            padding: 3rem 0;
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 2rem;
+        }
+        
+        .edit-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiB2aWV3Qm94PSIwIDAgMTI4MCAxNDAiIHByZXNlcnZlQXNwZWN0UmF0aW89Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGcgZmlsbD0iI2ZmZmZmZiI+PHBhdGggZD0iTTEyODAgMTQwVjBTOTkzLjQ2IDE0MCA2NDAgMTM5IDAgMCAwIDB2MTQweiIvPjwvZz48L3N2Zz4=');
+            background-size: 100% 100px;
+            background-position: bottom;
+            z-index: 1;
+            opacity: 0.1;
+        }
+        
+        .edit-header-content {
+            position: relative;
+            z-index: 2;
+        }
+        
+        .edit-card {
+            background-color: var(--light-color);
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            margin-bottom: 2rem;
+        }
+        
+        .edit-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        
+        .edit-card-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            background-color: white;
+        }
+        
+        .edit-card-title {
+            margin-bottom: 0;
+            font-weight: 700;
+            color: var(--dark-color);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .edit-card-title i {
+            color: var(--primary-light);
+        }
+        
+        .edit-card-body {
+            padding: 1.5rem;
+            background-color: white;
+        }
+        
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+        
+        .form-label {
+            font-weight: 600;
+            color: var(--dark-color);
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+        
+        .form-control, .form-select {
+            border-radius: 0.5rem;
+            border: 1px solid #e5e7eb;
+            padding: 0.75rem 1rem;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary-light);
+            box-shadow: 0 0 0 3px rgba(45, 125, 144, 0.1);
+            outline: none;
+        }
+        
+        .form-text {
+            font-size: 0.875rem;
+            color: var(--text-light);
+            margin-top: 0.25rem;
+        }
+        
+        .avatar-preview {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background-color: #f3f4f6;
+            margin: 0 auto 1.5rem;
+            overflow: hidden;
+            border: 5px solid white;
+            box-shadow: var(--box-shadow);
+            position: relative;
+        }
+        
+        .avatar-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .avatar-preview-text {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            font-weight: 700;
+            color: white;
+        }
+        
+        .form-section-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin: 1.5rem 0 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #f3f4f6;
+            color: var(--primary-color);
+        }
+        
+        .btn-form {
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary-color);
+            border: none;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--primary-light);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn-outline {
+            background-color: transparent;
+            border: 1px solid #e5e7eb;
+            color: var(--text-color);
+        }
+        
+        .btn-outline:hover {
+            background-color: #f9fafb;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+        
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+            justify-content: flex-end;
+        }
+        
+        .invalid-feedback {
+            color: #ef4444;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+        
+        .tab-navigation {
+            display: flex;
+            overflow-x: auto;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        .tab-button {
+            padding: 1rem 1.5rem;
+            border: none;
+            background: transparent;
+            font-weight: 600;
+            color: var(--text-light);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            white-space: nowrap;
+        }
+        
+        .tab-button.active {
+            color: var(--primary-color);
+        }
+        
+        .tab-button.active::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background-color: var(--primary-color);
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        #avatarUrlPreview {
+            margin-top: 1rem;
+        }
+        
+        /* Responsive fixes */
+        @media (max-width: 768px) {
+            .tab-navigation {
+                flex-wrap: nowrap;
+            }
+            
+            .tab-button {
+                padding: 0.75rem 1rem;
+            }
+            
+            .form-actions {
+                flex-direction: column;
+            }
+            
+            .btn-form {
+                width: 100%;
+            }
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+    <section class="edit-header">
+        <div class="container edit-header-content">
+            <h1 class="text-center">Modifier mon profil</h1>
+            <p class="lead text-center">Personnalisez vos informations et préférences</p>
+        </div>
+    </section>
+
+    <div class="container mb-5">
+        {% for type, messages in app.flashes %}
+            {% for message in messages %}
+                <div class="alert alert-{{ type }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endfor %}
+        
+        {{ form_start(form, {'attr': {'novalidate': 'novalidate', 'id': 'profile-form'}}) }}
+        
+        <div class="edit-card">
+            <div class="edit-card-header">
+                <h3 class="edit-card-title"><i class="fas fa-user-edit"></i> Édition du profil</h3>
+            </div>
+            <div class="edit-card-body">
+                <div class="tab-navigation">
+                    <button type="button" class="tab-button active" data-tab="personal-info">Informations personnelles</button>
+                    <button type="button" class="tab-button" data-tab="contact-info">Coordonnées</button>
+                    <button type="button" class="tab-button" data-tab="appearance">Apparence</button>
+                    <button type="button" class="tab-button" data-tab="biography">Biographie</button>
+                </div>
+                
+                <!-- Tab 1: Informations personnelles -->
+                <div class="tab-content active" id="personal-info">
+                    <div class="text-center mb-4">
+                        <div class="avatar-preview" id="avatarPreview">
+                            {% if form.vars.data.avatarUrl %}
+                                <img src="{{ form.vars.data.avatarUrl }}" alt="{{ form.vars.data.fullName }}" />
+                            {% else %}
+                                <div class="avatar-preview-text">{{ form.vars.data.initials }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                {{ form_label(form.firstname) }}
+                                {{ form_widget(form.firstname) }}
+                                <div class="invalid-feedback d-block">
+                                    {{ form_errors(form.firstname) }}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                {{ form_label(form.lastname) }}
+                                {{ form_widget(form.lastname) }}
+                                <div class="invalid-feedback d-block">
+                                    {{ form_errors(form.lastname) }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        {{ form_label(form.email) }}
+                        {{ form_widget(form.email) }}
+                        <div class="invalid-feedback d-block">
+                            {{ form_errors(form.email) }}
+                        </div>
+                        <div class="form-text">Un email de vérification sera envoyé si vous changez votre adresse.</div>
+                    </div>
+                    
+                    <div class="form-group">
+                        {{ form_label(form.avatarUrl) }}
+                        {{ form_widget(form.avatarUrl) }}
+                        <div class="invalid-feedback d-block">
+                            {{ form_errors(form.avatarUrl) }}
+                        </div>
+                        <div class="form-text">Entrez l'URL d'une image pour votre avatar.</div>
+                    </div>
+                    
+                    <div class="form-group">
+                        {{ form_label(form.birthDate) }}
+                        {{ form_widget(form.birthDate) }}
+                        <div class="invalid-feedback d-block">
+                            {{ form_errors(form.birthDate) }}
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Tab 2: Coordonnées -->
+                <div class="tab-content" id="contact-info">
+                    <div class="form-group">
+                        {{ form_label(form.phoneNumber) }}
+                        {{ form_widget(form.phoneNumber) }}
+                        <div class="invalid-feedback d-block">
+                            {{ form_errors(form.phoneNumber) }}
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        {{ form_label(form.address) }}
+                        {{ form_widget(form.address) }}
+                        <div class="invalid-feedback d-block">
+                            {{ form_errors(form.address) }}
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                {{ form_label(form.postalCode) }}
+                                {{ form_widget(form.postalCode) }}
+                                <div class="invalid-feedback d-block">
+                                    {{ form_errors(form.postalCode) }}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                {{ form_label(form.city) }}
+                                {{ form_widget(form.city) }}
+                                <div class="invalid-feedback d-block">
+                                    {{ form_errors(form.city) }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Tab 3: Apparence -->
+                <div class="tab-content" id="appearance">
+                    <div class="form-group">
+                        {{ form_label(form.theme) }}
+                        {{ form_widget(form.theme) }}
+                        <div class="invalid-feedback d-block">
+                            {{ form_errors(form.theme) }}
+                        </div>
+                        <div class="form-text">Choisissez votre thème préféré pour l'application.</div>
+                    </div>
+                    
+                    <div class="form-group">
+                        {{ form_label(form.language) }}
+                        {{ form_widget(form.language) }}
+                        <div class="invalid-feedback d-block">
+                            {{ form_errors(form.language) }}
+                        </div>
+                        <div class="form-text">Sélectionnez la langue de l'interface.</div>
+                    </div>
+                </div>
+                
+                <!-- Tab 4: Biographie -->
+                <div class="tab-content" id="biography">
+                    <div class="form-group">
+                        {{ form_label(form.bio) }}
+                        {{ form_widget(form.bio) }}
+                        <div class="invalid-feedback d-block">
+                            {{ form_errors(form.bio) }}
+                        </div>
+                        <div class="form-text">Partagez quelques informations sur vous.</div>
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <a href="{{ path('app_profile_index') }}" class="btn-form btn-outline">
+                        <i class="fas fa-times"></i> Annuler
+                    </a>
+                    <button type="submit" class="btn-form btn-primary">
+                        <i class="fas fa-save"></i> Enregistrer les modifications
+                    </button>
+                </div>
+            </div>
+        </div>
+        {{ form_end(form) }}
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Gestion des onglets
+            const tabButtons = document.querySelectorAll('.tab-button');
+            const tabContents = document.querySelectorAll('.tab-content');
+            
+            tabButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const tabId = this.getAttribute('data-tab');
+                    
+                    // Désactiver tous les onglets
+                    tabButtons.forEach(btn => btn.classList.remove('active'));
+                    tabContents.forEach(content => content.classList.remove('active'));
+                    
+                    // Activer l'onglet sélectionné
+                    this.classList.add('active');
+                    document.getElementById(tabId).classList.add('active');
+                });
+            });
+            
+            // Prévisualisation de l'avatar
+            const avatarUrlInput = document.getElementById('{{ form.avatarUrl.vars.id }}');
+            const avatarPreview = document.getElementById('avatarPreview');
+            
+            if (avatarUrlInput && avatarPreview) {
+                avatarUrlInput.addEventListener('input', function() {
+                    const url = this.value.trim();
+                    if (url) {
+                        // Tester si l'URL est valide
+                        const img = new Image();
+                        img.onload = function() {
+                            avatarPreview.innerHTML = `<img src="${url}" alt="Prévisualisation" />`;
+                        };
+                        img.onerror = function() {
+                            // En cas d'erreur, afficher les initiales
+                            const initials = '{{ form.vars.data.initials }}';
+                            avatarPreview.innerHTML = `<div class="avatar-preview-text">${initials}</div>`;
+                        };
+                        img.src = url;
+                    } else {
+                        // Si l'URL est vide, afficher les initiales
+                        const initials = '{{ form.vars.data.initials }}';
+                        avatarPreview.innerHTML = `<div class="avatar-preview-text">${initials}</div>`;
+                    }
+                });
+            }
+            
+            // Génération d'un fond coloré pour l'avatar
+            const avatarText = document.querySelector('.avatar-preview-text');
+            if (avatarText) {
+                const userName = '{{ form.vars.data.fullName }}';
+                const hash = userName.split('').reduce((acc, char) => {
+                    return char.charCodeAt(0) + ((acc << 5) - acc);
+                }, 0);
+                
+                const h = Math.abs(hash) % 360;
+                avatarText.style.background = `linear-gradient(135deg, hsl(${h}, 70%, 35%) 0%, hsl(${h}, 80%, 50%) 100%)`;
+            }
+        });
+    </script>
+{% endblock %} 

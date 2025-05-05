@@ -1,0 +1,309 @@
+{% extends 'BackBase.html.twig' %}
+
+{% block title %}Modifier la réclamation{% endblock %}
+
+{% block body %}
+<div class="page-header">
+    <h4 class="page-title">Modifier la réclamation</h4>
+    <ul class="breadcrumbs">
+        <li class="nav-home">
+            <a href="{{ path('app_home') }}">
+                <i class="fas fa-home"></i>
+            </a>
+        </li>
+        <li class="separator">
+            <i class="fas fa-angle-right"></i>
+        </li>
+        <li class="nav-item">
+            <a href="#">Citoyens</a>
+        </li>
+        <li class="separator">
+            <i class="fas fa-angle-right"></i>
+        </li>
+        <li class="nav-item">
+            <a href="{{ path('app_reclamation_index') }}">Réclamations</a>
+        </li>
+        <li class="separator">
+            <i class="fas fa-angle-right"></i>
+        </li>
+        <li class="nav-item">
+            <a href="#">Modifier</a>
+        </li>
+    </ul>
+</div>
+
+{# Afficher la section de débogage des erreurs #}
+{% if form.vars.submitted and not form.vars.valid %}
+<div class="alert alert-danger">
+    <h5><i class="fas fa-exclamation-triangle"></i> Erreurs de validation détectées</h5>
+    <p>Le formulaire contient les erreurs suivantes :</p>
+    <ul>
+        {% if form.vars.errors|length > 0 %}
+            {% for error in form.vars.errors %}
+                <li><strong>Erreur globale :</strong> {{ error.message }}</li>
+            {% endfor %}
+        {% endif %}
+        
+        {% for child in form.children %}
+            {% if not child.vars.valid %}
+                <li>
+                    <strong>{{ child.vars.label|default(child.vars.name)|humanize }} :</strong>
+                    <ul>
+                        {% for error in child.vars.errors %}
+                            <li>{{ error.message }}</li>
+                        {% endfor %}
+                    </ul>
+                </li>
+            {% endif %}
+        {% endfor %}
+    </ul>
+    
+    <hr>
+    <h6>Valeurs soumises :</h6>
+    <pre>{{ dump(form.vars.value) }}</pre>
+</div>
+{% endif %}
+
+{% for flash_error in app.flashes('error') %}
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        {{ flash_error }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+{% endfor %}
+
+{% for flash_success in app.flashes('success') %}
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        {{ flash_success }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+{% endfor %}
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header bg-primary bg-gradient">
+                <h4 class="card-title text-white mb-0">Formulaire de modification</h4>
+            </div>
+            <div class="card-body p-4">
+                {{ form_start(form, {
+                    'attr': {'class': 'needs-validation', 'novalidate': 'novalidate', 'data-turbo': 'false'}
+                }) }}
+                
+                {# Informations de débogage sur la validité des champs #}
+                <div class="debug-info mb-4 p-3 border bg-light small">
+                    <h6>Statut de validation des champs :</h6>
+                    <ul>
+                        {% for child_name, child in form.children %}
+                            <li>
+                                <strong>{{ child_name }}</strong> : 
+                                {% if child.vars.valid %}
+                                    <span class="text-success">Valide</span>
+                                {% else %}
+                                    <span class="text-danger">Invalide</span>
+                                    {% if child.vars.errors|length > 0 %}
+                                        <ul>
+                                            {% for error in child.vars.errors %}
+                                                <li>{{ error.message }}</li>
+                                            {% endfor %}
+                                        </ul>
+                                    {% endif %}
+                                {% endif %}
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <div class="form-group mb-3">
+                            {{ form_label(form.typeRec, 'Type de réclamation', {'label_attr': {'class': 'form-label fw-bold'}}) }}
+                            {{ form_widget(form.typeRec, {'attr': {'class': 'form-select'}}) }}
+                            {% if form.typeRec.vars.errors|length > 0 %}
+                                <div class="text-danger small">
+                                    {{ form_errors(form.typeRec) }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        {% if form.adresse is defined %}
+                        <div class="form-group mb-3">
+                            {{ form_label(form.adresse, 'Adresse concernée', {'label_attr': {'class': 'form-label fw-bold'}}) }}
+                            {{ form_widget(form.adresse, {'attr': {'class': 'form-control'}}) }}
+                            {% if form.adresse.vars.errors|length > 0 %}
+                                <div class="text-danger small">
+                                    {{ form_errors(form.adresse) }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="col-md-6">
+                        {% if form.photoFile is defined %}
+                        <div class="form-group mb-3">
+                            {{ form_label(form.photoFile, 'Photo (optionnelle)', {'label_attr': {'class': 'form-label fw-bold'}}) }}
+                            {{ form_widget(form.photoFile, {'attr': {'class': 'form-control'}}) }}
+                            {% if form.photoFile.vars.errors|length > 0 %}
+                                <div class="text-danger small">
+                                    {{ form_errors(form.photoFile) }}
+                                </div>
+                            {% endif %}
+                            <small class="text-muted">Formats acceptés: JPG, PNG, GIF. Taille max: 5MB</small>
+                        </div>
+                        {% endif %}
+                        
+                        {% if form.deletePhoto is defined %}
+                        <div class="form-check mb-3 mt-2">
+                            {{ form_widget(form.deletePhoto, {'attr': {'class': 'form-check-input'}}) }}
+                            {{ form_label(form.deletePhoto, 'Supprimer la photo actuelle', {'label_attr': {'class': 'form-check-label'}}) }}
+                            {% if form.deletePhoto.vars.errors|length > 0 %}
+                                <div class="text-danger small">
+                                    {{ form_errors(form.deletePhoto) }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                        
+                        {% if reclamation.photoName %}
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Photo actuelle</label>
+                            <div>
+                                <img src="{{ asset('uploads/' ~ reclamation.photoName) }}" alt="Photo de la réclamation" class="img-thumbnail" style="max-height: 150px;">
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="form-group mb-4">
+                    {{ form_label(form.reclamation, 'Description', {'label_attr': {'class': 'form-label fw-bold'}}) }}
+                    {{ form_widget(form.reclamation, {'attr': {'class': 'form-control', 'rows': '5'}}) }}
+                    {% if form.reclamation.vars.errors|length > 0 %}
+                        <div class="text-danger small">
+                            {{ form_errors(form.reclamation) }}
+                        </div>
+                    {% endif %}
+                </div>
+                
+                {% if is_granted('ROLE_ADMIN') %}
+                <hr class="my-4">
+                <h5 class="mb-3">Informations de traitement</h5>
+                
+                <div class="form-group mb-3">
+                    {{ form_label(form.etatRec, 'État', {'label_attr': {'class': 'form-label fw-bold'}}) }}
+                    {{ form_widget(form.etatRec, {'attr': {'class': 'form-select'}}) }}
+                    {% if form.etatRec.vars.errors|length > 0 %}
+                        <div class="text-danger small">
+                            {{ form_errors(form.etatRec) }}
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <div class="form-group mb-4">
+                    {{ form_label(form.reponse, 'Réponse', {'label_attr': {'class': 'form-label fw-bold'}}) }}
+                    {{ form_widget(form.reponse, {'attr': {'class': 'form-control', 'rows': '5'}}) }}
+                    {% if form.reponse.vars.errors|length > 0 %}
+                        <div class="text-danger small">
+                            {{ form_errors(form.reponse) }}
+                        </div>
+                    {% endif %}
+                    <small class="text-muted">Cette réponse sera visible par le citoyen.</small>
+                </div>
+                {% endif %}
+                
+                {# Afficher les champs manquants #}
+                <div class="d-none">
+                    {{ form_rest(form) }}
+                </div>
+                
+                <div class="card-action d-flex justify-content-between mt-4 pt-3 border-top">
+                    <a href="{{ path('app_reclamation_index') }}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left me-2"></i> Retour à la liste
+                    </a>
+                    <button type="submit" class="btn btn-primary btn-lg px-4">
+                        <i class="fas fa-save me-2"></i> Enregistrer
+                    </button>
+                </div>
+                
+                {{ form_end(form) }}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('Initialisation du formulaire de modification');
+        
+        // Journaliser les erreurs JavaScript
+        window.addEventListener('error', function(event) {
+            console.error('ERREUR JS:', event.message, 'dans', event.filename, 'ligne', event.lineno);
+        });
+        
+        // Journaliser les erreurs de requête
+        const oldFetch = window.fetch;
+        window.fetch = function() {
+            return oldFetch.apply(this, arguments)
+                .then(response => {
+                    console.log('Requête fetch:', response.url, response.status);
+                    return response;
+                })
+                .catch(error => {
+                    console.error('Erreur fetch:', error);
+                    throw error;
+                });
+        };
+        
+        // Détecter les problèmes de validation côté client
+        const form = document.querySelector('form');
+        if (form) {
+            console.log('Formulaire trouvé:', form.id || 'sans id');
+            
+            // Inspecter les champs
+            const formElements = form.elements;
+            console.log('Nombre de champs:', formElements.length);
+            
+            for (let i = 0; i < formElements.length; i++) {
+                const element = formElements[i];
+                if (element.name) {
+                    console.log('Champ:', element.name, 'Type:', element.type, 'Valeur:', element.value);
+                    
+                    // Vérifier les validations HTML5
+                    if (element.validity) {
+                        if (!element.validity.valid) {
+                            console.warn('Validation HTML5 échouée pour:', element.name);
+                            for (const key in element.validity) {
+                                if (element.validity[key] === true && key !== 'valid') {
+                                    console.warn('  - Raison:', key);
+                                }
+                            }
+                        }
+                    }
+                    
+                    // Écouter les changements pour débogage
+                    element.addEventListener('change', function() {
+                        console.log('Changement dans', element.name, ':', element.value);
+                    });
+                }
+            }
+            
+            // Intercepter la soumission pour journaliser
+            form.addEventListener('submit', function(event) {
+                console.log('Formulaire soumis');
+                
+                // Vérifier la validité côté client
+                const isValid = form.checkValidity();
+                console.log('Validité HTML5:', isValid);
+                
+                if (!isValid) {
+                    console.warn('Validation client échouée');
+                    // Ne pas empêcher la soumission, car nous voulons voir les erreurs serveur
+                }
+            });
+        }
+    });
+</script>
+{% endblock %} 

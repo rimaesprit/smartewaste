@@ -1,0 +1,367 @@
+{% extends 'FrontBase.html.twig' %}
+
+{% block title %}Gestion des poubelles intelligentes{% endblock %}
+
+{% block stylesheets %}
+{{ parent() }}
+<style>
+    .poubelle-card {
+        border-radius: 10px;
+        transition: transform 0.3s;
+        margin-bottom: 20px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    
+    .poubelle-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+    }
+    
+    .card-header {
+        border-radius: 10px 10px 0 0 !important;
+    }
+    
+    .progress {
+        height: 25px;
+        font-size: 14px;
+        font-weight: bold;
+        border-radius: 15px;
+    }
+    
+    .progress-bar {
+        line-height: 25px;
+    }
+    
+    .filter-buttons {
+        margin-bottom: 30px;
+    }
+    
+    .filter-buttons .btn {
+        margin-right: 10px;
+        margin-bottom: 10px;
+        border-radius: 20px;
+        padding: 8px 16px;
+        transition: all 0.3s;
+    }
+    
+    .filter-buttons .btn.active {
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        transform: translateY(-2px);
+    }
+    
+    .section-title {
+        position: relative;
+        margin-bottom: 30px;
+    }
+    
+    .section-title h2 {
+        font-size: 32px;
+        font-weight: 700;
+        position: relative;
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        color: #333;
+    }
+    
+    .section-title h2:after {
+        content: '';
+        position: absolute;
+        display: block;
+        width: 50px;
+        height: 3px;
+        background: #1abc9c;
+        bottom: 0;
+        left: 0;
+    }
+    
+    .statut-indicator {
+        width: 15px;
+        height: 15px;
+        border-radius: 50%;
+        margin-right: 10px;
+        display: inline-block;
+    }
+    
+    .statut-Fonctionnelle {
+        background-color: #28a745;
+    }
+    
+    .statut-En-maintenance {
+        background-color: #ffc107;
+    }
+    
+    .statut-Hors-service {
+        background-color: #dc3545;
+    }
+    
+    .niveau-critique {
+        background-color: #dc3545;
+    }
+    
+    .niveau-attention {
+        background-color: #ffc107;
+    }
+    
+    .niveau-normal {
+        background-color: #28a745;
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<!-- Hero Section -->
+<section class="section pt-5 mt-5">
+    <div class="container" data-aos="fade-up">
+        <div class="section-title">
+            <h2>Poubelles Intelligentes</h2>
+            <div><span>Gestion</span> <span class="description-title">des déchets</span></div>
+            <p class="mt-3">Notre système de poubelles intelligentes vous permet de surveiller le niveau de remplissage et l'état des poubelles en temps réel.</p>
+        </div>
+        
+        <div class="row">
+            <div class="col-lg-8 mb-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">À propos des poubelles intelligentes</h5>
+                        <p class="card-text">
+                            Notre système de poubelles intelligentes vous permet de consulter l'état de remplissage des poubelles, 
+                            leur localisation et de donner votre avis sur la propreté des sites. Aidez-nous à améliorer le service 
+                            en signalant les poubelles qui nécessitent une attention particulière.
+                        </p>
+                        <div class="row mt-4">
+                            <div class="col-md-4">
+                                <div class="d-flex align-items-center mb-2">
+                                    <div class="statut-indicator statut-Fonctionnelle"></div>
+                                    <span>Fonctionnelle</span>
+                                </div>
+                                <div class="d-flex align-items-center mb-2">
+                                    <div class="statut-indicator statut-En-maintenance"></div>
+                                    <span>En maintenance</span>
+                                </div>
+                                <div class="d-flex align-items-center">
+                                    <div class="statut-indicator statut-Hors-service"></div>
+                                    <span>Hors service</span>
+                                </div>
+                            </div>
+                            <div class="col-md-8">
+                                <p>
+                                    <strong>En tant qu'utilisateur, vous pouvez :</strong>
+                                </p>
+                                <ul>
+                                    <li>Consulter le niveau de remplissage des poubelles</li>
+                                    <li>Localiser les poubelles sur la <a href="{{ path('app_front_map') }}">carte interactive</a></li>
+                                    <li>Donner votre avis sur une poubelle</li>
+                                    <li>Consulter les avis des autres utilisateurs</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Statistiques</h5>
+                        <div class="d-flex justify-content-between my-2">
+                            <span>Nombre total de poubelles:</span>
+                            <strong>{{ poubelles|length }}</strong>
+                        </div>
+                        <div class="d-flex justify-content-between my-2">
+                            <span>Poubelles critiques:</span>
+                            <strong class="text-danger">{{ poubelles_critiques|length }}</strong>
+                        </div>
+                        <div class="d-flex justify-content-between my-2">
+                            <span>Poubelles à surveiller:</span>
+                            <strong class="text-warning">{{ poubelles_attention|length }}</strong>
+                        </div>
+                        <div class="d-flex justify-content-between my-2">
+                            <span>Poubelles normales:</span>
+                            <strong class="text-success">{{ poubelles_normales|length }}</strong>
+                        </div>
+                        <p class="mt-3"><strong>Niveau de remplissage moyen:</strong> 
+                            {% set total_niveau = 0 %}
+                            {% for poubelle in poubelles %}
+                                {% set total_niveau = total_niveau + poubelle.niveauRemplissage %}
+                            {% endfor %}
+                            {% set niveau_moyen = poubelles|length > 0 ? (total_niveau / poubelles|length)|round : 0 %}
+                            {{ niveau_moyen }}%
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Filtres -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <h2 class="section-title">Filtrer par niveau de remplissage</h2>
+                <div class="filter-buttons">
+                    <button class="btn btn-outline-primary active" data-filter="all">Toutes ({{ poubelles|length }})</button>
+                    <button class="btn btn-outline-danger" data-filter="critique">Critiques ({{ poubelles_critiques|length }})</button>
+                    <button class="btn btn-outline-warning" data-filter="attention">À surveiller ({{ poubelles_attention|length }})</button>
+                    <button class="btn btn-outline-success" data-filter="normal">Normales ({{ poubelles_normales|length }})</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Liste des poubelles critiques -->
+        <div class="poubelle-group critique">
+            <h2 class="section-title text-danger">Poubelles critiques ({{ poubelles_critiques|length }})</h2>
+            <div class="row">
+                {% for poubelle in poubelles_critiques %}
+                    <div class="col-md-4 mb-4">
+                        <div class="card poubelle-card">
+                            <div class="card-body">
+                                <h5 class="card-title">{{ poubelle.localisation }}</h5>
+                                <div class="d-flex align-items-center mb-2">
+                                    <div class="statut-indicator statut-{{ poubelle.statut|replace({' ': '-'}) }}"></div>
+                                    <span>{{ poubelle.statut }}</span>
+                                </div>
+                                <p class="card-text">Niveau de remplissage:</p>
+                                <div class="progress niveau-progress mb-3">
+                                    <div class="progress-bar niveau-critique" role="progressbar" style="width: {{ poubelle.niveauRemplissage }}%" 
+                                        aria-valuenow="{{ poubelle.niveauRemplissage }}" aria-valuemin="0" aria-valuemax="100">
+                                        {{ poubelle.niveauRemplissage }}%
+                                    </div>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <a href="{{ path('app_front_bienetre_new', {'poubelle_id': poubelle.id}) }}" class="btn btn-outline-primary btn-sm">
+                                        <i class="bi bi-chat-square-text"></i> Donner un avis
+                                    </a>
+                                    <a href="{{ path('app_front_bienetre_by_poubelle', {'id': poubelle.id}) }}" class="btn btn-outline-secondary btn-sm">
+                                        <i class="bi bi-eye"></i> Voir les avis
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="col-12">
+                        <div class="alert alert-success">
+                            <i class="bi bi-check-circle"></i> Aucune poubelle n'est en état critique.
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <!-- Liste des poubelles à surveiller -->
+        <div class="poubelle-group attention">
+            <h2 class="section-title text-warning">Poubelles à surveiller ({{ poubelles_attention|length }})</h2>
+            <div class="row">
+                {% for poubelle in poubelles_attention %}
+                    <div class="col-md-4 mb-4">
+                        <div class="card poubelle-card">
+                            <div class="card-body">
+                                <h5 class="card-title">{{ poubelle.localisation }}</h5>
+                                <div class="d-flex align-items-center mb-2">
+                                    <div class="statut-indicator statut-{{ poubelle.statut|replace({' ': '-'}) }}"></div>
+                                    <span>{{ poubelle.statut }}</span>
+                                </div>
+                                <p class="card-text">Niveau de remplissage:</p>
+                                <div class="progress niveau-progress mb-3">
+                                    <div class="progress-bar niveau-attention" role="progressbar" style="width: {{ poubelle.niveauRemplissage }}%" 
+                                        aria-valuenow="{{ poubelle.niveauRemplissage }}" aria-valuemin="0" aria-valuemax="100">
+                                        {{ poubelle.niveauRemplissage }}%
+                                    </div>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <a href="{{ path('app_front_bienetre_new', {'poubelle_id': poubelle.id}) }}" class="btn btn-outline-primary btn-sm">
+                                        <i class="bi bi-chat-square-text"></i> Donner un avis
+                                    </a>
+                                    <a href="{{ path('app_front_bienetre_by_poubelle', {'id': poubelle.id}) }}" class="btn btn-outline-secondary btn-sm">
+                                        <i class="bi bi-eye"></i> Voir les avis
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="col-12">
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle"></i> Aucune poubelle n'est à surveiller.
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <!-- Liste des poubelles normales -->
+        <div class="poubelle-group normal">
+            <h2 class="section-title text-success">Poubelles avec niveau normal ({{ poubelles_normales|length }})</h2>
+            <div class="row">
+                {% for poubelle in poubelles_normales %}
+                    <div class="col-md-4 mb-4">
+                        <div class="card poubelle-card">
+                            <div class="card-body">
+                                <h5 class="card-title">{{ poubelle.localisation }}</h5>
+                                <div class="d-flex align-items-center mb-2">
+                                    <div class="statut-indicator statut-{{ poubelle.statut|replace({' ': '-'}) }}"></div>
+                                    <span>{{ poubelle.statut }}</span>
+                                </div>
+                                <p class="card-text">Niveau de remplissage:</p>
+                                <div class="progress niveau-progress mb-3">
+                                    <div class="progress-bar niveau-normal" role="progressbar" style="width: {{ poubelle.niveauRemplissage }}%" 
+                                        aria-valuenow="{{ poubelle.niveauRemplissage }}" aria-valuemin="0" aria-valuemax="100">
+                                        {{ poubelle.niveauRemplissage }}%
+                                    </div>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <a href="{{ path('app_front_bienetre_new', {'poubelle_id': poubelle.id}) }}" class="btn btn-outline-primary btn-sm">
+                                        <i class="bi bi-chat-square-text"></i> Donner un avis
+                                    </a>
+                                    <a href="{{ path('app_front_bienetre_by_poubelle', {'id': poubelle.id}) }}" class="btn btn-outline-secondary btn-sm">
+                                        <i class="bi bi-eye"></i> Voir les avis
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="col-12">
+                        <div class="alert alert-warning">
+                            <i class="bi bi-exclamation-triangle"></i> Aucune poubelle n'a un niveau normal.
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Filtrage des poubelles
+        const filterButtons = document.querySelectorAll('.filter-buttons .btn');
+        const poubelleGroups = document.querySelectorAll('.poubelle-group');
+        
+        filterButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                // Retirer la classe active de tous les boutons
+                filterButtons.forEach(btn => btn.classList.remove('active'));
+                
+                // Ajouter la classe active au bouton cliqué
+                this.classList.add('active');
+                
+                // Filtrer les groupes
+                const filter = this.getAttribute('data-filter');
+                
+                if (filter === 'all') {
+                    poubelleGroups.forEach(group => group.style.display = 'block');
+                } else {
+                    poubelleGroups.forEach(group => {
+                        if (group.classList.contains(filter)) {
+                            group.style.display = 'block';
+                        } else {
+                            group.style.display = 'none';
+                        }
+                    });
+                }
+            });
+        });
+    });
+</script>
+{% endblock %} 

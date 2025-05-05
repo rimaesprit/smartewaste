@@ -1,0 +1,368 @@
+{% extends 'FrontBase.html.twig' %}
+
+{% block title %}Mes Réclamations{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .search-card {
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+        
+        .hover-shadow:hover {
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1) !important;
+            transform: translateY(-3px);
+        }
+        
+        .filter-badge {
+            font-size: 0.8rem;
+            padding: 0.35rem 0.7rem;
+            margin-right: 0.5rem;
+            margin-bottom: 0.5rem;
+            border-radius: 20px;
+            background-color: #f1f5f9;
+            display: inline-flex;
+            align-items: center;
+        }
+        
+        .filter-badge .close {
+            margin-left: 5px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        
+        .reclamation-item {
+            transition: opacity 0.3s ease;
+        }
+        
+        .card-header {
+            border-bottom: none;
+            background-color: #fff;
+            padding-bottom: 0.5rem;
+        }
+        
+        .fade-out {
+            opacity: 0;
+        }
+        
+        .fade-in {
+            opacity: 1;
+        }
+        
+        #loader {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .spinner-border {
+            width: 1.5rem;
+            height: 1.5rem;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+<section class="page-section">
+    <div class="container">
+        <div class="section-header">
+            <h2>Mes Réclamations</h2>
+            <p>Suivez l'état de vos demandes adressées à la mairie</p>
+        </div>
+        
+        {% for message in app.flashes('success') %}
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+        
+        <!-- Section de recherche -->
+        <div class="card mb-4 search-card">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="card-title mb-0">Recherche et filtres</h5>
+                    <button type="button" class="btn btn-sm btn-outline-secondary" id="toggle-search">
+                        <i class="bi bi-chevron-down"></i>
+                    </button>
+                </div>
+                
+                <div id="search-filters">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <div class="form-floating">
+                                <input type="text" class="form-control" id="search-query" placeholder="Rechercher">
+                                <label for="search-query">Rechercher</label>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-floating">
+                                <select class="form-select" id="search-status">
+                                    <option value="">Tous les statuts</option>
+                                    <option value="Pending">En attente</option>
+                                    <option value="In Progress">En cours</option>
+                                    <option value="Resolved">Résolue</option>
+                                    <option value="Rejected">Rejetée</option>
+                                </select>
+                                <label for="search-status">Statut</label>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-floating">
+                                <select class="form-select" id="search-type">
+                                    <option value="">Tous les types</option>
+                                    {% for type in typeOptions %}
+                                        <option value="{{ type }}">{{ type }}</option>
+                                    {% endfor %}
+                                </select>
+                                <label for="search-type">Type</label>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <button type="button" class="btn btn-primary h-100 w-100" id="search-button">
+                                <i class="bi bi-search me-1"></i> Rechercher
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="collapse mt-3" id="advancedSearch">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input type="date" class="form-control" id="search-fromDate">
+                                    <label for="search-fromDate">Date (de)</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input type="date" class="form-control" id="search-toDate">
+                                    <label for="search-toDate">Date (à)</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-3">
+                        <button class="btn btn-link p-0 text-decoration-none" data-bs-toggle="collapse" data-bs-target="#advancedSearch">
+                            <i class="bi bi-sliders me-1"></i> Filtres avancés
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Section de filtres actifs -->
+        <div id="active-filters" class="mb-3 d-none">
+            <span class="me-2 fw-medium">Filtres actifs:</span>
+            <div id="filter-badges" class="d-inline-block"></div>
+            <button type="button" class="btn btn-sm btn-outline-secondary ms-2" id="clear-all-filters">
+                <i class="bi bi-x-circle me-1"></i> Effacer tous les filtres
+            </button>
+        </div>
+        
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <span class="text-muted" id="results-count">{{ reclamations|length }} réclamation(s) trouvée(s)</span>
+            </div>
+            <a href="{{ path('app_front_reclamation_new') }}" class="btn btn-primary">
+                <i class="bi bi-plus-circle me-2"></i>Nouvelle réclamation
+            </a>
+        </div>
+        
+        <!-- Loader -->
+        <div id="loader">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Chargement...</span>
+            </div>
+            <span class="ms-2">Recherche en cours...</span>
+        </div>
+        
+        <!-- Liste des réclamations -->
+        <div class="row gy-4" id="reclamations-container">
+            {% include 'front/reclamation/_reclamation_list.html.twig' with {'reclamations': reclamations} %}
+        </div>
+        
+        <div class="mt-4">
+            <a href="{{ path('app_citoyen_dashboard') }}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-2"></i> Retour au tableau de bord
+            </a>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchButton = document.getElementById('search-button');
+            const searchQuery = document.getElementById('search-query');
+            const searchStatus = document.getElementById('search-status');
+            const searchType = document.getElementById('search-type');
+            const searchFromDate = document.getElementById('search-fromDate');
+            const searchToDate = document.getElementById('search-toDate');
+            const toggleSearch = document.getElementById('toggle-search');
+            const searchFilters = document.getElementById('search-filters');
+            const activeFilters = document.getElementById('active-filters');
+            const filterBadges = document.getElementById('filter-badges');
+            const clearAllFilters = document.getElementById('clear-all-filters');
+            const reclamationsContainer = document.getElementById('reclamations-container');
+            const resultsCount = document.getElementById('results-count');
+            const loader = document.getElementById('loader');
+            
+            // Toggle search panel
+            toggleSearch.addEventListener('click', function() {
+                if (searchFilters.style.display === 'none') {
+                    searchFilters.style.display = 'block';
+                    this.innerHTML = '<i class="bi bi-chevron-down"></i>';
+                } else {
+                    searchFilters.style.display = 'none';
+                    this.innerHTML = '<i class="bi bi-chevron-up"></i>';
+                }
+            });
+            
+            // Clear all filters
+            clearAllFilters.addEventListener('click', function() {
+                searchQuery.value = '';
+                searchStatus.value = '';
+                searchType.value = '';
+                searchFromDate.value = '';
+                searchToDate.value = '';
+                activeFilters.classList.add('d-none');
+                filterBadges.innerHTML = '';
+                performSearch();
+            });
+            
+            // Function to update active filters
+            function updateActiveFilters() {
+                let hasActiveFilters = false;
+                filterBadges.innerHTML = '';
+                
+                if (searchQuery.value) {
+                    addFilterBadge('Recherche: ' + searchQuery.value, 'query');
+                    hasActiveFilters = true;
+                }
+                
+                if (searchStatus.value) {
+                    let statusText = searchStatus.options[searchStatus.selectedIndex].text;
+                    addFilterBadge('Statut: ' + statusText, 'status');
+                    hasActiveFilters = true;
+                }
+                
+                if (searchType.value) {
+                    addFilterBadge('Type: ' + searchType.value, 'type');
+                    hasActiveFilters = true;
+                }
+                
+                if (searchFromDate.value) {
+                    addFilterBadge('Date de: ' + formatDate(searchFromDate.value), 'fromDate');
+                    hasActiveFilters = true;
+                }
+                
+                if (searchToDate.value) {
+                    addFilterBadge('Date à: ' + formatDate(searchToDate.value), 'toDate');
+                    hasActiveFilters = true;
+                }
+                
+                if (hasActiveFilters) {
+                    activeFilters.classList.remove('d-none');
+                } else {
+                    activeFilters.classList.add('d-none');
+                }
+            }
+            
+            // Function to add a filter badge
+            function addFilterBadge(text, type) {
+                const badge = document.createElement('span');
+                badge.className = 'filter-badge';
+                badge.innerHTML = text + '<span class="close" data-type="' + type + '"><i class="bi bi-x"></i></span>';
+                filterBadges.appendChild(badge);
+                
+                // Add event listener to remove filter
+                const closeButton = badge.querySelector('.close');
+                closeButton.addEventListener('click', function() {
+                    const filterType = this.getAttribute('data-type');
+                    if (filterType === 'query') searchQuery.value = '';
+                    if (filterType === 'status') searchStatus.value = '';
+                    if (filterType === 'type') searchType.value = '';
+                    if (filterType === 'fromDate') searchFromDate.value = '';
+                    if (filterType === 'toDate') searchToDate.value = '';
+                    
+                    badge.remove();
+                    if (filterBadges.children.length === 0) {
+                        activeFilters.classList.add('d-none');
+                    }
+                    
+                    performSearch();
+                });
+            }
+            
+            // Format date
+            function formatDate(dateString) {
+                const date = new Date(dateString);
+                return date.toLocaleDateString('fr-FR');
+            }
+            
+            // Perform search
+            function performSearch() {
+                // Show loader
+                loader.style.display = 'block';
+                reclamationsContainer.classList.add('fade-out');
+                
+                // Build URL with query parameters
+                let url = '{{ path('app_front_reclamation_search') }}?';
+                const params = new URLSearchParams();
+                
+                if (searchQuery.value) params.append('query', searchQuery.value);
+                if (searchStatus.value) params.append('status', searchStatus.value);
+                if (searchType.value) params.append('type', searchType.value);
+                if (searchFromDate.value) params.append('fromDate', searchFromDate.value);
+                if (searchToDate.value) params.append('toDate', searchToDate.value);
+                
+                url += params.toString();
+                
+                // Fetch results
+                fetch(url, {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => response.text())
+                .then(html => {
+                    // Hide loader
+                    loader.style.display = 'none';
+                    
+                    // Update container with new results
+                    reclamationsContainer.innerHTML = html;
+                    reclamationsContainer.classList.remove('fade-out');
+                    reclamationsContainer.classList.add('fade-in');
+                    
+                    // Count results
+                    const reclamationItems = reclamationsContainer.querySelectorAll('.reclamation-item');
+                    resultsCount.textContent = reclamationItems.length + ' réclamation(s) trouvée(s)';
+                    
+                    // Update active filters
+                    updateActiveFilters();
+                })
+                .catch(error => {
+                    console.error('Error during search:', error);
+                    loader.style.display = 'none';
+                    reclamationsContainer.classList.remove('fade-out');
+                });
+            }
+            
+            // Event listeners
+            searchButton.addEventListener('click', performSearch);
+            
+            // Enter key in search field
+            searchQuery.addEventListener('keypress', function(event) {
+                if (event.key === 'Enter') {
+                    event.preventDefault();
+                    performSearch();
+                }
+            });
+        });
+    </script>
+{% endblock %} 

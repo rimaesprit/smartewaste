@@ -1,0 +1,41 @@
+{% extends 'BackBase.html.twig' %}
+
+{% block title %}Mes Réclamations{% endblock %}
+
+{% block body %}
+<div class="container mt-5">
+  <h1 class="mb-4">Mes Réclamations</h1>
+  <a href="{{ path('app_front_reclamation_new') }}" class="btn btn-success mb-3">Ajouter une réclamation</a>
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th scope="col">#</th>
+        <th scope="col">Type</th>
+        <th scope="col">Description</th>
+        <th scope="col">Date</th>
+        <th scope="col">Statut</th>
+        <th scope="col">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for reclamation in reclamations %}
+      <tr>
+        <th scope="row">{{ loop.index }}</th>
+        <td>{{ reclamation.typeRec }}</td>
+        <td>{{ reclamation.reclamation }}</td>
+        <td>{{ reclamation.dateRec|date('d/m/Y') }}</td>
+        <td>{{ reclamation.etatRec }}</td>
+        <td>
+          <a href="{{ path('app_reclamation_show', {'id': reclamation.id}) }}" class="btn btn-primary btn-sm">Voir</a>
+          <a href="{{ path('app_reclamation_edit', {'id': reclamation.id}) }}" class="btn btn-warning btn-sm">Modifier</a>
+        </td>
+      </tr>
+      {% else %}
+      <tr>
+        <td colspan="6" class="text-center">Aucune réclamation trouvée.</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %} 

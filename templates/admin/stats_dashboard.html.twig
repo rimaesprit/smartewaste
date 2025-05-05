@@ -1,0 +1,114 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Admin Stats Dashboard{% endblock %}
+
+{% block body %}
+    <div class="container py-4">
+        <h1 class="text-center mb-5">Admin Stats Dashboard</h1>
+
+        <!-- KPI Cards -->
+        <div class="row">
+            <div class="col-md-3 mb-4">
+                <div class="card shadow-sm">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Total Users</h5>
+                        <p class="display-4">{{ totalUsers }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3 mb-4">
+                <div class="card shadow-sm">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Admins</h5>
+                        <p class="display-4">{{ adminCount }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3 mb-4">
+                <div class="card shadow-sm">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Users</h5>
+                        <p class="display-4">{{ userCount }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3 mb-4">
+                <div class="card shadow-sm">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Verified Users</h5>
+                        <p class="display-4">{{ verifiedCount }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-3 mb-4">
+                <div class="card shadow-sm">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Unverified Users</h5>
+                        <p class="display-4">{{ unverifiedCount }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts -->
+        <div class="row">
+            <!-- Role Distribution Chart -->
+            <div class="col-md-6 mb-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">User Role Distribution</h5>
+                        <canvas id="roleChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Verification Status Chart -->
+            <div class="col-md-6 mb-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Verification Status</h5>
+                        <canvas id="verificationChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Chart JS Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Role Distribution Chart
+        var roleChart = new Chart(document.getElementById('roleChart'), {
+            type: 'pie',
+            data: {
+                labels: ['Admins', 'Users'],
+                datasets: [{
+                    label: 'User Role Distribution',
+                    data: [{{ adminCount }}, {{ userCount }}],
+                    backgroundColor: ['#4e73df', '#1cc88a'],
+                    hoverOffset: 4
+                }]
+            }
+        });
+
+        // Verification Status Chart
+        var verificationChart = new Chart(document.getElementById('verificationChart'), {
+            type: 'bar',
+            data: {
+                labels: ['Verified', 'Unverified'],
+                datasets: [{
+                    label: 'Verification Status',
+                    data: [{{ verifiedCount }}, {{ unverifiedCount }}],
+                    backgroundColor: ['#36b9cc', '#f6c23e'],
+                    borderColor: ['#36b9cc', '#f6c23e'],
+                    borderWidth: 1
+                }]
+            }
+        });
+    </script>
+{% endblock %}

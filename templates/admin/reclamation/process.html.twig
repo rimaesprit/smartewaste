@@ -1,0 +1,164 @@
+{% extends 'BackBase.html.twig' %}
+
+{% block title %}Traitement de la réclamation #{{ reclamation.id }}{% endblock %}
+
+{% block body %}
+<div class="container-fluid">
+    <h1 class="h3 mb-4 text-gray-800">Traitement de la réclamation #{{ reclamation.id }}</h1>
+    
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ path('app_admin_dashboard') }}">Tableau de bord</a></li>
+            <li class="breadcrumb-item"><a href="{{ path('app_admin_reclamation_index') }}">Réclamations</a></li>
+            <li class="breadcrumb-item"><a href="{{ path('app_admin_reclamation_show', {'id': reclamation.id}) }}">Réclamation #{{ reclamation.id }}</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Traitement</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <div class="col-lg-5">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Informations de la réclamation</h6>
+                </div>
+                <div class="card-body">
+                    <table class="table table-bordered">
+                        <tbody>
+                            <tr>
+                                <th style="width: 40%">Type</th>
+                                <td>{{ reclamation.typeRec }}</td>
+                            </tr>
+                            <tr>
+                                <th>Date de création</th>
+                                <td>{{ reclamation.dateRec|date('d/m/Y H:i') }}</td>
+                            </tr>
+                            <tr>
+                                <th>État actuel</th>
+                                <td>
+                                    {% if reclamation.etatRec == 'Pending' %}
+                                        <span class="badge badge-warning">En attente</span>
+                                    {% elseif reclamation.etatRec == 'In Progress' %}
+                                        <span class="badge badge-info">En traitement</span>
+                                    {% elseif reclamation.etatRec == 'Resolved' %}
+                                        <span class="badge badge-success">Résolu</span>
+                                    {% elseif reclamation.etatRec == 'Rejected' %}
+                                        <span class="badge badge-danger">Rejeté</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Adresse</th>
+                                <td>{{ reclamation.adresseRec }}</td>
+                            </tr>
+                            <tr>
+                                <th>Utilisateur</th>
+                                <td>
+                                    {% if reclamation.user %}
+                                        <a href="{{ path('app_admin_user_show', {'id': reclamation.user.id}) }}">
+                                            {{ reclamation.user.email }}
+                                        </a>
+                                    {% else %}
+                                        Anonyme
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div class="mt-3">
+                        <h6 class="font-weight-bold">Description</h6>
+                        <p>{{ reclamation.reclamation|nl2br }}</p>
+                    </div>
+                    
+                    {% if reclamation.photoRec %}
+                    <div class="mt-3">
+                        <h6 class="font-weight-bold">Photo jointe</h6>
+                        <img src="{{ asset('uploads/reclamations/' ~ reclamation.photoRec) }}" alt="Photo de la réclamation" class="img-fluid" style="max-height: 200px;">
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-7">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Traiter la réclamation</h6>
+                </div>
+                <div class="card-body">
+                    {{ form_start(form, {'attr': {'id': 'process-form'}}) }}
+                    
+                        <div class="form-group">
+                            {{ form_label(form.etatRec) }}
+                            {{ form_widget(form.etatRec, {'attr': {'class': 'form-control'}}) }}
+                            {{ form_errors(form.etatRec) }}
+                        </div>
+                        
+                        <div class="form-group">
+                            {{ form_label(form.reponseRec) }}
+                            {{ form_widget(form.reponseRec, {'attr': {'class': 'form-control', 'rows': 5}}) }}
+                            {{ form_errors(form.reponseRec) }}
+                            <small class="form-text text-muted">Cette réponse sera visible par l'utilisateur qui a soumis la réclamation.</small>
+                        </div>
+                        
+                        {% if form.noteInterne is defined %}
+                        <div class="form-group">
+                            {{ form_label(form.noteInterne) }}
+                            {{ form_widget(form.noteInterne, {'attr': {'class': 'form-control', 'rows': 3}}) }}
+                            {{ form_errors(form.noteInterne) }}
+                            <small class="form-text text-muted">Cette note est visible uniquement par les administrateurs.</small>
+                        </div>
+                        {% endif %}
+                        
+                        <div class="text-right">
+                            <a href="{{ path('app_admin_reclamation_show', {'id': reclamation.id}) }}" class="btn btn-secondary">Annuler</a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save mr-1"></i> Enregistrer
+                            </button>
+                        </div>
+                    
+                    {{ form_end(form) }}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const stateSelect = document.querySelector('#{{ form.etatRec.vars.id }}');
+        const responseTextarea = document.querySelector('#{{ form.reponseRec.vars.id }}');
+        
+        stateSelect.addEventListener('change', function(e) {
+            const selectedState = e.target.value;
+            
+            // Suggestions de réponses en fonction de l'état sélectionné
+            if (selectedState === 'In Progress') {
+                if (!responseTextarea.value) {
+                    responseTextarea.value = "Votre réclamation a été prise en charge et est actuellement en cours de traitement par nos services. Nous vous tiendrons informé de l'avancement.";
+                }
+            } else if (selectedState === 'Resolved') {
+                if (!responseTextarea.value) {
+                    responseTextarea.value = "Nous avons le plaisir de vous informer que votre réclamation a été traitée avec succès. N'hésitez pas à nous contacter si vous avez d'autres questions.";
+                }
+            } else if (selectedState === 'Rejected') {
+                if (!responseTextarea.value) {
+                    responseTextarea.value = "Après examen, nous sommes au regret de vous informer que votre réclamation n'a pas pu être acceptée. ";
+                }
+            }
+        });
+        
+        // Validation du formulaire
+        document.getElementById('process-form').addEventListener('submit', function(e) {
+            if (stateSelect.value !== 'Pending' && !responseTextarea.value.trim()) {
+                e.preventDefault();
+                alert('Une réponse est requise lorsque vous changez l\'état de la réclamation.');
+                responseTextarea.focus();
+            }
+        });
+    });
+</script>
+{% endblock %} 

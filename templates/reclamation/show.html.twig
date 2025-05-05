@@ -1,0 +1,105 @@
+{% extends 'BackBase.html.twig' %}
+
+{% block title %}Détails de la réclamation{% endblock %}
+
+{% block body %}
+<div class="page-header">
+    <h4 class="page-title">Détails de la réclamation</h4>
+    <ul class="breadcrumbs">
+        <li class="nav-home">
+            <a href="{{ path('app_home') }}">
+                <i class="fas fa-home"></i>
+            </a>
+        </li>
+        <li class="separator">
+            <i class="fas fa-angle-right"></i>
+        </li>
+        <li class="nav-item">
+            <a href="#">Citoyens</a>
+        </li>
+        <li class="separator">
+            <i class="fas fa-angle-right"></i>
+        </li>
+        <li class="nav-item">
+            <a href="{{ path('app_reclamation_index') }}">Réclamations</a>
+        </li>
+        <li class="separator">
+            <i class="fas fa-angle-right"></i>
+        </li>
+        <li class="nav-item">
+            <a href="#">Détails</a>
+        </li>
+    </ul>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h4 class="card-title">Informations de la réclamation</h4>
+                <span class="badge {% if reclamation.etatRec == 'Pending' %}badge-warning{% elseif reclamation.etatRec == 'In Progress' %}badge-info{% elseif reclamation.etatRec == 'Resolved' %}badge-success{% elseif reclamation.etatRec == 'Rejected' %}badge-danger{% else %}badge-secondary{% endif %}">
+                    {% if reclamation.etatRec == 'Pending' %}
+                        En attente
+                    {% elseif reclamation.etatRec == 'In Progress' %}
+                        En cours
+                    {% elseif reclamation.etatRec == 'Resolved' %}
+                        Résolue
+                    {% elseif reclamation.etatRec == 'Rejected' %}
+                        Rejetée
+                    {% else %}
+                        {{ reclamation.etatRec }}
+                    {% endif %}
+                </span>
+            </div>
+            <div class="card-body">
+                <table class="table table-bordered">
+                    <tbody>
+                        <tr>
+                            <th style="width: 200px">Type</th>
+                            <td>{{ reclamation.typeRec }}</td>
+                        </tr>
+                        <tr>
+                            <th>Date de soumission</th>
+                            <td>{{ reclamation.dateRec ? reclamation.dateRec|date('d/m/Y H:i') : '' }}</td>
+                        </tr>
+                        <tr>
+                            <th>Description</th>
+                            <td style="white-space: pre-line;">{{ reclamation.reclamation }}</td>
+                        </tr>
+                        {% if reclamation.reponse %}
+                        <tr>
+                            <th>Réponse</th>
+                            <td style="white-space: pre-line;">{{ reclamation.reponse }}</td>
+                        </tr>
+                        {% endif %}
+                        {% if reclamation.user %}
+                        <tr>
+                            <th>Utilisateur</th>
+                            <td>{{ reclamation.user.fullName }} ({{ reclamation.user.email }})</td>
+                        </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+                
+                <div class="card-action d-flex justify-content-between mt-3">
+                    <a href="{{ path('app_reclamation_index') }}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left me-1"></i> Retour à la liste
+                    </a>
+                    
+                    <div>
+                        {% if (is_granted('ROLE_ADMIN')) or (app.user and reclamation.user.id == app.user.id and reclamation.etatRec == 'Pending') %}
+                        <a href="{{ path('app_reclamation_edit', {'id': reclamation.id}) }}" class="btn btn-info me-1">
+                            <i class="fas fa-edit me-1"></i> Modifier
+                        </a>
+                        {% endif %}
+                        
+                        {% if is_granted('ROLE_ADMIN') or (app.user and reclamation.user.id == app.user.id) %}
+                        {{ include('reclamation/_delete_form.html.twig') }}
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

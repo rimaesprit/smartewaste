@@ -1,0 +1,64 @@
+{% extends 'FrontBase.html.twig' %}
+
+{% block title %}Informations des Parkings{% endblock %}
+
+{% block body %}
+    <section class="parking-section section-padding">
+        <div class="container">
+            <div class="row">
+                <div class="col-12">
+                    <h2 class="mb-4 text-center">Informations des Parkings</h2>
+                    <div class="d-flex justify-content-end mb-3">
+                        <a href="{{ path('app_front_parking_heatmap') }}" class="btn btn-primary">
+                            <i class="bi bi-map"></i> Voir la carte d'occupation
+                        </a>
+                    </div>
+                    <div class="card shadow">
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead class="bg-success text-white">
+                                        <tr>
+                                            <th>Camion</th>
+                                            <th>Conteneur</th>
+                                            <th>Date d'entrée</th>
+                                            <th>Description</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for parking in parkings %}
+                                            <tr>
+                                                <td>{{ parking.camion.matricule }}</td>
+                                                <td>{{ parking.conteneur.typeDechet }} ({{ parking.conteneur.emplacement }})</td>
+                                                <td>{{ parking.dateEntree|date('d/m/Y H:i') }}</td>
+                                                <td>{{ parking.description }}</td>
+                                            </tr>
+                                        {% else %}
+                                            <tr>
+                                                <td colspan="4" class="text-center">Aucun enregistrement trouvé</td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        $(document).ready(function() {
+            $('table').DataTable({
+                "language": {
+                    "url": "//cdn.datatables.net/plug-ins/1.10.20/i18n/French.json"
+                },
+                "responsive": true
+            });
+        });
+    </script>
+{% endblock %} 

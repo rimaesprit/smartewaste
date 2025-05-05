@@ -1,0 +1,187 @@
+{% extends 'BackBase.html.twig' %}
+
+{% block title %}Nouveau signalement{% endblock %}
+
+{% block body %}
+<div class="page-header">
+    <h4 class="page-title">Nouveau signalement</h4>
+    <ul class="breadcrumbs">
+        <li class="nav-home">
+            <a href="{{ path('app_home') }}">
+                <i class="fas fa-home"></i>
+            </a>
+        </li>
+        <li class="separator">
+            <i class="fas fa-angle-right"></i>
+        </li>
+        <li class="nav-item">
+            <a href="#">Citoyens</a>
+        </li>
+        <li class="separator">
+            <i class="fas fa-angle-right"></i>
+        </li>
+        <li class="nav-item">
+            <a href="{{ path('app_signalement_index') }}">Signalements</a>
+        </li>
+        <li class="separator">
+            <i class="fas fa-angle-right"></i>
+        </li>
+        <li class="nav-item">
+            <a href="#">Nouveau</a>
+        </li>
+    </ul>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="card-title">Formulaire de signalement</h4>
+            </div>
+            <div class="card-body">
+                {{ form_start(form, {'attr': {'class': 'needs-validation', 'id': 'signalement-form', 'novalidate': 'novalidate'}}) }}
+                
+                <div class="form-group">
+                    {{ form_label(form.typeSign) }}
+                    {{ form_widget(form.typeSign, {'attr': {'required': 'required'}}) }}
+                    <div class="invalid-feedback">
+                        Le type de signalement est obligatoire.
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    {{ form_label(form.zone) }}
+                    {{ form_widget(form.zone, {'attr': {'required': 'required'}}) }}
+                    <div class="invalid-feedback">
+                        La zone concernée est obligatoire.
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    {{ form_label(form.adresse) }}
+                    {{ form_widget(form.adresse, {'attr': {'required': 'required'}}) }}
+                    <div class="invalid-feedback">
+                        L'adresse est obligatoire.
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    {{ form_label(form.description) }}
+                    {{ form_widget(form.description, {'attr': {'required': 'required'}}) }}
+                    <div class="invalid-feedback">
+                        La description est obligatoire.
+                    </div>
+                </div>
+                
+                <div class="card-action d-flex justify-content-between">
+                    <a href="{{ path('app_signalement_index') }}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left me-1"></i> Retour à la liste
+                    </a>
+                    <button type="button" id="submit-btn" class="btn btn-success">
+                        <i class="fas fa-save me-1"></i> Enregistrer
+                    </button>
+                </div>
+                
+                {{ form_end(form) }}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+{{ parent() }}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('signalement-form');
+        const submitBtn = document.getElementById('submit-btn');
+        
+        submitBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            // Récupération des champs
+            const typeSign = document.getElementById('{{ form.typeSign.vars.id }}');
+            const zone = document.getElementById('{{ form.zone.vars.id }}');
+            const adresse = document.getElementById('{{ form.adresse.vars.id }}');
+            const description = document.getElementById('{{ form.description.vars.id }}');
+            
+            // Vérification si tous les champs sont remplis
+            let errors = [];
+            
+            if (!typeSign.value) {
+                errors.push('Le type de signalement est obligatoire');
+                typeSign.classList.add('is-invalid');
+            } else {
+                typeSign.classList.remove('is-invalid');
+            }
+            
+            if (!zone.value) {
+                errors.push('La zone concernée est obligatoire');
+                zone.classList.add('is-invalid');
+            } else {
+                zone.classList.remove('is-invalid');
+            }
+            
+            if (!adresse.value) {
+                errors.push('L\'adresse est obligatoire');
+                adresse.classList.add('is-invalid');
+            } else {
+                adresse.classList.remove('is-invalid');
+            }
+            
+            if (!description.value) {
+                errors.push('La description est obligatoire');
+                description.classList.add('is-invalid');
+            } else {
+                description.classList.remove('is-invalid');
+            }
+            
+            // Si des erreurs existent, afficher SweetAlert
+            if (errors.length > 0) {
+                let errorHtml = '<ul style="text-align: left; margin-top: 10px;">';
+                errors.forEach(function(error) {
+                    errorHtml += '<li>' + error + '</li>';
+                });
+                errorHtml += '</ul>';
+                
+                Swal.fire({
+                    title: 'Erreur',
+                    html: 'Veuillez corriger les erreurs suivantes: ' + errorHtml,
+                    icon: 'error',
+                    confirmButtonText: 'OK'
+                });
+            } else {
+                // Si tout est valide, confirmation avant envoi
+                Swal.fire({
+                    title: 'Confirmation',
+                    text: 'Êtes-vous sûr de vouloir soumettre ce signalement?',
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonText: 'Oui, soumettre',
+                    cancelButtonText: 'Annuler'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Soumission du formulaire
+                        form.submit();
+                    }
+                });
+            }
+        });
+        
+        // Validation en temps réel sur les champs
+        const inputs = [typeSign, zone, adresse, description];
+        inputs.forEach(function(input) {
+            input.addEventListener('change', function() {
+                if (this.value) {
+                    this.classList.remove('is-invalid');
+                    this.classList.add('is-valid');
+                } else {
+                    this.classList.remove('is-valid');
+                    this.classList.add('is-invalid');
+                }
+            });
+        });
+    });
+</script>
+{% endblock %} 

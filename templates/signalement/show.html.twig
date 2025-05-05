@@ -1,0 +1,113 @@
+{% extends 'BackBase.html.twig' %}
+
+{% block title %}Détails du signalement{% endblock %}
+
+{% block body %}
+<div class="page-header">
+    <h4 class="page-title">Détails du signalement</h4>
+    <ul class="breadcrumbs">
+        <li class="nav-home">
+            <a href="{{ path('app_home') }}">
+                <i class="fas fa-home"></i>
+            </a>
+        </li>
+        <li class="separator">
+            <i class="fas fa-angle-right"></i>
+        </li>
+        <li class="nav-item">
+            <a href="#">Citoyens</a>
+        </li>
+        <li class="separator">
+            <i class="fas fa-angle-right"></i>
+        </li>
+        <li class="nav-item">
+            <a href="{{ path('app_signalement_index') }}">Signalements</a>
+        </li>
+        <li class="separator">
+            <i class="fas fa-angle-right"></i>
+        </li>
+        <li class="nav-item">
+            <a href="#">Détails</a>
+        </li>
+    </ul>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h4 class="card-title">Informations du signalement</h4>
+                <span class="badge {% if signalement.etatSign == 'Pending' %}badge-warning{% elseif signalement.etatSign == 'In Progress' %}badge-info{% elseif signalement.etatSign == 'Resolved' %}badge-success{% elseif signalement.etatSign == 'Rejected' %}badge-danger{% else %}badge-secondary{% endif %}">
+                    {% if signalement.etatSign == 'Pending' %}
+                        En attente
+                    {% elseif signalement.etatSign == 'In Progress' %}
+                        En cours
+                    {% elseif signalement.etatSign == 'Resolved' %}
+                        Résolu
+                    {% elseif signalement.etatSign == 'Rejected' %}
+                        Rejeté
+                    {% else %}
+                        {{ signalement.etatSign }}
+                    {% endif %}
+                </span>
+            </div>
+            <div class="card-body">
+                <table class="table table-bordered">
+                    <tbody>
+                        <tr>
+                            <th style="width: 200px">Type</th>
+                            <td>{{ signalement.typeSign }}</td>
+                        </tr>
+                        <tr>
+                            <th>Zone</th>
+                            <td>{{ signalement.zone }}</td>
+                        </tr>
+                        <tr>
+                            <th>Adresse</th>
+                            <td>{{ signalement.adresse }}</td>
+                        </tr>
+                        <tr>
+                            <th>Date de soumission</th>
+                            <td>{{ signalement.tempsSign ? signalement.tempsSign|date('d/m/Y H:i') : '' }}</td>
+                        </tr>
+                        <tr>
+                            <th>Description</th>
+                            <td style="white-space: pre-line;">{{ signalement.description }}</td>
+                        </tr>
+                        {% if signalement.feedback %}
+                        <tr>
+                            <th>Commentaire</th>
+                            <td style="white-space: pre-line;">{{ signalement.feedback }}</td>
+                        </tr>
+                        {% endif %}
+                        {% if signalement.user %}
+                        <tr>
+                            <th>Utilisateur</th>
+                            <td>{{ signalement.user.fullName }} ({{ signalement.user.email }})</td>
+                        </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+                
+                <div class="card-action d-flex justify-content-between mt-3">
+                    <a href="{{ path('app_signalement_index') }}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left me-1"></i> Retour à la liste
+                    </a>
+                    
+                    <div>
+                        {% if (is_granted('ROLE_ADMIN')) or (app.user and signalement.user.id == app.user.id and signalement.etatSign == 'Pending') %}
+                        <a href="{{ path('app_signalement_edit', {'id': signalement.id}) }}" class="btn btn-info me-1">
+                            <i class="fas fa-edit me-1"></i> Modifier
+                        </a>
+                        {% endif %}
+                        
+                        {% if is_granted('ROLE_ADMIN') or (app.user and signalement.user.id == app.user.id) %}
+                        {{ include('signalement/_delete_form.html.twig') }}
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

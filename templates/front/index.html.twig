@@ -1,0 +1,233 @@
+{% extends 'FrontBase.html.twig' %}
+
+{% block title %}Accueil - SmartWaste System{% endblock %}
+
+{% block stylesheets %}
+<style>
+  /* Styles spécifiques à la page d'accueil */
+  #hero {
+    background-color: var(--dark-color);
+    min-height: 85vh;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-content {
+    padding-top: 60px;
+    position: relative;
+    z-index: 10;
+  }
+  
+  .hero-img {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: pulse 2s infinite ease-in-out;
+  }
+  
+  @keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+  }
+  
+  .icon-boxes {
+    margin-top: 30px;
+  }
+  
+  .hero-waves {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 100px;
+    fill: #f5f5f5;
+  }
+</style>
+{% endblock %}
+
+{% block body %}
+    <!-- Hero Section -->
+    <section id="hero" class="hero section dark-background">
+        <div class="container hero-content">
+            <div class="row gy-4 justify-content-between">
+                <div class="col-lg-6 d-flex flex-column justify-content-center" data-aos="fade-up">
+                    <h1>Solution écologique de <span>Gestion des Déchets</span></h1>
+                    <p>Une gestion optimisée des déchets pour un environnement plus propre et durable</p>
+                    <div class="d-flex flex-wrap">
+                        <a href="#about" class="btn-get-started mb-2 me-3">En savoir plus</a>
+                        <a href="#" class="btn-watch-video d-flex align-items-center mb-2"><i class="bi bi-play-circle"></i><span>Voir la vidéo</span></a>
+                    </div>
+                </div>
+                
+                <div class="col-lg-5 hero-img" data-aos="zoom-out">
+                    <div class="bg-info p-4 text-white rounded shadow-lg" style="width: 100%; height: 300px; display: flex; align-items: center; justify-content: center;">
+                        <h3 class="m-0">Image de présentation</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <svg class="hero-waves" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 24 150 28" preserveAspectRatio="none">
+            <defs>
+                <path id="wave-path" d="M-160 44c30 0 58-18 88-18s 58 18 88 18 58-18 88-18 58 18 88 18 v44h-352z"></path>
+            </defs>
+            <g class="wave1">
+                <use xlink:href="#wave-path" x="50" y="3"></use>
+            </g>
+            <g class="wave2">
+                <use xlink:href="#wave-path" x="50" y="0"></use>
+            </g>
+            <g class="wave3">
+                <use xlink:href="#wave-path" x="50" y="9"></use>
+            </g>
+        </svg>
+    </section><!-- /Hero Section -->
+
+    <!-- About Section -->
+    <section id="about" class="about section">
+        <div class="container" data-aos="fade-up">
+            <div class="row align-items-xl-center gy-5">
+                <div class="col-xl-5 content">
+                    <h3>À Propos</h3>
+                    <h2>Gestion innovante des déchets urbains</h2>
+                    <p>Notre système de gestion des déchets utilise des technologies avancées pour optimiser la collecte, le tri et le traitement des déchets urbains. Une approche écologique et économique pour les municipalités et entreprises.</p>
+                    <a href="{{ path('app_front_about') }}" class="read-more"><span>Lire plus</span><i class="bi bi-arrow-right"></i></a>
+                </div>
+
+                <div class="col-xl-7">
+                    <div class="row gy-4 icon-boxes">
+                        <div class="col-md-6">
+                            <div class="icon-box">
+                                <i class="bi bi-recycle"></i>
+                                <h3>Recyclage Optimisé</h3>
+                                <p>Nos processus de recyclage permettent une valorisation maximale des déchets collectés</p>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="icon-box">
+                                <i class="bi bi-truck"></i>
+                                <h3>Flotte Connectée</h3>
+                                <p>Nos camions sont équipés de capteurs intelligents pour optimiser les trajets et la collecte</p>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="icon-box">
+                                <i class="bi bi-geo-alt"></i>
+                                <h3>Géolocalisation</h3>
+                                <p>Localisez nos points de collecte et suivez nos camions en temps réel pour une meilleure planification</p>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="icon-box">
+                                <i class="bi bi-bar-chart"></i>
+                                <h3>Analyses Avancées</h3>
+                                <p>Des statistiques détaillées pour optimiser la gestion des déchets à l'échelle urbaine</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section><!-- /About Section -->
+
+    <!-- Statistics Section -->
+    <section id="stats" class="stats section light-background">
+        <div class="container">
+            <div class="section-title mb-5">
+                <h2>Nos Statistiques</h2>
+                <div><span>L'Impact de</span> <span class="description-title">Notre Travail</span></div>
+            </div>
+
+            <div class="row gy-4">
+                <div class="col-lg-3 col-md-6 d-flex flex-column align-items-center">
+                    <i class="bi bi-recycle"></i>
+                    <div class="stats-item">
+                        <span class="purecounter">2500</span>
+                        <p>Tonnes recyclées</p>
+                    </div>
+                </div>
+
+                <div class="col-lg-3 col-md-6 d-flex flex-column align-items-center">
+                    <i class="bi bi-truck"></i>
+                    <div class="stats-item">
+                        <span class="purecounter">20</span>
+                        <p>Camions actifs</p>
+                    </div>
+                </div>
+
+                <div class="col-lg-3 col-md-6 d-flex flex-column align-items-center">
+                    <i class="bi bi-geo-alt"></i>
+                    <div class="stats-item">
+                        <span class="purecounter">150</span>
+                        <p>Points de collecte</p>
+                    </div>
+                </div>
+
+                <div class="col-lg-3 col-md-6 d-flex flex-column align-items-center">
+                    <i class="bi bi-people"></i>
+                    <div class="stats-item">
+                        <span class="purecounter">50000</span>
+                        <p>Utilisateurs satisfaits</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section><!-- /Statistics Section -->
+
+    <!-- Services Section -->
+    <section id="services" class="features section">
+        <div class="container">
+            <div class="section-title mb-5">
+                <h2>Services</h2>
+                <div><span>Nos</span> <span class="description-title">Services</span></div>
+            </div>
+
+            <div class="row gy-4">
+                <div class="col-lg-3 col-md-4">
+                    <div class="features-item">
+                        <i class="bi bi-trash" style="color: #ffbb2c;"></i>
+                        <h3><a href="{{ path('app_front_services') }}" class="stretched-link">Collecte de déchets</a></h3>
+                    </div>
+                </div>
+
+                <div class="col-lg-3 col-md-4">
+                    <div class="features-item">
+                        <i class="bi bi-arrow-repeat" style="color: #5578ff;"></i>
+                        <h3><a href="{{ path('app_front_services') }}" class="stretched-link">Recyclage</a></h3>
+                    </div>
+                </div>
+
+                <div class="col-lg-3 col-md-4">
+                    <div class="features-item">
+                        <i class="bi bi-flower2" style="color: #e80368;"></i>
+                        <h3><a href="{{ path('app_front_services') }}" class="stretched-link">Compostage</a></h3>
+                    </div>
+                </div>
+
+                <div class="col-lg-3 col-md-4">
+                    <div class="features-item">
+                        <i class="bi bi-lightbulb" style="color: #e361ff;"></i>
+                        <h3><a href="{{ path('app_front_services') }}" class="stretched-link">Conseil Environnemental</a></h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section><!-- /Services Section -->
+
+    <!-- Call to Action Section -->
+    <section id="cta" class="cta section dark-background">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-8 text-center">
+                    <h3>Visualisez nos collectes en temps réel</h3>
+                    <p>Suivez l'emplacement de nos camions de collecte et l'état du traitement des déchets grâce à notre carte interactive.</p>
+                    <a href="{{ path('app_front_map') }}" class="cta-btn">Voir la carte</a>
+                </div>
+            </div>
+        </div>
+    </section><!-- /Call to Action Section -->
+{% endblock %} 

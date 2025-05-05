@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Vérification de votre nouvelle adresse email</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #f9f9f9;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+        }
+        .header {
+            background: linear-gradient(135deg, #1e4b57 0%, #2d7d90 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: 8px 8px 0 0;
+            margin: -20px -20px 20px -20px;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+        .content {
+            padding: 20px 0;
+        }
+        .button {
+            display: inline-block;
+            background: linear-gradient(135deg, #1e4b57 0%, #2d7d90 100%);
+            color: white;
+            padding: 12px 20px;
+            text-decoration: none;
+            border-radius: 4px;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+        .footer {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+            font-size: 12px;
+            color: #777;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Vérification de votre adresse email</h1>
+        </div>
+        
+        <div class="content">
+            <p>Bonjour {{ user.firstName }},</p>
+            
+            <p>Vous avez récemment demandé à changer votre adresse email sur la plateforme SmartWaste. Pour finaliser cette modification, veuillez cliquer sur le bouton ci-dessous :</p>
+            
+            <p style="text-align: center;">
+                <a href="{{ verifyUrl }}" class="button">Vérifier mon adresse email</a>
+            </p>
+            
+            <p>Si vous n'êtes pas à l'origine de cette demande, veuillez ignorer cet email et votre adresse email ne sera pas modifiée.</p>
+            
+            <p>Ce lien expirera dans 24 heures pour des raisons de sécurité.</p>
+        </div>
+        
+        <div class="footer">
+            <p>&copy; {{ "now"|date("Y") }} SmartWaste. Tous droits réservés.</p>
+            <p>Ceci est un email automatique, merci de ne pas y répondre.</p>
+        </div>
+    </div>
+</body>
+</html> 

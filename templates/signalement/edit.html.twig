@@ -1,0 +1,68 @@
+{% extends 'BackBase.html.twig' %}
+
+{% block title %}Modifier le signalement{% endblock %}
+
+{% block body %}
+<div class="page-header">
+    <h4 class="page-title">Modifier le signalement</h4>
+    <ul class="breadcrumbs">
+        <li class="nav-home">
+            <a href="{{ path('app_home') }}">
+                <i class="fas fa-home"></i>
+            </a>
+        </li>
+        <li class="separator">
+            <i class="fas fa-angle-right"></i>
+        </li>
+        <li class="nav-item">
+            <a href="#">Citoyens</a>
+        </li>
+        <li class="separator">
+            <i class="fas fa-angle-right"></i>
+        </li>
+        <li class="nav-item">
+            <a href="{{ path('app_signalement_index') }}">Signalements</a>
+        </li>
+        <li class="separator">
+            <i class="fas fa-angle-right"></i>
+        </li>
+        <li class="nav-item">
+            <a href="#">Modifier</a>
+        </li>
+    </ul>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="card-title">Formulaire de modification</h4>
+            </div>
+            <div class="card-body">
+                {{ form_start(form, {'attr': {'class': 'needs-validation'}}) }}
+                
+                {{ form_row(form.typeSign) }}
+                {{ form_row(form.zone) }}
+                {{ form_row(form.adresse) }}
+                {{ form_row(form.description) }}
+
+                {% if is_granted('ROLE_ADMIN') %}
+                    {{ form_row(form.etatSign) }}
+                    {{ form_row(form.feedback) }}
+                {% endif %}
+
+                <div class="card-action d-flex justify-content-between">
+                    <a href="{{ path('app_signalement_index') }}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left me-1"></i> Retour à la liste
+                    </a>
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-save me-1"></i> Enregistrer
+                    </button>
+                </div>
+                
+                {{ form_end(form) }}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,407 @@
+{% extends 'FrontBase.html.twig' %}
+
+{% block title %}Carte d'occupation des parkings{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.css" />
+    <style>
+        .hero-heatmap {
+            background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('/assets/images/smart-city.jpg');
+            background-size: cover;
+            background-position: center;
+            padding: 100px 0;
+            color: white;
+            text-align: center;
+            margin-bottom: 50px;
+        }
+        
+        .hero-heatmap h1 {
+            font-size: 3rem;
+            margin-bottom: 20px;
+        }
+        
+        .hero-heatmap p {
+            font-size: 1.2rem;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        #parkingHeatmap {
+            width: 100%;
+            height: 600px;
+            border-radius: 10px;
+            box-shadow: 0 5px 30px rgba(0, 0, 0, 0.1);
+            margin-bottom: 50px;
+        }
+        
+        .heatmap-legend {
+            background-color: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            margin-bottom: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+        }
+        
+        .legend-color {
+            width: 24px;
+            height: 24px;
+            margin-right: 10px;
+            border-radius: 5px;
+        }
+        
+        .info-panel {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 30px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            margin-bottom: 50px;
+        }
+        
+        .info-panel h2 {
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            color: #333;
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 15px;
+        }
+        
+        .stat-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: #f9f9f9;
+            border-radius: 10px;
+            padding: 25px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+        
+        .stat-card h3 {
+            font-size: 1.2rem;
+            color: #666;
+            margin-bottom: 15px;
+        }
+        
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #28a745;
+        }
+        
+        .stat-card.warning .stat-value {
+            color: #ffc107;
+        }
+        
+        .stat-card.danger .stat-value {
+            color: #dc3545;
+        }
+        
+        .info-box {
+            padding: 15px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            max-width: 350px;
+        }
+        
+        .info-box h4 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 8px;
+        }
+        
+        .info-box p {
+            margin: 8px 0;
+            font-size: 15px;
+        }
+        
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            border-radius: 10px;
+        }
+        
+        .explanation {
+            margin-top: 40px;
+        }
+        
+        .explanation h3 {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            color: #333;
+        }
+        
+        .explanation p {
+            font-size: 1.1rem;
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+        
+        @media (max-width: 768px) {
+            .hero-heatmap {
+                padding: 60px 0;
+            }
+            
+            .hero-heatmap h1 {
+                font-size: 2rem;
+            }
+            
+            .hero-heatmap p {
+                font-size: 1rem;
+            }
+            
+            #parkingHeatmap {
+                height: 400px;
+            }
+            
+            .stat-value {
+                font-size: 2rem;
+            }
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+    <div class="hero-heatmap">
+        <div class="container">
+            <h1>Carte d'occupation des parkings</h1>
+            <p>Visualisez en temps réel l'état d'occupation des parkings de la ville pour optimiser vos déplacements et trouver facilement une place de stationnement.</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="info-panel">
+            <h2>Statistiques d'occupation</h2>
+            <div class="stat-cards" id="statCards">
+                <div class="stat-card">
+                    <h3>Chargement...</h3>
+                    <div class="stat-value">-</div>
+                </div>
+            </div>
+            
+            <div class="heatmap-legend">
+                <div class="legend-item">
+                    <div class="legend-color" style="background-color: #00FF00;"></div>
+                    <span>Faible occupation (0-30%)</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background-color: #FFFF00;"></div>
+                    <span>Occupation moyenne (30-70%)</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background-color: #FF0000;"></div>
+                    <span>Forte occupation (70-100%)</span>
+                </div>
+            </div>
+            
+            <div class="position-relative">
+                <div id="parkingHeatmap"></div>
+                <div id="loadingOverlay" class="loading-overlay">
+                    <div class="spinner-border text-success" role="status">
+                        <span class="visually-hidden">Chargement...</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="explanation">
+                <h3>Comment utiliser cette carte ?</h3>
+                <p>
+                    Cette carte vous montre l'état d'occupation des différentes zones de parking en temps réel. 
+                    Les zones vertes indiquent un faible taux d'occupation, les zones jaunes un taux moyen, et les zones rouges un taux élevé.
+                </p>
+                <p>
+                    Cliquez sur une zone pour voir plus de détails sur son occupation actuelle. 
+                    Ces informations sont mises à jour régulièrement pour vous fournir les données les plus récentes.
+                </p>
+                <p>
+                    Utilisez cette carte pour planifier vos déplacements et trouver plus facilement une place de stationnement, 
+                    en privilégiant les zones moins occupées (vertes et jaunes).
+                </p>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Coordonnées approximatives pour chaque zone (à adapter selon votre configuration)
+            const zoneCoordinates = {
+                'Zone A': { lat: 48.8584, lng: 2.2945 },
+                'Zone B': { lat: 48.8584, lng: 2.2985 },
+                'Zone C': { lat: 48.8564, lng: 2.2945 },
+                'Zone D': { lat: 48.8564, lng: 2.2985 },
+                'Zone E': { lat: 48.8574, lng: 2.2965 }
+                // Ajoutez d'autres zones selon vos besoins
+            };
+            
+            // Initialiser la carte
+            const map = L.map('parkingHeatmap').setView([48.8574, 2.2965], 17);
+            
+            // Ajouter la couche de carte
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            }).addTo(map);
+            
+            // Fonction pour déterminer la couleur en fonction du taux d'occupation
+            function getColor(rate) {
+                if (rate < 30) return '#00FF00';  // Vert
+                if (rate < 70) return '#FFFF00';  // Jaune
+                return '#FF0000';  // Rouge
+            }
+            
+            // Fonction pour déterminer la classe CSS en fonction du taux d'occupation
+            function getClass(rate) {
+                if (rate < 30) return '';  // Par défaut (vert)
+                if (rate < 70) return 'warning';  // Jaune
+                return 'danger';  // Rouge
+            }
+            
+            // Variables pour stocker les cercles et les markers
+            let circles = {};
+            let markers = {};
+            
+            // Fonction pour récupérer et afficher les données
+            function fetchAndDisplayData() {
+                // Afficher l'overlay de chargement
+                document.getElementById('loadingOverlay').style.display = 'flex';
+                
+                fetch('{{ path('app_parking_heatmap_data') }}')
+                    .then(response => response.json())
+                    .then(data => {
+                        // Masquer l'overlay de chargement
+                        document.getElementById('loadingOverlay').style.display = 'none';
+                        
+                        if (data.success) {
+                            // Supprimer les cercles et markers existants
+                            Object.values(circles).forEach(circle => map.removeLayer(circle));
+                            Object.values(markers).forEach(marker => map.removeLayer(marker));
+                            circles = {};
+                            markers = {};
+                            
+                            // Statistiques globales
+                            let totalCapacity = 0;
+                            let totalUsed = 0;
+                            let totalContainers = 0;
+                            let highOccupancyZones = 0;
+                            
+                            // Parcourir les données de chaque zone
+                            for (const [zone, zoneData] of Object.entries(data.data)) {
+                                // Mettre à jour les statistiques globales
+                                totalCapacity += zoneData.capacity;
+                                totalUsed += zoneData.used;
+                                totalContainers += zoneData.containers;
+                                if (zoneData.occupation_rate >= 70) highOccupancyZones++;
+                                
+                                // Vérifier si nous avons des coordonnées pour cette zone
+                                if (zoneCoordinates[zone]) {
+                                    const coords = zoneCoordinates[zone];
+                                    const radius = Math.max(30, zoneData.containers * 5); // Rayon basé sur le nombre de conteneurs
+                                    const color = getColor(zoneData.occupation_rate);
+                                    
+                                    // Créer un cercle coloré pour représenter l'occupation
+                                    circles[zone] = L.circle([coords.lat, coords.lng], {
+                                        color: color,
+                                        fillColor: color,
+                                        fillOpacity: 0.5,
+                                        radius: radius
+                                    }).addTo(map);
+                                    
+                                    // Créer un marker avec une popup d'information
+                                    const popupContent = `
+                                        <div class="info-box">
+                                            <h4>${zone}</h4>
+                                            <p><strong>Nombre de conteneurs:</strong> ${zoneData.containers}</p>
+                                            <p><strong>Capacité totale:</strong> ${zoneData.capacity.toFixed(2)} kg</p>
+                                            <p><strong>Occupation actuelle:</strong> ${zoneData.used.toFixed(2)} kg</p>
+                                            <p><strong>Taux d'occupation:</strong> ${zoneData.occupation_rate}%</p>
+                                            <div class="progress mt-2">
+                                                <div class="progress-bar ${zoneData.occupation_rate >= 70 ? 'bg-danger' : (zoneData.occupation_rate >= 30 ? 'bg-warning' : 'bg-success')}" 
+                                                     role="progressbar" 
+                                                     style="width: ${zoneData.occupation_rate}%" 
+                                                     aria-valuenow="${zoneData.occupation_rate}" 
+                                                     aria-valuemin="0" 
+                                                     aria-valuemax="100"></div>
+                                            </div>
+                                        </div>
+                                    `;
+                                    
+                                    markers[zone] = L.marker([coords.lat, coords.lng])
+                                        .bindPopup(popupContent)
+                                        .addTo(map);
+                                }
+                            }
+                            
+                            // Mettre à jour les cartes de statistiques
+                            const globalOccupationRate = totalCapacity > 0 ? (totalUsed / totalCapacity * 100).toFixed(2) : 0;
+                            const globalClass = getClass(globalOccupationRate);
+                            
+                            const statCardsHTML = `
+                                <div class="stat-card ${globalClass}">
+                                    <h3>Occupation Globale</h3>
+                                    <div class="stat-value">${globalOccupationRate}%</div>
+                                </div>
+                                <div class="stat-card">
+                                    <h3>Capacité Totale</h3>
+                                    <div class="stat-value">${totalCapacity.toFixed(2)} kg</div>
+                                </div>
+                                <div class="stat-card">
+                                    <h3>Utilisation Actuelle</h3>
+                                    <div class="stat-value">${totalUsed.toFixed(2)} kg</div>
+                                </div>
+                                <div class="stat-card ${highOccupancyZones > 0 ? 'danger' : ''}">
+                                    <h3>Zones Très Occupées</h3>
+                                    <div class="stat-value">${highOccupancyZones}</div>
+                                </div>
+                            `;
+                            
+                            document.getElementById('statCards').innerHTML = statCardsHTML;
+                        }
+                    })
+                    .catch(error => {
+                        // Masquer l'overlay de chargement en cas d'erreur
+                        document.getElementById('loadingOverlay').style.display = 'none';
+                        console.error('Erreur lors de la récupération des données:', error);
+                        alert('Une erreur est survenue lors de la récupération des données de la carte d\'occupation.');
+                    });
+            }
+            
+            // Récupérer les données dès le chargement
+            fetchAndDisplayData();
+            
+            // Rafraîchir automatiquement toutes les 3 minutes
+            setInterval(fetchAndDisplayData, 3 * 60 * 1000);
+        });
+    </script>
+{% endblock %} 
