@@ -44,7 +44,7 @@ symfony server:start
 5.Accéder à l'application :
 http://localhost:8000
 
-##🚀 Utilisation
+## 🚀 Utilisation
 Gestion des utilisateurs : Ajout, modification et suppression des rôles.
 
 Consultation des signalements : Visualisation et traitement des requêtes.
@@ -55,14 +55,14 @@ Visualisation des statistiques de collecte : Tableaux de bord analytiques.
 
 Gestion du bien-être : Suivi des indicateurs environnementaux.
 
-##💻 Technologies utilisées
+## 💻 Technologies utilisées
 Backend : PHP / Symfony 6.4
 
 Frontend : Twig, Bootstrap
 
 Base de données : Doctrine ORM, MySQL
 
-##🤝 Contribuer
+## 🤝 Contribuer
 Les contributions sont les bienvenues ! Voici comment procéder :
 
 Forker le projet : Créez une copie du projet dans votre compte GitHub.
@@ -126,7 +126,10 @@ JDBC (pour la connexion à MySQL si utilisée en local)
 
 Lancer la compilation et exécuter la classe principale.
 
-## 💡 Utilisation
+
+---
+
+## Utilisation :
 Connexion du collecteur via identifiants API.
 
 Liste des signalements et détails de chaque collecte.
@@ -150,7 +153,7 @@ REST API (provenant de l’application Symfony)
 
 MySQL (optionnel si persistance locale)
 
-## 🤝 Contribuer
+##  🤝 Contribuer
 Les contributions sont les bienvenues !
 Voici comment faire :
 
@@ -163,9 +166,11 @@ Commit tes modifications.
 Push vers ta branche.
 
 Crée une Pull Request pour révision.
+---
 
-📄 Licence
+## 📄 Licence
 Ce projet est distribué sous la licence MIT – voir le fichier LICENSE pour plus d’informations.
+---
 
 ## 🙌 Remerciements
 Projet réalisé dans le cadre du PIDEV à l’Esprit School of Engineering
